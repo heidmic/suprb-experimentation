@@ -1,7 +1,7 @@
 with import (builtins.fetchGit {
-  name = "nixpkgs-2020-11-11";
+  name = "nixpkgs-2021-12-08";
   url = "https://github.com/NixOS/nixpkgs/";
-  rev = "dd1b7e377f6d77ddee4ab84be11173d3566d6a18";
+  rev = "35ad3c79b6c264aa73bd8e7ca1dd0ffb67bd73b1";
 }) { config = { allowUnfree = true; }; };
 
 
@@ -10,12 +10,12 @@ mkShell {
   venvDir = "./_venv";
   # Add dependencies that pip can't fetch here (or that we don't want to
   # install using pip).
-  buildInputs = (with pkgs.python38Packages; [ python venvShellHook wheel ])
+  buildInputs = (with pkgs.python39Packages; [ python venvShellHook wheel ])
     ++ (import ./system-dependencies.nix { inherit pkgs; });
   postShellHook = ''
     unset SOURCE_DATE_EPOCH
     export LD_LIBRARY_PATH=${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH
-    pip install -r suprb2/requirements.txt
+    pip install -r requirements.txt
   '';
-
 }
+
