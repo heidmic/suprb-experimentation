@@ -41,7 +41,12 @@ class Experiment(metaclass=ABCMeta):
         pass
 
     def __str__(self):
-        """Get a nice string representation, which includes nested experiments."""
+        """
+        Get a nice string representation, which includes nested experiments.
+        Note that it explicitly does not include newlines and indentation, because
+        getting this right is a whole another problem.
+        Just look at `__repr__()` of `sklearn.base.BaseEstimator`.
+        """
 
         if hasattr(self, 'experiments'):
             inner = getattr(self, 'experiments')
@@ -50,12 +55,7 @@ class Experiment(metaclass=ABCMeta):
         else:
             inner = None
 
-        inner_text = str(inner)
-
-        if len(inner_text) > 20:
-            inner_text = '\n' + inner_text + '\n'
-
-        return f"{self.__class__.__name__}({inner_text})"
+        return f"{self.__class__.__name__}({inner})"
 
     def __repr__(self):
         return str(self)
