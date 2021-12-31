@@ -21,8 +21,8 @@ class Experiment(metaclass=ABCMeta):
 
     def clone(self) -> Experiment:
         """
-        Return a identical clone of the experiment, including nested experiments.
-        Note that we don't want to use `copy.deepcopy()`, because numpy arrays etc should not be copied.
+        Return an identical clone of the experiment, including nested experiments.
+        Note that we don't want to use `copy.deepcopy()`, because numpy arrays, etc., should not be copied.
         """
         obj = type(self).__new__(self.__class__)
         obj.__dict__.update(self.__dict__)
