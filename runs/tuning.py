@@ -1,15 +1,22 @@
+import mlflow
+import numpy as np
 import suprb2
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from skopt.space import Real
-from suprb2 import SupRB2
+from skopt.utils import point_asdict
+from suprb2.logging.combination import CombinedLogger
+from suprb2.logging.default import DefaultLogger
 from suprb2.logging.stdout import StdoutLogger
 from suprb2.optimizer.rule.es import ES1xLambda
 
 from experiment.parameter_search.skopt import SkoptTuner
 
 if __name__ == '__main__':
+
+    np.seterr('raise')
+
     random_state = 42
 
     X, y = make_regression(n_samples=1000, n_features=10, noise=5, random_state=random_state)
@@ -20,11 +27,12 @@ if __name__ == '__main__':
 
     model = suprb2.SupRB2(
         n_iter=4,
+        n_jobs=2,
         rule_generation=ES1xLambda(
             init=suprb2.rule.initialization.HalfnormInit(),
             mutation=suprb2.optimizer.rule.es.mutation.Normal(),
         ),
-        logger=StdoutLogger(),
+        logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
 
     param_space = {
@@ -32,12 +40,44 @@ if __name__ == '__main__':
         'rule_generation__mutation__sigma': Real(0.01, 2),
     }
 
-    tuner = SkoptTuner(model, X_train, y_train, scoring='r2', parameter_space=param_space, n_calls=10, cv=2, n_jobs_cv=2,
+    tuner = SkoptTuner(model, X_train, y_train, scoring='r2', parameter_space=param_space, n_calls=10, cv=2,
+                       n_jobs_cv=2,
                        verbose=10, random_state=random_state)
     tuned_params = tuner.tune()
-    print("tuned params", tuned_params)
 
     model.set_params(**tuned_params)
     model.fit(X_train, y_train)
 
-    print("test r2 score:", model.score(X_test, y_test))
+    mlflow.set_experiment("Make Regression")
+    with mlflow.start_run(run_name="single+tuning"):
+        with mlflow.start_run(run_name='tuning', nested=True):
+
+            # Log params
+            for attribute in ['tuner', 'n_calls', 'scoring', 'cv', 'parameter_space', 'random_state']:
+                mlflow.log_param(attribute, getattr(tuner, attribute))
+
+            # Log history
+            for step, objective_value in enumerate(tuner.tuning_result_.func_vals):
+                mlflow.log_metric("objective_function", objective_value, step=step)
+
+            for step, params_list in enumerate(tuner.tuning_result_.x_iters):
+                params = point_asdict(tuner.parameter_space, params_list)
+                mlflow.log_metrics(params, step=step)
+
+            # Log final result
+            for param_name, final_value in tuned_params.items():
+                mlflow.log_metric(f"{param_name}_final", final_value)
+
+        with mlflow.start_run(run_name='single', nested=True):
+            logger: DefaultLogger = model.logger_.loggers_[1][1]
+
+            # Log model parameters
+            mlflow.log_params(logger.params_)
+
+            # Log fitting metrics
+            for key, values in logger.metrics_.items():
+                for step, value in values.items():
+                    mlflow.log_metric(key=key, value=value, step=step)
+
+            # Log test metrics
+            mlflow.log_metric("test_score", model.score(X_test, y_test))
