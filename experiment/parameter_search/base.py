@@ -5,7 +5,16 @@ import numpy as np
 import sklearn
 from sklearn.base import BaseEstimator, clone
 from sklearn.model_selection import cross_validate
-from skopt.utils import use_named_args, point_asdict
+
+from . import metrics
+
+
+def _validate_sklearn_metric(metric: str) -> bool:
+    return metric in sklearn.metrics.SCORERS.keys()
+
+
+def _validate_own_metric(metric: str) -> bool:
+    return metric in metrics.__all__
 
 
 class ParameterTuner(metaclass=ABCMeta):
@@ -40,32 +49,12 @@ class ParameterTuner(metaclass=ABCMeta):
         self.verbose = verbose
         self.random_state = random_state
 
-    def _init_parameter_space(self):
-        for name, dimension in self.parameter_space.items():
-            dimension.name = name
-
-    @staticmethod
-    def _validate_sklearn_metric(metric: str) -> bool:
-        return metric in sklearn.metrics.SCORERS.keys()
-
-    @staticmethod
-    def _validate_own_metric(self, metric: str) -> bool:
-        pass
-
-    @staticmethod
-    def _compute_metric(metric: Union[Callable, str], scores: dict) -> list:
-        if callable(metric):
-            return metric(scores['estimator'])
-        else:
-            pass
-
-    def tune(self) -> dict:
-        self._init_parameter_space()
+    def generate_objective_function(self):
+        """The default objective function performs cross-validation and uses the average of the scoring as value."""
 
         estimator = clone(self.estimator)
         estimator.set_params(random_state=self.random_state)
 
-        @use_named_args(self.parameter_space.values())
         def objective(**params):
             estimator.set_params(**params)
             scores = cross_validate(
@@ -73,23 +62,24 @@ class ParameterTuner(metaclass=ABCMeta):
                 self.X_train,
                 self.y_train,
                 cv=self.cv,
-                scoring=self.scoring if self._validate_sklearn_metric(self.scoring) else None,
+                scoring=self.scoring if _validate_sklearn_metric(self.scoring) else None,
                 n_jobs=self.n_jobs_cv,
                 return_estimator=True,
                 verbose=self.verbose,
+                error_score='raise',
             )
 
-            if self._validate_sklearn_metric(self.scoring):
+            if _validate_sklearn_metric(self.scoring):
                 score = scores['test_score']
-            elif self.scoring == 'fitness':
-                score = [estimator.elitist_.fitness_ for estimator in scores['estimator']]
+            elif _validate_own_metric(self.scoring):
+                score = [getattr(metrics, self.scoring)(_estimator) for _estimator in scores['estimator']]
+            else:
+                raise ValueError('invalid scoring metric')
 
             return -np.mean(score)
 
-        self.tuning_result_ = self._optimize(objective=objective)
-        self.tuned_params_ = point_asdict(self.parameter_space, self.tuning_result_.x)
-        return self.tuned_params_
+        return objective
 
     @abstractmethod
-    def _optimize(self, objective: Callable[[dict], float]) -> list:
+    def tune(self) -> dict:
         pass
