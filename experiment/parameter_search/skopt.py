@@ -21,8 +21,7 @@ class SkoptTuner(ParameterTuner):
             estimator: BaseEstimator,
             X_train: np.ndarray,
             y_train: np.ndarray,
-            scoring: Union[str, Callable],
-            parameter_space: dict[str, Any],
+            scoring: Union[str, Callable] = 'r2',
             tuner: str = 'gp',
             **kwargs
     ):
@@ -31,16 +30,10 @@ class SkoptTuner(ParameterTuner):
             X_train=X_train,
             y_train=y_train,
             scoring=scoring,
-            parameter_space=parameter_space,
             **kwargs
         )
 
         self.tuner = tuner
-
-    def _init_parameter_space(self):
-        """Sets the key of the dict as name, because `skopt` handles this weirdly."""
-        for name, dimension in self.parameter_space.items():
-            dimension.name = name
 
     @staticmethod
     def _get_optimizer(tuner: str) -> Callable:
@@ -50,16 +43,18 @@ class SkoptTuner(ParameterTuner):
             'gp': gp_minimize
         }[tuner]
 
-    def tune(self) -> dict:
-        self._init_parameter_space()
+    def __call__(self, parameter_space: dict[str, Any]) -> tuple[dict, Any]:
+        # Sets the key of the dict as name, because `skopt` handles this weirdly
+        for name, dimension in parameter_space.items():
+            dimension.name = name
 
         # Convert the objective function to accept a list rather than a dict
-        objective = use_named_args(self.parameter_space.values())(self.generate_objective_function())
+        objective = use_named_args(parameter_space.values())(self.generate_objective_function())
 
         # Perform the tuning
         self.tuning_result_ = (self._get_optimizer(self.tuner))(
             func=objective,
-            dimensions=self.parameter_space.values(),
+            dimensions=parameter_space.values(),
             n_calls=self.n_calls,
             n_jobs=self.n_jobs,
             random_state=self.random_state,
@@ -68,5 +63,5 @@ class SkoptTuner(ParameterTuner):
         )
 
         # Convert the list back to a dict, such that it can be used with `set_params`
-        self.tuned_params_ = point_asdict(self.parameter_space, self.tuning_result_.x)
-        return self.tuned_params_
+        self.tuned_params_ = point_asdict(parameter_space, self.tuning_result_.x)
+        return self.tuned_params_, self.tuning_result_

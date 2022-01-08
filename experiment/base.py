@@ -1,202 +1,141 @@
 from __future__ import annotations
 
-import copy
-from abc import ABCMeta, abstractmethod
-from typing import Union, Iterator, Generator
+import itertools
+from typing import Union, Any
 
-import numpy as np
-from sklearn.base import BaseEstimator, clone
+from sklearn.base import BaseEstimator
+from sklearn.utils import Bunch
 
+from experiment.evaluation import Evaluation
 from experiment.parameter_search import ParameterTuner
 
 
-class Experiment(metaclass=ABCMeta):
-    """Base class for experiments."""
+def product_dict(**kwargs):
+    keys = kwargs.keys()
+    vals = kwargs.values()
+    for instance in itertools.product(*vals):
+        yield dict(zip(keys, instance))
 
-    def set_params(self, **params):
-        """Set the parameters of this and nested experiments."""
-        for key, value in params.items():
-            if hasattr(self, key) and getattr(self, key) is None:
-                setattr(self, key, copy.copy(value))
 
-    def clone(self) -> Experiment:
-        """
-        Return an identical clone of the experiment, including nested experiments.
-        Note that we don't want to use `copy.deepcopy()`, because numpy arrays, etc., should not be copied.
-        """
-        obj = type(self).__new__(self.__class__)
-        obj.__dict__.update(self.__dict__)
+class Experiment:
+    """Performs an experiment."""
 
-        for key, value in self.__dict__.items():
-            if isinstance(value, Experiment):
-                setattr(obj, key, value.clone())
-            elif isinstance(value, list) and all(isinstance(element, Experiment) for element in value):
-                setattr(obj, key, [element.clone() for element in value])
+    results_: Bunch
+    estimators_: list[BaseEstimator]
 
-        return obj
+    tuned_params_: dict
+    tuning_results_: Any
 
-    @abstractmethod
-    def __call__(self, *args, **kwargs) -> Experiment:
+    def __init__(self, name: str = 'Default', params: dict = None, tuner: ParameterTuner = None, verbose: int = 1):
+        self.name = name
+        self.tuner = tuner
+        self.verbose = verbose
+
+        self.params = params if params is not None else {}
+        self.param_space = {}
+        self.experiments = []
+
+    def perform(self, evaluation: Evaluation, **kwargs):
         """Perform the experiment."""
-        pass
+
+        # Tune, if both the parameter space and the tuner are set
+        if self.param_space and self.tuner is not None:
+            self.log("Starting parameter tuning", reason='tuning', fill='-')
+            self.log(f"Parameter space is {self.param_space}", reason='tuning', priority=5)
+            tuned_params, tuning_result = self.tuner(parameter_space=self.param_space)
+            self.tuned_params_ = tuned_params
+            self.tuning_results_ = tuning_result
+
+            self.log(f"Ended parameter tuning", reason='tuning', fill='-')
+            self.log(f"Results were {tuned_params}", reason='tuning', priority=5)
+
+            # Propagate to nested experiments
+            for experiment in self.experiments:
+                experiment.params |= tuned_params
+        else:
+            tuned_params = {}
+
+        # Evaluate either itself or call on nested experiments
+        if self.experiments:
+            for experiment in self.experiments:
+                experiment.perform(evaluation=evaluation, **kwargs)
+        else:
+            self.log("Starting evaluation", reason='eval', fill='-')
+            params = self.params | tuned_params
+            self.estimators_, result = evaluation(params=params, **kwargs)
+            self.results_ = Bunch(**result)
+            self.log("Ended evaluation", reason='eval', fill='-')
+
+    def with_params(self, params: dict) -> Union[Experiment, list[Experiment]]:
+        """
+        Return a new nested experiment with the parameters supplied.
+        :param params: The parameter dict. If any of the parameter values is a list,
+         the parameters will be expanded to all combinations of parameters.
+        :return: All nested experiments, either directly or as list, depending on params`.
+        """
+
+        # Perform product of all parameters, if necessary
+        if any(map(lambda value: isinstance(value, list), params.values())):
+            params = {key: list(value) if not isinstance(value, list) else value for key, value in params.items()}
+            param_list = product_dict(**params)
+        else:
+            param_list = [params]
+
+        # Create a new experiment for every parameter combination
+        experiments = []
+        for params in param_list:
+            experiment = self._clone()
+            experiment.params |= params
+            experiments.append(experiment)
+
+        self.experiments.extend(experiments)
+
+        if len(experiments) > 1:
+            return experiments
+        else:
+            return experiments[0]
+
+    def with_tuning(self, param_space: dict, tuner: ParameterTuner = None, propagate: bool = False) -> Experiment:
+        """
+        Add parameter tuning to the experiment.
+        :param param_space: The parameter space which should be optimized.
+        :param tuner: The tuning method. Can overwrite the tuner set by super-experiments.
+        :param propagate: If the tuning should be propagated to nested experiments. The parameter spaces are
+        merged, not overwritten. Note that this is only done in retrospective, so nested experiments added after
+        this method call will not be influenced.
+        :return:
+        """
+
+        if not propagate or not self.experiments:
+            self.param_space |= param_space
+            if tuner is not None:
+                self.tuner = tuner
+        else:
+            for experiment in self.experiments:
+                experiment.with_tuning(param_space=param_space, tuner=tuner, propagate=True)
+
+        return self
+
+    def _clone(self) -> Experiment:
+        return Experiment(params=self.params.copy() if self.params else None, tuner=self.tuner, verbose=self.verbose)
+
+    def log(self, message: str, reason: str, fill: str = None, priority=1):
+        if self.verbose >= priority:
+            message = f"[{reason.upper()}] {message}"
+            if fill is not None:
+                message = f"{message} ".ljust(80, fill)
+            print(message, flush=True)
 
     def __str__(self):
-        """
-        Get a nice string representation, which includes nested experiments.
-        Note that it explicitly does not include newlines and indentation, because
-        getting this right is a whole another problem.
-        Just look at `__repr__()` of `sklearn.base.BaseEstimator`.
-        """
-
-        if hasattr(self, 'experiments'):
-            inner = getattr(self, 'experiments')
-        elif hasattr(self, 'experiment'):
-            inner = getattr(self, 'experiment')
-        else:
-            inner = None
-
-        return f"{self.__class__.__name__}({inner})"
+        return f"<Experiment:{self.name};nested={len(self.experiments)};depth={self._height}>"
 
     def __repr__(self):
         return str(self)
 
-
-class Evaluation(Experiment):
-    """This experiment evaluates a single model using cross-validation."""
-
-    score_: float
-
-    def __init__(self,
-                 estimator: BaseEstimator = None,
-                 X_train: np.ndarray = None,
-                 X_test: np.ndarray = None,
-                 y_train: np.ndarray = None,
-                 y_test: np.ndarray = None,
-                 random_state: int = None,
-                 ):
-        self.estimator = clone(estimator)
-        self.X_train = X_train
-        self.X_test = X_test
-        self.y_train = y_train
-        self.y_test = y_test
-        self.random_state = random_state
-
-    def set_params(self, **params):
-        """Parameters of the estimator can be supplied using the `estimator__` prefix."""
-
-        super().set_params(**params)
-
-        for key, value in params.items():
-            if key.startswith('estimator__'):
-                modified_key = key.removeprefix('estimator__')
-                self.estimator.set_params(**{modified_key: value})
-
-    def clone(self) -> Experiment:
-        """Clone the experiment and the estimator."""
-        obj = super().clone()
-        obj.estimator = clone(self.estimator)
-        return obj
-
-    def __call__(self, *args, **kwargs) -> Evaluation:
-        print(f"Starting fit of {self.estimator}")
-
-        self.estimator.fit(self.X_train, self.y_train)
-        self.score_ = self.estimator.score(self.X_test, self.y_test)
-
-        # TODO: implement real cv
-
-        print(f"Ended fit, score was {self.score_}")
-
-        return self
-
-    def __str__(self):
-        return f"{self.__class__.__name__}({self.estimator})"
-
-
-class ParameterTuning(Experiment):
-    """Perform parameter tuning on the supplied `parameter_space`."""
-
-    def __init__(self, experiment: Experiment, tuner: ParameterTuner = None, parameter_space: dict = None,
-                 random_state: int = None):
-        self.experiment = experiment
-        self.tuner = tuner
-        self.parameter_space = parameter_space
-        self.random_state = random_state
-
-    def set_params(self, **params):
-        super().set_params(**params)
-        self.experiment.set_params(**params)
-
-    def __call__(self, *args, **kwargs) -> ParameterTuning:
-        # TODO: implement real tuning
-
-        self.experiment(*args, **kwargs)
-
-        return self
-
-
-class ParameterList(Experiment):
-    """
-    Extend the supplied experiment using the parameter list.
-    A new nested experiment is created for every element in `parameter_list`
-    and the `parameter_name` is set to this element.
-    """
-
-    def __init__(self, experiment: Experiment,
-                 parameter_name: str = None,
-                 parameter_list: Union[Iterator, Generator, list, tuple] = None):
-        self.experiment = experiment
-        self.parameter_name = parameter_name
-        self.parameter_list = parameter_list
-
-        self.experiments = []
-        for parameter in parameter_list:
-            cloned_experiment = self.experiment.clone()
-            cloned_experiment.set_params(**{self.parameter_name: parameter})
-            self.experiments.append(cloned_experiment)
-
-    def set_params(self, **params):
-        super().set_params(**params)
-
-        for experiment in self.experiments:
-            experiment.set_params(**params)
-
-    def __call__(self, *args, **kwargs) -> Experiment:
-        for experiment in self.experiments:
-            experiment(*args, **kwargs)
-
-        return self
-
-
-class NestedExperiment(Experiment):
-    """Perform nested experiments, e.g., for multiple models."""
-
-    def __init__(self, experiments: list[Experiment]):
-        self.experiments = experiments
-
-    def set_params(self, **params):
-        super().set_params(**params)
-
-        for experiment in self.experiments:
-            experiment.set_params(**params)
-
-    def __call__(self, *args, **kwargs) -> Experiment:
-        for experiment in self.experiments:
-            experiment(*args, **kwargs)
-
-        return self
-
-
-class FixedParameters(Experiment):
-    """Overwrite the parameters of the nested experiments, if the value is None."""
-
-    def __init__(self, experiment: Experiment, parameters: dict = None):
-        self.experiment = experiment
-        self.parameters = parameters
-
-        self.experiment.set_params(**self.parameters)
-
-    def __call__(self, *args, **kwargs) -> Experiment:
-        self.experiment(*args, **kwargs)
-
-        return self
+    @property
+    def _height(self) -> int:
+        """Calculates the height in the nested experiment tree, i.e., leaves have a height of zero."""
+        if not self.experiments:
+            return 0
+        else:
+            return max(map(lambda ex: ex._height, self.experiments)) + 1

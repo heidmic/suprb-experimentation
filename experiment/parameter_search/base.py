@@ -23,11 +23,13 @@ class ParameterTuner(metaclass=ABCMeta):
     tuning_result_: Any
     tuned_params_: dict
 
-    def __init__(self, estimator: BaseEstimator = None,
-                 X_train: np.ndarray = None,
-                 y_train: np.ndarray = None,
-                 scoring: Union[str, Callable] = 'r2',
-                 parameter_space: dict[str, Any] = None,
+    parameter_space: dict
+
+    def __init__(self,
+                 estimator: BaseEstimator,
+                 X_train: np.ndarray,
+                 y_train: np.ndarray,
+                 scoring: Union[str, Callable],
                  n_calls: int = 32,
                  callback: Union[Callable, list[Callable]] = None,
                  cv: int = None,
@@ -40,7 +42,6 @@ class ParameterTuner(metaclass=ABCMeta):
         self.X_train = X_train
         self.y_train = y_train
         self.scoring = scoring
-        self.parameter_space = parameter_space
         self.n_calls = n_calls
         self.callback = callback
         self.cv = cv
@@ -81,5 +82,5 @@ class ParameterTuner(metaclass=ABCMeta):
         return objective
 
     @abstractmethod
-    def tune(self) -> dict:
+    def __call__(self, parameter_space: dict[str, Any]) -> tuple[dict, Any]:
         pass
