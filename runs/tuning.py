@@ -12,6 +12,7 @@ from suprb2.logging.stdout import StdoutLogger
 from suprb2.optimizer.rule.es import ES1xLambda
 
 from experiment.parameter_search.skopt import SkoptTuner
+from problems import scale_X_y
 
 if __name__ == '__main__':
 
@@ -20,9 +21,7 @@ if __name__ == '__main__':
     random_state = 42
 
     X, y = make_regression(n_samples=1000, n_features=10, noise=5, random_state=random_state)
-    X = MinMaxScaler(feature_range=(-1, 1)).fit_transform(X)
-    y = StandardScaler().fit_transform(y.reshape((-1, 1))).reshape((-1,))
-
+    X, y = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
     model = suprb2.SupRB2(
@@ -40,10 +39,10 @@ if __name__ == '__main__':
         'rule_generation__mutation__sigma': Real(0.01, 2),
     }
 
-    tuner = SkoptTuner(model, X_train, y_train, scoring='r2', parameter_space=param_space, n_calls=10, cv=2,
+    tuner = SkoptTuner(model, X_train, y_train, scoring='r2', n_calls=10, cv=2,
                        n_jobs_cv=2,
                        verbose=10, random_state=random_state)
-    tuned_params = tuner.tune()
+    tuned_params, _ = tuner(parameter_space=param_space)
 
     model.set_params(**tuned_params)
     model.fit(X_train, y_train)

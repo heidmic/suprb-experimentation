@@ -5,13 +5,13 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from suprb2 import SupRB2
 from suprb2.logging.default import DefaultLogger
 
+from problems import scale_X_y
+
 if __name__ == '__main__':
     random_state = 42
 
     X, y = make_regression(n_samples=100, n_features=2, noise=5, random_state=random_state)
-    X = MinMaxScaler(feature_range=(-1, 1)).fit_transform(X)
-    y = StandardScaler().fit_transform(y.reshape((-1, 1))).reshape((-1,))
-
+    X, y = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
     model = SupRB2(n_iter=4, logger=DefaultLogger())
