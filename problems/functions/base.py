@@ -38,15 +38,15 @@ def load_test_function(
 
     # Sample the input space
     if bounds is not None:
-        high, low = bounds.T
+        low, high = bounds.T
     else:
-        high, low = func.bounds.T
+        low, high = func.bounds.T
 
     # Expand the bounds to input dims, if wanted and possible
     if n_dims is not None and func.bounds.ndim == 1:
-        high, low = np.hstack([high] * n_dims), np.hstack([low] * n_dims)
+        low, high = np.hstack([high] * n_dims), np.hstack([low] * n_dims)
     else:
-        n_dims = func.bounds.ndim
+        n_dims = func.bounds.T.shape[1]
 
     X = random_state_.uniform(low, high, size=(n_samples, n_dims))
     y = func(X)
