@@ -5,6 +5,7 @@ import numpy as np
 import sklearn
 from sklearn.base import BaseEstimator, clone
 from sklearn.model_selection import cross_validate
+from sklearn.utils import Bunch
 
 from . import metrics
 
@@ -20,10 +21,8 @@ def _validate_own_metric(metric: str) -> bool:
 class ParameterTuner(metaclass=ABCMeta):
     """A generic parameter tuning method."""
 
-    tuning_result_: Any
+    tuning_result_: Bunch
     tuned_params_: dict
-
-    parameter_space: dict
 
     def __init__(self,
                  estimator: BaseEstimator,
@@ -31,7 +30,6 @@ class ParameterTuner(metaclass=ABCMeta):
                  y_train: np.ndarray,
                  scoring: Union[str, Callable],
                  n_calls: int = 32,
-                 callback: Union[Callable, list[Callable]] = None,
                  cv: int = None,
                  n_jobs_cv: int = None,
                  n_jobs: int = None,
@@ -43,18 +41,17 @@ class ParameterTuner(metaclass=ABCMeta):
         self.y_train = y_train
         self.scoring = scoring
         self.n_calls = n_calls
-        self.callback = callback
         self.cv = cv
         self.n_jobs_cv = n_jobs_cv
         self.n_jobs = n_jobs
         self.verbose = verbose
         self.random_state = random_state
 
-    def generate_objective_function(self):
+    def generate_objective_function(self, **initial_params):
         """The default objective function performs cross-validation and uses the average of the scoring as value."""
 
         estimator = clone(self.estimator)
-        estimator.set_params(random_state=self.random_state)
+        estimator.set_params(**({'random_state': self.random_state} | initial_params))
 
         def objective(**params):
             estimator.set_params(**params)
@@ -81,6 +78,12 @@ class ParameterTuner(metaclass=ABCMeta):
 
         return objective
 
+    def _get_params(self, keys: list) -> dict:
+        return {key: getattr(self, key) for key in keys}
+
+    def get_params(self):
+        return self._get_params(['scoring', 'n_calls', 'cv', 'random_state'])
+
     @abstractmethod
-    def __call__(self, parameter_space: dict[str, Any]) -> tuple[dict, Any]:
+    def __call__(self, parameter_space: dict[str, Any], local_params: dict) -> tuple[dict, Any]:
         pass

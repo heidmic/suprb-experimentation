@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import itertools
-from typing import Union, Any
+from typing import Union, Any, Optional, Callable
 
+from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
 
-from experiment.evaluation import Evaluation
-from experiment.parameter_search import ParameterTuner
+from experiments.evaluation import Evaluation
+from experiments.parameter_search import ParameterTuner
 
 
 def product_dict(**kwargs):
@@ -26,23 +27,30 @@ class Experiment:
     tuned_params_: dict
     tuning_results_: Any
 
-    def __init__(self, name: str = 'Default', params: dict = None, tuner: ParameterTuner = None, verbose: int = 1):
+    def __init__(self,
+                 name: str = 'Default',
+                 params: dict = None,
+                 tuner: ParameterTuner = None,
+                 n_jobs: int = None,
+                 verbose: int = 1
+                 ):
         self.name = name
         self.tuner = tuner
+        self.n_jobs = n_jobs
         self.verbose = verbose
 
         self.params = params if params is not None else {}
         self.param_space = {}
         self.experiments = []
 
-    def perform(self, evaluation: Evaluation, **kwargs):
+    def perform(self, evaluation: Evaluation, **kwargs) -> Experiment:
         """Perform the experiment."""
 
         # Tune, if both the parameter space and the tuner are set
         if self.param_space and self.tuner is not None:
             self.log("Starting parameter tuning", reason='tuning', fill='-')
             self.log(f"Parameter space is {self.param_space}", reason='tuning', priority=5)
-            tuned_params, tuning_result = self.tuner(parameter_space=self.param_space)
+            tuned_params, tuning_result = self.tuner(parameter_space=self.param_space, local_params=self.params)
             self.tuned_params_ = tuned_params
             self.tuning_results_ = tuning_result
 
@@ -50,21 +58,30 @@ class Experiment:
             self.log(f"Results were {tuned_params}", reason='tuning', priority=5)
 
             # Propagate to nested experiments
-            for experiment in self.experiments:
-                experiment.params |= tuned_params
+            self._propagate_params(tuned_params)
         else:
             tuned_params = {}
 
         # Evaluate either itself or call on nested experiments
         if self.experiments:
-            for experiment in self.experiments:
-                experiment.perform(evaluation=evaluation, **kwargs)
+            with Parallel(n_jobs=self.n_jobs) as parallel:
+                self.experiments = parallel(delayed(experiment.perform)(evaluation=evaluation, **kwargs)
+                                            for experiment in self.experiments)
         else:
             self.log("Starting evaluation", reason='eval', fill='-')
             params = self.params | tuned_params
             self.estimators_, result = evaluation(params=params, **kwargs)
             self.results_ = Bunch(**result)
             self.log("Ended evaluation", reason='eval', fill='-')
+
+        return self
+
+    def _propagate_params(self, params: dict):
+        """Propagate parameters to all nested experiments."""
+
+        self.params |= params
+        for experiment in self.experiments:
+            experiment._propagate_params(params)
 
     def with_params(self, params: dict) -> Union[Experiment, list[Experiment]]:
         """
@@ -95,19 +112,25 @@ class Experiment:
         else:
             return experiments[0]
 
-    def with_tuning(self, param_space: dict, tuner: ParameterTuner = None, propagate: bool = False) -> Experiment:
+    def with_tuning(self, param_space: Union[dict, Callable], tuner: ParameterTuner = None,
+                    propagate: bool = False, overwrite: bool = False) -> Experiment:
         """
         Add parameter tuning to the experiment.
         :param param_space: The parameter space which should be optimized.
         :param tuner: The tuning method. Can overwrite the tuner set by super-experiments.
         :param propagate: If the tuning should be propagated to nested experiments. The parameter spaces are
-        merged, not overwritten. Note that this is only done in retrospective, so nested experiments added after
+        merged, if possible. Note that this is only done in retrospective, so nested experiments added after
         this method call will not be influenced.
+        :param overwrite: Decides if the old parameter space should be overwritten, if merging them is not possible.
         :return:
         """
 
         if not propagate or not self.experiments:
-            self.param_space |= param_space
+            if isinstance(self.param_space, dict) and isinstance(param_space, dict):
+                self.param_space |= param_space
+            else:
+                if overwrite or not self.param_space:
+                    self.param_space = param_space
             if tuner is not None:
                 self.tuner = tuner
         else:
@@ -116,18 +139,34 @@ class Experiment:
 
         return self
 
+    def with_random_states(self, random_states: list[int], n_jobs: int = None) -> Optional[list[Experiment]]:
+
+        if not self.experiments:
+            new_experiments = []
+            for random_state in random_states:
+                new_experiment = self._clone()
+                new_experiment.name = f'RandomState:{random_state}'
+                new_experiment.params |= {'random_state': random_state}
+                new_experiments.append(new_experiment)
+            self.experiments = new_experiments
+            self.n_jobs = n_jobs
+            return new_experiments
+        else:
+            for experiment in self.experiments:
+                experiment.with_random_states(random_states)
+
     def _clone(self) -> Experiment:
         return Experiment(params=self.params.copy() if self.params else None, tuner=self.tuner, verbose=self.verbose)
 
     def log(self, message: str, reason: str, fill: str = None, priority=1):
         if self.verbose >= priority:
-            message = f"[{reason.upper()}] {message}"
+            message = f"[{self.name}] [{reason.upper()}] {message}"
             if fill is not None:
                 message = f"{message} ".ljust(80, fill)
             print(message, flush=True)
 
     def __str__(self):
-        return f"<Experiment:{self.name};nested={len(self.experiments)};depth={self._height}>"
+        return f"<Experiment:{self.name};nested={len(self.experiments)};height={self._height}>"
 
     def __repr__(self):
         return str(self)
