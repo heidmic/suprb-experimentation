@@ -10,9 +10,9 @@ from suprb2.optimizer.individual import ga
 from suprb2.optimizer.rule import es
 from suprb2opt.individual import gwo, aco, abc, pso
 
-from experiment import Experiment
-from experiment.evaluation import CrossValidateTest
-from experiment.parameter_search.skopt import SkoptTuner
+from experiments import Experiment
+from experiments.evaluation import CrossValidateTest
+from experiments.parameter_search.skopt import SkoptTuner
 from problems import scale_X_y
 from problems.datasets import load_concrete_strength
 
@@ -23,10 +23,9 @@ if __name__ == '__main__':
     X, y = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
-    params = {
+    global_params = {
         'population_optimizer__n_iter': 32,
         'population_optimizer__population_size': 128,
-        'population_optimizer__fitness': individual.fitness.ComplexityWu(),
     }
 
     global_space = {
@@ -52,7 +51,7 @@ if __name__ == '__main__':
         verbose=10
     )
 
-    experiment = Experiment(params=params, tuner=tuner)
+    experiment = Experiment(params=global_params, tuner=tuner)
     experiment.with_tuning(global_space)
 
     # GA

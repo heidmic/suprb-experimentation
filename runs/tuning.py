@@ -11,7 +11,7 @@ from suprb2.logging.default import DefaultLogger
 from suprb2.logging.stdout import StdoutLogger
 from suprb2.optimizer.rule.es import ES1xLambda
 
-from experiment.parameter_search.skopt import SkoptTuner
+from experiments.parameter_search.skopt import SkoptTuner
 from problems import scale_X_y
 
 if __name__ == '__main__':

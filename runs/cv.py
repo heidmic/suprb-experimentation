@@ -5,8 +5,8 @@ from suprb2.logging.default import DefaultLogger
 from suprb2.logging.stdout import StdoutLogger
 from suprb2.optimizer.rule import es
 
-from experiment import Experiment
-from experiment.evaluation import CrossValidateTest
+from experiments import Experiment
+from experiments.evaluation import CrossValidateTest
 from problems import scale_X_y
 from problems.datasets import load_gas_turbine
 
