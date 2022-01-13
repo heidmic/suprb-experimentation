@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import itertools
+from datetime import datetime
 from typing import Union, Any, Optional, Callable
 
 from joblib import Parallel, delayed
@@ -46,15 +47,20 @@ class Experiment:
     def perform(self, evaluation: Evaluation, **kwargs) -> Experiment:
         """Perform the experiment."""
 
+        tuning_start = datetime.now()
+
         # Tune, if both the parameter space and the tuner are set
         if self.param_space and self.tuner is not None:
-            self.log("Starting parameter tuning", reason='tuning', fill='-')
+            self.log(f"Starting parameter tuning at {tuning_start}", reason='tuning', fill='-')
             self.log(f"Parameter space is {self.param_space}", reason='tuning', priority=5)
             tuned_params, tuning_result = self.tuner(parameter_space=self.param_space, local_params=self.params)
             self.tuned_params_ = tuned_params
             self.tuning_results_ = tuning_result
 
-            self.log(f"Ended parameter tuning", reason='tuning', fill='-')
+            tuning_stop = datetime.now()
+            tuning_delta = tuning_stop - tuning_start
+
+            self.log(f"Ended parameter tuning at {tuning_stop}, took {tuning_delta}", reason='tuning', fill='-')
             self.log(f"Results were {tuned_params}", reason='tuning', priority=5)
 
             # Propagate to nested experiments
@@ -62,17 +68,27 @@ class Experiment:
         else:
             tuned_params = {}
 
+        start = datetime.now()
+
         # Evaluate either itself or call on nested experiments
+        nested = "nested-" if self.experiments else ""
+        self.log(f"Starting evaluation at {start}", reason=f'{nested}eval', fill='-')
         if self.experiments:
             with Parallel(n_jobs=self.n_jobs) as parallel:
                 self.experiments = parallel(delayed(experiment.perform)(evaluation=evaluation, **kwargs)
                                             for experiment in self.experiments)
         else:
-            self.log("Starting evaluation", reason='eval', fill='-')
             params = self.params | tuned_params
             self.estimators_, result = evaluation(params=params, **kwargs)
             self.results_ = Bunch(**result)
-            self.log("Ended evaluation", reason='eval', fill='-')
+
+        end = datetime.now()
+        delta = end - start
+
+        self.log(f"Ended evaluation at {end}, took {delta}", reason=f'{nested}eval', fill='-')
+
+        total_delta = end - tuning_start
+        self.log(f"Total runtime: {total_delta}", reason='stats', priority=5)
 
         return self
 
@@ -140,12 +156,13 @@ class Experiment:
         return self
 
     def with_random_states(self, random_states: list[int], n_jobs: int = None) -> Optional[list[Experiment]]:
+        """Expand this experiment with copies that use different random states."""
 
         if not self.experiments:
             new_experiments = []
-            for random_state in random_states:
+            for i, random_state in enumerate(random_states):
                 new_experiment = self._clone()
-                new_experiment.name = f'RandomState:{random_state}'
+                new_experiment.name = f'RandomState:{i}:{random_state}'
                 new_experiment.params |= {'random_state': random_state}
                 new_experiments.append(new_experiment)
             self.experiments = new_experiments
