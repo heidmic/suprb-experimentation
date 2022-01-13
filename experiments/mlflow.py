@@ -20,7 +20,7 @@ def _expand_dict(d: dict) -> list:
 def _expand_list(l: list) -> dict:
     """Convert a list of dicts into a dict of lists."""
     keys = set().union(*l)
-    return {k: [dic[k] if k in dic else None for dic in l] for k in l[0]}
+    return {k: [dic[k] if k in dic else None for dic in l] for k in keys}
 
 
 def _get_default_logger(estimator: BaseEstimator) -> Optional[DefaultLogger]:
