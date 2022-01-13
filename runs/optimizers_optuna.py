@@ -19,25 +19,25 @@ from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space, individual_optimizer_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-from problems.functions import load_test_function
-from problems.functions.fixed import higdon_gramacy_lee
+from problems.datasets import load_concrete_strength
 
 if __name__ == '__main__':
     random_state = 42
 
-    X, y = load_test_function(higdon_gramacy_lee, noise=0.1, random_state=random_state)
+    X, y = load_concrete_strength()
     X, y = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
     global_params = Bunch(**{
+        'rule_generation__init__fitness__alpha': 0.8,
         'individual_optimizer__n_iter': 32,
         'individual_optimizer__population_size': 128,
     })
 
     estimator = SupRB2(
-        rule_generation=es.ES1xLambda(),
+        rule_generation=es.ES1xLambda(init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu())),
         individual_optimizer=ga.GeneticAlgorithm(),
-        n_iter=16,
+        n_iter=64,
         n_rules=4,
         verbose=10,
         logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
@@ -178,7 +178,7 @@ if __name__ == '__main__':
 
     # Repeat evaluations with several random states
     random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=8)
+    experiment.with_random_states(random_states, n_jobs=2)
 
     # Evaluation
     evaluation = CrossValidateTest(estimator=estimator, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test,
@@ -186,5 +186,5 @@ if __name__ == '__main__':
 
     experiment.perform(evaluation, cv=8, n_jobs=8)
 
-    mlflow.set_experiment("Higdon & Gramacy & Lee")
+    mlflow.set_experiment("Concrete Strength")
     log_experiment(experiment)
