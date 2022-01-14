@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from numbers import Integral
 from typing import Iterable
 
@@ -10,7 +10,28 @@ from sklearn.metrics import get_scorer
 from sklearn.model_selection import cross_validate, KFold
 
 
-class Evaluation:
+def check_scoring(scoring):
+    """Always use R^2 and MSE for evaluation."""
+
+    if scoring is None:
+        scoring = set()
+    elif isinstance(scoring, Iterable):
+        scoring = set(scoring)
+    else:
+        scoring = {scoring}
+    scoring.update({'r2', 'neg_mean_squared_error'})
+
+    return list(scoring)
+
+
+def check_cv(cv, random_state=None):
+    """Enable shuffle by default."""
+    if isinstance(cv, Integral):
+        cv = KFold(n_splits=cv, shuffle=True, random_state=random_state)
+    return cv
+
+
+class Evaluation(metaclass=ABCMeta):
 
     def __init__(self, estimator: BaseEstimator, random_state: int, verbose: int):
         self.estimator = estimator
@@ -22,11 +43,34 @@ class Evaluation:
         pass
 
 
-class CrossValidateTest(Evaluation):
-    """Evaluate the estimator using cross validation and an extra test set."""
-
+class BaseCrossValidate(Evaluation, metaclass=ABCMeta):
     estimators_: list[BaseEstimator]
     results_: dict
+
+    def cross_validate(self, X: np.ndarray, y: np.ndarray, params: dict, scoring, cv, **kwargs):
+        scoring = check_scoring(scoring)
+        cv = check_cv(cv, random_state=self.random_state)
+
+        estimator = clone(self.estimator)
+        estimator.set_params(**params)
+
+        # Do cross-validation
+        scores = cross_validate(
+            estimator=estimator,
+            X=X,
+            y=y,
+            scoring=scoring,
+            cv=cv,
+            return_estimator=True,
+            verbose=self.verbose,
+            **kwargs
+        )
+
+        return scores
+
+
+class CrossValidateTest(BaseCrossValidate):
+    """Evaluate the estimator using cross validation and an extra test set."""
 
     def __init__(
             self,
@@ -44,33 +88,9 @@ class CrossValidateTest(Evaluation):
         self.X_test = X_test
         self.y_test = y_test
 
-    def __call__(self, params: dict, scoring=None, cv=None, **kwargs) -> tuple[list[BaseEstimator], dict]:
+    def __call__(self, **kwargs) -> tuple[list[BaseEstimator], dict]:
 
-        # Always use R^2 and MSE for evaluation, shuffle for cv and return estimators
-        if scoring is None:
-            scoring = set()
-        elif isinstance(scoring, Iterable):
-            scoring = set(scoring)
-        else:
-            scoring = {scoring}
-        scoring.update({'r2', 'neg_mean_squared_error'})
-        if isinstance(cv, Integral):
-            cv = KFold(n_splits=cv, shuffle=True, random_state=self.random_state)
-
-        estimator = clone(self.estimator)
-        estimator.set_params(**params)
-
-        # Do cross-validation
-        scores = cross_validate(
-            estimator=estimator,
-            X=self.X_train,
-            y=self.y_train,
-            scoring=scoring,
-            cv=cv,
-            return_estimator=True,
-            verbose=self.verbose,
-            **kwargs
-        )
+        scores = self.cross_validate(self.X_train, self.y_train, **kwargs)
 
         # Save estimators externally
         estimators = scores.pop('estimator')
@@ -89,3 +109,28 @@ class CrossValidateTest(Evaluation):
 
         self.estimators_, self.results_ = estimators, new_scores
         return estimators, new_scores
+
+
+class CrossValidate(BaseCrossValidate):
+    """Evaluate the estimator using cross validation."""
+
+    def __init__(
+            self,
+            estimator: BaseEstimator,
+            X: np.ndarray,
+            y: np.ndarray,
+            random_state: int = None,
+            verbose: int = 0,
+    ):
+        super().__init__(estimator=estimator, random_state=random_state, verbose=verbose)
+        self.X = X
+        self.y = y
+
+    def __call__(self, **kwargs) -> tuple[list[BaseEstimator], dict]:
+        scores = self.cross_validate(self.X, self.y, **kwargs)
+
+        # Save estimators externally
+        estimators = scores.pop('estimator')
+
+        self.estimators_, self.results_ = estimators, scores
+        return estimators, scores
