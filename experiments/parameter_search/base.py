@@ -51,10 +51,10 @@ class ParameterTuner(metaclass=ABCMeta):
         """The default objective function performs cross-validation and uses the average of the scoring as value."""
 
         estimator = clone(self.estimator)
-        estimator.set_params(**({'random_state': self.random_state} | initial_params))
+        initial_params = {'random_state': self.random_state} | initial_params
 
         def objective(**params):
-            estimator.set_params(**params)
+            estimator.set_params(**(initial_params | params))
             scores = cross_validate(
                 estimator,
                 self.X_train,
