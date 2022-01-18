@@ -1,7 +1,6 @@
 import mlflow
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from suprb2 import SupRB2
 from suprb2.logging.default import DefaultLogger
 
