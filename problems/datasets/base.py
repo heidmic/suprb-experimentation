@@ -6,6 +6,8 @@ from sklearn.utils import Bunch
 
 from ..base import ProblemRepr
 
+from sklearn.datasets import load_diabetes
+
 DATASETS_PATH = (pathlib.Path(__file__).parent / 'data').resolve()
 
 
@@ -22,11 +24,10 @@ def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: 
 
     if return_X_y:
         return data, target
+    elif as_frame:
+        return Bunch(frame=frame, data=data, target=target)
     else:
-        if as_frame:
-            return Bunch(frame=frame, data=data, target=target)
-        else:
-            return Bunch(X=data, y=target)
+        return Bunch(X=data, y=target)
 
 
 def load_combined_cycle_power_plant(return_X_y: bool = True, as_frame: bool = False):

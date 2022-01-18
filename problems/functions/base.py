@@ -79,11 +79,10 @@ def load_test_function(
     # Return arrays directly or use Bunch, depending on parameter
     if return_X_y:
         return X, y
+    elif scale:
+        return Bunch(X=X, y=y, X_scaler=scale_result.X_scaler, y_scaler=scale_result.y_scaler)
     else:
-        if scale:
-            return Bunch(X=X, y=y, X_scaler=scale_result.X_scaler, y_scaler=scale_result.y_scaler)
-        else:
-            return Bunch(X=X, y=y)
+        return Bunch(X=X, y=y)
 
 
 def with_bounds(bounds: list):

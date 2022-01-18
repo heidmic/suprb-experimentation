@@ -145,9 +145,8 @@ class Experiment:
         if not propagate or not self.experiments:
             if isinstance(self.param_space, dict) and isinstance(param_space, dict):
                 self.param_space |= param_space
-            else:
-                if overwrite or not self.param_space:
-                    self.param_space = param_space
+            elif overwrite or not self.param_space:
+                self.param_space = param_space
             if tuner is not None:
                 self.tuner = tuner
         else:
