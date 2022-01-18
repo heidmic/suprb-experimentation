@@ -47,9 +47,9 @@ class BaseCrossValidate(Evaluation, metaclass=ABCMeta):
     estimators_: list[BaseEstimator]
     results_: dict
 
-    def cross_validate(self, X: np.ndarray, y: np.ndarray, params: dict, scoring, cv, **kwargs):
-        scoring = check_scoring(scoring)
-        cv = check_cv(cv, random_state=self.random_state)
+    def cross_validate(self, X: np.ndarray, y: np.ndarray, params: dict, **kwargs):
+        scoring = check_scoring(kwargs.pop('scoring', None))
+        cv = check_cv(kwargs.pop('cv', None), random_state=self.random_state)
 
         estimator = clone(self.estimator)
         estimator.set_params(**params)

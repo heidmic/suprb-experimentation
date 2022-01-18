@@ -55,26 +55,32 @@ def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dic
             results = []
             for subexperiment in experiment.experiments:
                 result = _log_experiment(subexperiment, parent_name=run_name, depth=depth + 1)
-                results.append(result)
+                if result is not None:
+                    results.append(result)
 
             with mlflow.start_run(run_name=f"{run_name}.averaged_exp", nested=True) as average_run:
                 average_results = {key: np.mean(value) for key, value in _expand_list(results).items()}
                 log_run_result(average_results)
 
         else:
-            # Log cv folds
-            for i, (estimator, result) in enumerate(zip(experiment.estimators_, _expand_dict(experiment.results_)), 1):
-                with mlflow.start_run(run_name=f"{run_name}.fold-{i}/{len(experiment.estimators_)}",
-                                      nested=True) as cv_run:
-                    log_run(estimator)
-                    log_run_result(result)
+            # Check if experiment has evaluations
+            if hasattr(experiment, 'results_') and hasattr(experiment, 'estimators_'):
+                # Log cv folds
+                for i, (estimator, result) in enumerate(zip(experiment.estimators_, _expand_dict(experiment.results_)),
+                                                        1):
+                    with mlflow.start_run(run_name=f"{run_name}.fold-{i}/{len(experiment.estimators_)}",
+                                          nested=True) as cv_run:
+                        log_run(estimator)
+                        log_run_result(result)
 
-                    mlflow.set_tag('fold', True)
+                        mlflow.set_tag('fold', True)
 
-            # Log cv average
-            with mlflow.start_run(run_name=f"{run_name}.averaged_cv", nested=True) as average_run:
-                average_results = {key: np.mean(value) for key, value in experiment.results_.items()}
-                log_run_result(average_results)
+                # Log cv average
+                with mlflow.start_run(run_name=f"{run_name}.averaged_cv", nested=True) as average_run:
+                    average_results = {key: np.mean(value) for key, value in experiment.results_.items()}
+                    log_run_result(average_results)
+            else:
+                average_results = None
 
             # Set leaf tag
             mlflow.set_tag("leaf", True)

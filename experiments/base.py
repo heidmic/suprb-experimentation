@@ -44,7 +44,7 @@ class Experiment:
         self.param_space = {}
         self.experiments = []
 
-    def perform(self, evaluation: Evaluation, **kwargs) -> Experiment:
+    def perform(self, evaluation: Optional[Evaluation], **kwargs) -> Experiment:
         """Perform the experiment."""
 
         tuning_start = datetime.now()
@@ -72,23 +72,24 @@ class Experiment:
 
         # Evaluate either itself or call on nested experiments
         nested = "nested-" if self.experiments else ""
-        self.log(f"Starting evaluation at {start}", reason=f'{nested}eval', fill='-')
-        if self.experiments:
-            with Parallel(n_jobs=self.n_jobs) as parallel:
-                self.experiments = parallel(delayed(experiment.perform)(evaluation=evaluation, **kwargs)
-                                            for experiment in self.experiments)
+        if evaluation is not None:
+            self.log(f"Starting evaluation at {start}", reason=f'{nested}eval', fill='-')
+            if self.experiments:
+                with Parallel(n_jobs=self.n_jobs) as parallel:
+                    self.experiments = parallel(delayed(experiment.perform)(evaluation=evaluation, **kwargs)
+                                                for experiment in self.experiments)
+            else:
+                params = self.params | tuned_params
+                self.estimators_, result = evaluation(params=params, **kwargs)
+                self.results_ = Bunch(**result)
+
+            end = datetime.now()
+            delta = end - start
+            self.log(f"Ended evaluation at {end}, took {delta}", reason=f'{nested}eval', fill='-')
+            total_delta = end - tuning_start
+            self.log(f"Total runtime: {total_delta}", reason='stats', priority=5)
         else:
-            params = self.params | tuned_params
-            self.estimators_, result = evaluation(params=params, **kwargs)
-            self.results_ = Bunch(**result)
-
-        end = datetime.now()
-        delta = end - start
-
-        self.log(f"Ended evaluation at {end}, took {delta}", reason=f'{nested}eval', fill='-')
-
-        total_delta = end - tuning_start
-        self.log(f"Total runtime: {total_delta}", reason='stats', priority=5)
+            self.log(f"Skipping evaluation, because None was passed", reason=f'{nested}eval', fill='-')
 
         return self
 
