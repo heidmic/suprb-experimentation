@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.model_selection import KFold
 from sklearn.utils import Bunch
 from suprb2 import rule, SupRB2
 from suprb2.logging.combination import CombinedLogger
@@ -62,10 +63,10 @@ dataset_params = {
 estimator = SupRB2(
     rule_generation=es.ES1xLambda(
         operator='&',
-        n_iter=200,
+        n_iter=10_000,
         delay=40,
         init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu()),
-        mutation=es.mutation.HalfnormIncrease(sigma=0.1),
+        mutation=es.mutation.HalfnormIncrease(sigma=0.8),
         origin_generation=origin.SquaredError(),
     ),
     individual_optimizer=ga.GeneticAlgorithm(),
@@ -80,7 +81,7 @@ shared_tuning_params = dict(
     random_state=random_state,
     cv=4,
     n_jobs_cv=4,
-    n_jobs=1,
+    n_jobs=4,
     n_calls=128,
     timeout=90 * 60 * 60,  # 90 hours
     verbose=10
