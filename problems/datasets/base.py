@@ -9,10 +9,11 @@ from ..base import ProblemRepr
 DATASETS_PATH = (pathlib.Path(__file__).parent / 'data').resolve()
 
 
-def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool) -> ProblemRepr:
+def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool,
+                 remove_columns: list = None) -> ProblemRepr:
     frame = pd.read_csv(DATASETS_PATH / filename, sep=',')
 
-    data = frame.loc[:, frame.columns != target_column]
+    data = frame.drop(columns=[target_column] + (remove_columns if remove_columns is not None else []))
     target = frame[target_column]
 
     if not as_frame:
@@ -87,3 +88,88 @@ def load_airfoil_self_noise(return_X_y: bool = True, as_frame: bool = False):
     """
     return load_dataset(filename='airfoil_self_noise.csv', target_column='SPL', return_X_y=return_X_y,
                         as_frame=as_frame)
+
+
+def load_energy_heat(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Energy efficiency dataset with heating load as target.
+
+    ==============   ==================
+    Samples total    768
+    Dimensionality   8
+    Features         real, TODO: ranges
+    Targets          real, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/ml/datasets/energy+efficiency.
+    """
+
+    return load_dataset(filename='energy.csv', target_column='Y1', return_X_y=return_X_y,
+                        as_frame=as_frame, remove_columns=['Y2'])
+
+
+def load_energy_cool(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Energy efficiency dataset with cooling load as target.
+
+    ==============   ==================
+    Samples total    768
+    Dimensionality   8
+    Features         real, TODO: ranges
+    Targets          real, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/ml/datasets/energy+efficiency.
+    """
+
+    return load_dataset(filename='energy.csv', target_column='Y2', return_X_y=return_X_y,
+                        as_frame=as_frame, remove_columns=['Y1'])
+
+
+def load_forest_fires(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Forest Fires dataset.
+
+    ==============   ==================
+    Samples total    517
+    Dimensionality   13
+    Features         real, TODO: ranges
+    Targets          real, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/ml/datasets/forest+fires.
+    """
+
+    return load_dataset(filename='forest_fires.csv', target_column='area', return_X_y=return_X_y,
+                        as_frame=as_frame)
+
+
+def load_parkinson_total(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Parkinson dataset with total UPDRS as target.
+
+    ==============   ==================
+    Samples total    5875
+    Dimensionality   26
+    Features         real, TODO: ranges
+    Targets          real, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/ml/datasets/parkinsons+telemonitoring.
+    """
+
+    return load_dataset(filename='parkinson.csv', target_column='total_UPDRS', return_X_y=return_X_y,
+                        as_frame=as_frame, remove_columns=['subject#', 'test_time', 'motor_UPDRS'])
+
+
+def load_parkinson_motor(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Parkinson dataset with motor UPDRS as target.
+
+    ==============   ==================
+    Samples total    5875
+    Dimensionality   26
+    Features         real, TODO: ranges
+    Targets          real, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/ml/datasets/parkinsons+telemonitoring.
+    """
+
+    return load_dataset(filename='parkinson.csv', target_column='motor_UPDRS', return_X_y=return_X_y,
+                        as_frame=as_frame, remove_columns=['subject#', 'test_time', 'total_UPDRS'])

@@ -1,1 +1,12 @@
-from .base import load_airfoil_self_noise, load_combined_cycle_power_plant, load_gas_turbine, load_concrete_strength
+from .base import *
+
+__all__ = [
+    'load_forest_fires',
+    'load_energy_heat',
+    'load_energy_cool',
+    'load_parkinson',
+    'load_gas_turbine',
+    'load_combined_cycle_power_plant',
+    'load_concrete_strength',
+    'load_airfoil_self_noise'
+]
