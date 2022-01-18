@@ -45,13 +45,13 @@ def run(problem: str, optimizer: str):
     experiment = Experiment(name=f'{optimizer.upper()} Evaluation', params=params, verbose=10)
 
     # Repeat evaluations with several random states
-    random_states = np.random.SeedSequence(random_state).generate_state(2)
-    experiment.with_random_states(random_states, n_jobs=1)
+    random_states = np.random.SeedSequence(random_state).generate_state(8)
+    experiment.with_random_states(random_states, n_jobs=2)
 
     # Evaluation
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
-    experiment.perform(evaluation, cv=4, n_jobs=4)
+    experiment.perform(evaluation, cv=8, n_jobs=8)
 
     mlflow.set_experiment(problem)
     log_experiment(experiment)
