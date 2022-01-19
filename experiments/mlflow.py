@@ -129,7 +129,7 @@ def log_tuning(experiment: Experiment):
 
 def log_run(estimator: BaseEstimator):
     # Log model parameters
-    mlflow.log_params(estimator.get_params())
+    mlflow.log_dict(estimator.get_params(), 'params.txt')
 
     logger = _get_default_logger(estimator)
     if logger is not None:
