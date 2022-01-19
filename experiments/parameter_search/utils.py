@@ -9,7 +9,7 @@ def param_space(prefix=''):
         def wrapper(*args, **kwargs):
             bunch = Bunch()
             func(params=bunch, *args, **kwargs)
-            return {prefix + '__' + key: value for key, value in bunch.items()}
+            return {prefix + ('__' if prefix is not '' else '') + key: value for key, value in bunch.items()}
 
         return wrapper
 
