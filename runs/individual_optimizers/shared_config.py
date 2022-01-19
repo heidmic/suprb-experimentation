@@ -66,7 +66,7 @@ estimator = SupRB2(
     rule_generation=es.ES1xLambda(
         operator='&',
         n_iter=10_000,
-        delay=40,
+        delay=20,
         init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu()),
         mutation=es.mutation.HalfnormIncrease(sigma=0.8),
         origin_generation=origin.SquaredError(),

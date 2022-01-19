@@ -77,6 +77,7 @@ def run(problem: str, optimizer: str):
 
     params = global_params | dataset_params.get(problem, {}) | {'individual_optimizer': get_optimizer(optimizer)}
 
+    print(f"Problem is {problem}, optimizer is {optimizer}")
     experiment = Experiment(name=f'{optimizer.upper()} Tuning', params=params, verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, scoring='fitness',
