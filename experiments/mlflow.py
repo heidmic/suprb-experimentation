@@ -34,6 +34,17 @@ def _get_default_logger(estimator: BaseEstimator) -> Optional[DefaultLogger]:
                     return sublogger
 
 
+def try_log_dict(d: dict, name: str):
+    try:
+        mlflow.log_dict(d, name)
+    except TypeError as e1:
+        try:
+            mlflow.log_text(json.dumps(d, default=str), name)
+        except TypeError as e2:
+            warnings.warn(f"Logging of {name} as json has failed twice with reasons: {e1}; {e2}")
+            print(d)
+
+
 def log_experiment(experiment: Experiment):
     _log_experiment(experiment, parent_name='', depth=0)
 
@@ -102,14 +113,7 @@ def log_tuning(experiment: Experiment):
 
     history = _expand_list(tuning_result.params_history)
 
-    try:
-        mlflow.log_dict(history, 'tuning_history.json')
-    except TypeError as e1:
-        try:
-            mlflow.log_text(json.dumps(history, default=str), 'tuning_history.json')
-        except TypeError as e2:
-            warnings.warn(f"Logging of param history as json has failed twice with reasons: {e1}; {e2}")
-            print(history)
+    try_log_dict(history, 'param_history.json')
 
     # Try to log floaty params as metrics. `mlflow.log_metric` only accepts float values.
     for step, params in enumerate(tuning_result.params_history):
@@ -129,7 +133,7 @@ def log_tuning(experiment: Experiment):
 
 def log_run(estimator: BaseEstimator):
     # Log model parameters
-    mlflow.log_dict(estimator.get_params(), 'params.txt')
+    try_log_dict(estimator.get_params(), 'params.json')
 
     logger = _get_default_logger(estimator)
     if logger is not None:
