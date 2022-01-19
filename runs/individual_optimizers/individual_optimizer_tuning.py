@@ -22,11 +22,13 @@ def ga_space(trial: Trial, params: Bunch):
     params.crossover = getattr(ga.crossover, params.crossover)()
 
     params.mutation__mutation_rate = trial.suggest_float('mutation_rate', 0, 0.1)
+    params.elitist_ratio = trial.suggest_float('elitist_ratio', 0, 0.2)
 
 
 def gwo_space(trial: Trial, params: Bunch):
     params.position = trial.suggest_categorical('position', ['Sigmoid', 'Crossover'])
     params.position = getattr(gwo.position, params.position)()
+    params.n_leaders = trial.suggest_int('n_leaders', 1, global_params.individual_optimizer__population_size // 2)
 
 
 def aco_space(trial: Trial, params: Bunch):
@@ -35,7 +37,7 @@ def aco_space(trial: Trial, params: Bunch):
     params.builder.alpha = trial.suggest_float('alpha', 0.5, 5)
     params.builder.beta = trial.suggest_float('beta', 0.5, 5)
 
-    params.evaporation_rate = trial.suggest_float('evaporation_rate', 0, 1)
+    params.evaporation_rate = trial.suggest_float('evaporation_rate', 0, 0.9)
     params.selection__n = trial.suggest_int('selection__n', 1,
                                             global_params.individual_optimizer__population_size // 2)
 
@@ -83,7 +85,7 @@ def run(problem: str, optimizer: str):
 
     experiment.perform(evaluation=None)
 
-    mlflow.set_experiment("Individual Optimizer Tuning")
+    mlflow.set_experiment(f"{problem} Tuning")
     log_experiment(experiment)
 
 

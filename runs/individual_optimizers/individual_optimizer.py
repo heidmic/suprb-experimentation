@@ -49,7 +49,7 @@ def run(problem: str, optimizer: str):
 
     # Repeat evaluations with several random states
     random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=1)
+    experiment.with_random_states(random_states, n_jobs=2)
 
     # Evaluation
     evaluation = CrossValidateTest(estimator=estimator, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test,

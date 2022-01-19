@@ -38,25 +38,27 @@ global_params = Bunch(**{
 
 dataset_params = {
     'combined_cycle_power_plant': {
-
-    },
-    'gas_turbine': {
-
+        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
+        'rule_generation__mutation__sigma': 0.28,
     },
     'concrete_strength': {
-
+        'rule_generation__init__fitness__alpha': 0.3,
+        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
+        'rule_generation__mutation__sigma': 2.3,
     },
     'airfoil_self_noise': {
-
+        'rule_generation__init__fitness__alpha': 0.3,
+        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
+        'rule_generation__mutation__sigma': 2.15,
     },
-    'energy_heat': {
-
+    'energy_cool': {
+        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
+        'rule_generation__mutation__sigma': 1.17,
     },
-    'forest_fires': {
-
-    },
-    'parkinson_total': {
-
+    'parkinson_motor': {
+        'rule_generation__init__fitness__alpha': 0.3,
+        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
+        'rule_generation__mutation__sigma': 2.17,
     }
 }
 
