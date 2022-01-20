@@ -72,12 +72,13 @@ def abc_space(trial: Trial, params: Bunch):
 @click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
 @click.option('-o', '--optimizer', type=click.STRING, default='ga')
 def run(problem: str, optimizer: str):
+    print(f"Problem is {problem}, optimizer is {optimizer}")
+
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
 
     params = global_params | dataset_params.get(problem, {}) | {'individual_optimizer': get_optimizer(optimizer)}
 
-    print(f"Problem is {problem}, optimizer is {optimizer}")
     experiment = Experiment(name=f'{optimizer.upper()} Tuning', params=params, verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, scoring='fitness',

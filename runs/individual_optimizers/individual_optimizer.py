@@ -16,6 +16,8 @@ from shared_config import load_dataset, global_params, estimator, random_state, 
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 @click.option('-o', '--optimizer', type=click.STRING, default='ga')
 def run(problem: str, optimizer: str):
+    print(f"Problem is {problem}, optimizer is {optimizer}")
+
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
