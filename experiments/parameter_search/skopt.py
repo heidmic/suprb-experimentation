@@ -2,6 +2,7 @@ from typing import Union, Callable, Any
 
 import numpy as np
 from sklearn.base import BaseEstimator
+from sklearn.utils import Bunch
 from skopt import forest_minimize, gbrt_minimize, gp_minimize
 from skopt.utils import use_named_args, point_asdict
 
@@ -21,8 +22,8 @@ class SkoptTuner(ParameterTuner):
             estimator: BaseEstimator,
             X_train: np.ndarray,
             y_train: np.ndarray,
-            scoring: Union[str, Callable],
-            parameter_space: dict[str, Any],
+            scoring: Union[str, Callable] = 'r2',
+            callback: Union[Callable, list[Callable]] = None,
             tuner: str = 'gp',
             **kwargs
     ):
@@ -31,16 +32,14 @@ class SkoptTuner(ParameterTuner):
             X_train=X_train,
             y_train=y_train,
             scoring=scoring,
-            parameter_space=parameter_space,
             **kwargs
         )
 
+        self.callback = callback
         self.tuner = tuner
 
-    def _init_parameter_space(self):
-        """Sets the key of the dict as name, because `skopt` handles this weirdly."""
-        for name, dimension in self.parameter_space.items():
-            dimension.name = name
+    def get_params(self):
+        return super().get_params() | self._get_params(['tuner'])
 
     @staticmethod
     def _get_optimizer(tuner: str) -> Callable:
@@ -50,16 +49,18 @@ class SkoptTuner(ParameterTuner):
             'gp': gp_minimize
         }[tuner]
 
-    def tune(self) -> dict:
-        self._init_parameter_space()
+    def __call__(self, parameter_space: dict[str, Any], local_params: dict) -> tuple[dict, Any]:
+        # Sets the key of the dict as name, because `skopt` handles this weirdly
+        for name, dimension in parameter_space.items():
+            dimension.name = name
 
         # Convert the objective function to accept a list rather than a dict
-        objective = use_named_args(self.parameter_space.values())(self.generate_objective_function())
+        objective = use_named_args(parameter_space.values())(self.generate_objective_function(**local_params))
 
         # Perform the tuning
-        self.tuning_result_ = (self._get_optimizer(self.tuner))(
+        result = (self._get_optimizer(self.tuner))(
             func=objective,
-            dimensions=self.parameter_space.values(),
+            dimensions=parameter_space.values(),
             n_calls=self.n_calls,
             n_jobs=self.n_jobs,
             random_state=self.random_state,
@@ -68,5 +69,11 @@ class SkoptTuner(ParameterTuner):
         )
 
         # Convert the list back to a dict, such that it can be used with `set_params`
-        self.tuned_params_ = point_asdict(self.parameter_space, self.tuning_result_.x)
-        return self.tuned_params_
+        self.tuned_params_ = point_asdict(parameter_space, result.x)
+
+        self.tuning_result_ = Bunch()
+        self.tuning_result_.objective_history = result.func_vals
+        self.tuning_result_.params_history = [point_asdict(parameter_space, params_list) for params_list in
+                                              result.x_iters]
+
+        return self.tuned_params_, self.tuning_result_
