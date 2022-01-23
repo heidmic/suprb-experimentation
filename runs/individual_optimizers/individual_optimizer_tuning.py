@@ -1,6 +1,7 @@
 import click
 import mlflow
 from optuna import Trial
+from sklearn.model_selection import train_test_split
 from sklearn.utils import Bunch
 from suprb2.optimizer.individual import ga
 from suprb2opt.individual import gwo, aco, pso, abc
@@ -10,7 +11,7 @@ from experiments.mlflow import log_experiment
 from experiments.parameter_search import individual_optimizer_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-from shared_config import load_dataset, shared_tuning_params, global_params, get_optimizer, dataset_params
+from shared_config import load_dataset, shared_tuning_params, global_params, get_optimizer, dataset_params, random_state
 
 
 def ga_space(trial: Trial, params: Bunch):
@@ -18,8 +19,14 @@ def ga_space(trial: Trial, params: Bunch):
                                                  ['RouletteWheel', 'Tournament', 'LinearRank', 'Random'])
     params.selection = getattr(ga.selection, params.selection)()
 
+    if isinstance(params.selection, ga.selection.Tournament):
+        params.selection__k = trial.suggest_int('selection__k', 3, 10)
+
     params.crossover = trial.suggest_categorical('crossover', ['NPoint', 'Uniform'])
     params.crossover = getattr(ga.crossover, params.crossover)()
+
+    if isinstance(params.crossover, ga.crossover.NPoint):
+        params.crossover__n = trial.suggest_int('crossover__n', 1, 10)
 
     params.mutation__mutation_rate = trial.suggest_float('mutation_rate', 0, 0.1)
     params.elitist_ratio = trial.suggest_float('elitist_ratio', 0, 0.2)
@@ -65,7 +72,7 @@ def abc_space(trial: Trial, params: Bunch):
     params.trials_limit = trial.suggest_int('trials_limit', 1, global_params.individual_optimizer__n_iter)
 
     if isinstance(params.food, abc.food.DimensionFlips):
-        params.food.flip_rate = trial.suggest_float('b', 0.01, 1)
+        params.food.flip_rate = trial.suggest_float('flip_rate', 0.01, 1)
 
 
 @click.command()
@@ -76,12 +83,13 @@ def run(problem: str, optimizer: str):
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
     params = global_params | dataset_params.get(problem, {}) | {'individual_optimizer': get_optimizer(optimizer)}
 
     experiment = Experiment(name=f'{optimizer.upper()} Tuning', params=params, verbose=10)
 
-    tuner = OptunaTuner(X_train=X, y_train=y, scoring='fitness',
+    tuner = OptunaTuner(X_train=X_train, y_train=y_train, scoring='fitness',
                         **shared_tuning_params)
     experiment.with_tuning(individual_optimizer_space(globals()[f"{optimizer}_space"]), tuner=tuner)
 

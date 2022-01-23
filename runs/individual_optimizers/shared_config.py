@@ -31,34 +31,42 @@ def get_optimizer(name: str) -> type:
 random_state = 42
 
 global_params = Bunch(**{
-    'rule_generation__init__fitness__alpha': 0.1,
     'individual_optimizer__n_iter': 32,
     'individual_optimizer__population_size': 32,
 })
 
 dataset_params = {
     'combined_cycle_power_plant': {
+        'rule_generation__init__fitness__alpha': 0.05,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 0.28,
+        'rule_generation__mutation__sigma': 1.76,
+        'rule_generation__delay': 80,
     },
     'concrete_strength': {
-        'rule_generation__init__fitness__alpha': 0.3,
+        'rule_generation__init__fitness__alpha': 0.13,
+        # 'rule_generation__init__fitness__alpha': 0.33,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 2.3,
+        'rule_generation__mutation__sigma': 2.2,
+        'rule_generation__delay': 25,
     },
     'airfoil_self_noise': {
-        'rule_generation__init__fitness__alpha': 0.3,
+        'rule_generation__init__fitness__alpha': 0.06,
+        # 'rule_generation__init__fitness__alpha': 0.26,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 2.15,
+        'rule_generation__mutation__sigma': 1.76,
+        'rule_generation__delay': 143,
     },
     'energy_cool': {
+        'rule_generation__init__fitness__alpha': 0.07,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 1.17,
+        'rule_generation__mutation__sigma': 1.25,
+        'rule_generation__delay': 64,
     },
     'parkinson_motor': {
-        'rule_generation__init__fitness__alpha': 0.3,
+        'rule_generation__init__fitness__alpha': 0.08,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 2.17,
+        'rule_generation__mutation__sigma': 2.08,
+        'rule_generation__delay': 54,
     }
 }
 
