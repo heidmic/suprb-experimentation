@@ -2,7 +2,7 @@ import click
 import mlflow
 from optuna import Trial
 from sklearn.model_selection import train_test_split
-from sklearn.utils import Bunch
+from sklearn.utils import Bunch, shuffle
 from suprb2.optimizer.individual import ga
 from suprb2opt.individual import gwo, aco, pso, abc
 
@@ -83,14 +83,13 @@ def run(problem: str, optimizer: str):
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
+    X, y = shuffle(X, y, random_state=random_state)
 
     params = global_params | dataset_params.get(problem, {}) | {'individual_optimizer': get_optimizer(optimizer)}
 
     experiment = Experiment(name=f'{optimizer.upper()} Tuning', params=params, verbose=10)
 
-    tuner = OptunaTuner(X_train=X_train, y_train=y_train, scoring='fitness',
-                        **shared_tuning_params)
+    tuner = OptunaTuner(X_train=X, y_train=y, scoring='fitness', **shared_tuning_params)
     experiment.with_tuning(individual_optimizer_space(globals()[f"{optimizer}_space"]), tuner=tuner)
 
     experiment.perform(evaluation=None)

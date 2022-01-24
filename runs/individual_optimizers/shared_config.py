@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.model_selection import KFold
+from sklearn.linear_model import Ridge
 from sklearn.utils import Bunch
 from suprb2 import rule, SupRB2
 from suprb2.logging.combination import CombinedLogger
@@ -74,12 +74,12 @@ estimator = SupRB2(
     rule_generation=es.ES1xLambda(
         operator='&',
         n_iter=10_000,
-        init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu()),
+        init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(random_state=random_state)),
         mutation=es.mutation.HalfnormIncrease(),
         origin_generation=origin.SquaredError(),
     ),
     individual_optimizer=ga.GeneticAlgorithm(),
-    n_iter=64,
+    n_iter=32,
     n_rules=4,
     verbose=10,
     logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
