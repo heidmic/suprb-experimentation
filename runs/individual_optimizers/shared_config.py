@@ -39,42 +39,35 @@ dataset_params = {
     'combined_cycle_power_plant': {
         'rule_generation__init__fitness__alpha': 0.05,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 1.76,
-        'rule_generation__delay': 80,
+        'rule_generation__mutation__sigma': 0.58,
+        'rule_generation__delay': 84,
     },
     'concrete_strength': {
-        'rule_generation__init__fitness__alpha': 0.13,
-        # 'rule_generation__init__fitness__alpha': 0.33,
-        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 2.2,
-        'rule_generation__delay': 25,
-    },
-    'airfoil_self_noise': {
-        'rule_generation__init__fitness__alpha': 0.06,
-        # 'rule_generation__init__fitness__alpha': 0.26,
-        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 1.76,
-        'rule_generation__delay': 143,
-    },
-    'energy_cool': {
         'rule_generation__init__fitness__alpha': 0.07,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 1.25,
-        'rule_generation__delay': 64,
+        'rule_generation__mutation__sigma': 2.62,
+        'rule_generation__delay': 124,
     },
-    'parkinson_motor': {
-        'rule_generation__init__fitness__alpha': 0.08,
+    'airfoil_self_noise': {
+        'rule_generation__init__fitness__alpha': 0.05,
         'rule_generation__mutation': es.mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 2.08,
-        'rule_generation__delay': 54,
-    }
+        'rule_generation__mutation__sigma': 2.01,
+        'rule_generation__delay': 146,
+    },
+    'energy_cool': {
+        'rule_generation__init__fitness__alpha': 0.05,
+        'rule_generation__mutation': es.mutation.HalfnormIncrease(),
+        'rule_generation__mutation__sigma': 1.22,
+        'rule_generation__delay': 69,
+    },
 }
 
 estimator = SupRB2(
     rule_generation=es.ES1xLambda(
         operator='&',
         n_iter=10_000,
-        init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(random_state=random_state)),
+        init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
+                                          model=Ridge(alpha=0.01, random_state=random_state)),
         mutation=es.mutation.HalfnormIncrease(),
         origin_generation=origin.SquaredError(),
     ),

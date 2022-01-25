@@ -1,7 +1,6 @@
 import click
 import mlflow
 from optuna import Trial
-from sklearn.model_selection import train_test_split
 from sklearn.utils import Bunch, shuffle
 from suprb2.optimizer.individual import ga
 from suprb2opt.individual import gwo, aco, pso, abc

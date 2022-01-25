@@ -61,7 +61,7 @@ class Experiment:
             tuning_delta = tuning_stop - tuning_start
 
             self.log(f"Ended parameter tuning at {tuning_stop}, took {tuning_delta}", reason='tuning', fill='-')
-            self.log(f"Results were {tuned_params}", reason='tuning', priority=5)
+            self.log(f"Tuning results were {tuned_params}", reason='tuning', priority=5)
 
             # Propagate to nested experiments
             self._propagate_params(tuned_params)
@@ -82,6 +82,7 @@ class Experiment:
                 params = self.params | tuned_params
                 self.estimators_, result = evaluation(params=params, **kwargs)
                 self.results_ = Bunch(**result)
+                self.log(f"Evaluation results were {self.results_}", reason=f'{nested}eval', priority=5)
 
             end = datetime.now()
             delta = end - start
