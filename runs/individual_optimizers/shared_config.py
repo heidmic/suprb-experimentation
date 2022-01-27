@@ -62,6 +62,46 @@ dataset_params = {
     },
 }
 
+optimizer_params = {
+    'combined_cycle_power_plant': {
+        'ga': {
+            'individual_optimizer__selection': ga.selection.Tournament(),
+            'individual_optimizer__selection__k': 5,
+            'individual_optimizer__crossover': ga.crossover.Uniform(),
+            'individual_optimizer__mutation__mutation_rate': 0.024,
+            'individual_optimizer__elitist_ratio': 0.16,  # 5
+        }
+    },
+    'concrete_strength': {
+        'ga': {
+            'individual_optimizer__selection': ga.selection.Tournament(),
+            'individual_optimizer__selection__k': 5,
+            'individual_optimizer__crossover': ga.crossover.Uniform(),
+            'individual_optimizer__mutation__mutation_rate': 0.024,
+            'individual_optimizer__elitist_ratio': 0.16,  # 5
+        }
+
+    },
+    'airfoil_self_noise': {
+        'ga': {
+            'individual_optimizer__selection': ga.selection.LinearRank(),
+            'individual_optimizer__crossover': ga.crossover.NPoint(),
+            'individual_optimizer__crossover__n': 3,
+            'individual_optimizer__mutation__mutation_rate': 0.001,
+            'individual_optimizer__elitist_ratio': 0.17,  # 5
+        }
+    },
+    'energy_cool': {
+        'ga': {
+            'individual_optimizer__selection': ga.selection.Tournament(),
+            'individual_optimizer__selection__k': 9,
+            'individual_optimizer__crossover': ga.crossover.Uniform(),
+            'individual_optimizer__mutation__mutation_rate': 0.014,
+            'individual_optimizer__elitist_ratio': 0.19,  # 6
+        }
+    },
+}
+
 estimator = SupRB2(
     rule_generation=es.ES1xLambda(
         operator='&',
