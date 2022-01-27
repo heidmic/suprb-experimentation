@@ -70,7 +70,25 @@ optimizer_params = {
             'individual_optimizer__crossover': ga.crossover.Uniform(),
             'individual_optimizer__mutation__mutation_rate': 0.024,
             'individual_optimizer__elitist_ratio': 0.16,  # 5
-        }
+        },
+        'aco': {
+            'individual_optimizer__builder': aco.builder.Complete(alpha=2.33, beta=4.91),
+            'individual_optimizer__evaporation_rate': 0.39,
+            'individual_optimizer__selection__n': 1,
+        },
+        'gwo': {
+            'individual_optimizer__position': gwo.position.Sigmoid(),
+            'individual_optimizer__n_leaders': 1,
+        },
+        'pso': {
+            'individual_optimizer__movement': pso.movement.Sigmoid(b=2.23, c=2.20),
+            'individual_optimizer__a_min': 1.04,
+            'individual_optimizer__a_max': 2.54,
+        },
+        'abc': {
+            'individual_optimizer__food': abc.food.Sigmoid(),
+            'individual_optimizer__trials_limit': 24,
+        },
     },
     'concrete_strength': {
         'ga': {
@@ -79,7 +97,21 @@ optimizer_params = {
             'individual_optimizer__crossover': ga.crossover.Uniform(),
             'individual_optimizer__mutation__mutation_rate': 0.024,
             'individual_optimizer__elitist_ratio': 0.16,  # 5
-        }
+        },
+        'aco': None,
+        'gwo': {
+            'individual_optimizer__position': gwo.position.Sigmoid(),
+            'individual_optimizer__n_leaders': 2,
+        },
+        'pso': {
+            'individual_optimizer__movement': pso.movement.Sigmoid(b=2.32, c=1.36),
+            'individual_optimizer__a_min': 1.27,
+            'individual_optimizer__a_max': 1.79,
+        },
+        'abc': {
+            'individual_optimizer__food': abc.food.DimensionFlips(flip_rate=0.13),
+            'individual_optimizer__trials_limit': 17,
+        },
 
     },
     'airfoil_self_noise': {
@@ -89,7 +121,21 @@ optimizer_params = {
             'individual_optimizer__crossover__n': 3,
             'individual_optimizer__mutation__mutation_rate': 0.001,
             'individual_optimizer__elitist_ratio': 0.17,  # 5
-        }
+        },
+        'aco': None,
+        'gwo': {
+            'individual_optimizer__position': gwo.position.Crossover(),
+            'individual_optimizer__n_leaders': 11,
+        },
+        'pso': {
+            'individual_optimizer__movement': pso.movement.Sigmoid(b=2.76, c=2.98),
+            'individual_optimizer__a_min': 2.36,
+            'individual_optimizer__a_max': 2.39,
+        },
+        'abc': {
+            'individual_optimizer__food': abc.food.Bitwise(),
+            'individual_optimizer__trials_limit': 5,
+        },
     },
     'energy_cool': {
         'ga': {
@@ -98,7 +144,25 @@ optimizer_params = {
             'individual_optimizer__crossover': ga.crossover.Uniform(),
             'individual_optimizer__mutation__mutation_rate': 0.014,
             'individual_optimizer__elitist_ratio': 0.19,  # 6
-        }
+        },
+        'aco': {
+            'individual_optimizer__builder': aco.builder.Complete(alpha=1.66, beta=1.83),
+            'individual_optimizer__evaporation_rate': 0.67,
+            'individual_optimizer__selection__n': 1
+        },
+        'gwo': {
+            'individual_optimizer__position': gwo.position.Sigmoid(),
+            'individual_optimizer__n_leaders': 2,
+        },
+        'pso': {
+            'individual_optimizer__movement': pso.movement.Sigmoid(b=1.12, c=1.42),
+            'individual_optimizer__a_min': 0.35,
+            'individual_optimizer__a_max': 2.65,
+        },
+        'abc': {
+            'individual_optimizer__food': abc.food.Sigmoid(),
+            'individual_optimizer__trials_limit': 11,
+        },
     },
 }
 
