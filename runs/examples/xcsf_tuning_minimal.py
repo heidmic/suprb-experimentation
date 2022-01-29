@@ -62,6 +62,10 @@ def run(problem: str):
         params.THETA_EA = trial.suggest_int('THETA_EA', 25, 50)
         params.EA_SUBSUMPTION = trial.suggest_categorical('EA_SUBSUMPTION',
                                                           [True, False])
+        params.EA_SELECT_TYPE = trial.suggest_categorical('EA_SELECT_TYPE',
+                                                          ["roulette",
+                                                           "tournament"])
+
         scores = cross_validate(
             estimator=estimator,
             X=X,

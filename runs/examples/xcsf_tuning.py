@@ -117,10 +117,15 @@ def default_xcs_params():
 class XCSF(BaseEstimator, RegressorMixin):
     """
     Almost a correct sklearn wrapper for ``xcsf.XCS``. For example, it can't yet
-    be pickled.
+    be pickled and some parameters are missing
     """
-    def __init__(self, params, random_state):
-        self.params = params
+    def __init__(self, random_state, MAX_TRIALS=1000, POP_SIZE=200, NU=5,
+                 P_CROSSOVER=0.8, P_EXPLORE=0.9, THETA_EA=50,
+                 EA_SUBSUMPTION=False, EA_SELECT_TYPE="tournament"):
+        self.params = {"MAX_TRIALS": MAX_TRIALS, "POP_SIZE": POP_SIZE, "NU": NU,
+                       "P_CROSSOVER": P_CROSSOVER, "P_EXPLORE": P_EXPLORE,
+                       "THETA_EA": THETA_EA, "EA_SUBSUMPTION": EA_SUBSUMPTION,
+                       "EA_SELECT_TYPE": EA_SELECT_TYPE}
         self.random_state = random_state
 
     def fit(self, X, y):
@@ -137,7 +142,10 @@ class XCSF(BaseEstimator, RegressorMixin):
         if self.params is None:
             set_xcs_params(xcs, default_xcs_params())
         else:
-            set_xcs_params(xcs, self.params)
+            params = default_xcs_params()
+            params.update(self.params)
+            set_xcs_params(xcs, params)
+            print(params)
         # log_xcs_params(xcs)
 
         xcs.action("integer")  # (dummy) integer actions
@@ -158,9 +166,9 @@ class XCSF(BaseEstimator, RegressorMixin):
 
         args = {
             "x0": 1,  # bias attribute
-            "rls_scale_factor":
+            "scale_factor":
                 1000,  # initial diagonal values of the gain-matrix
-            "rls_lambda": 1,  # forget rate (small values may be unstable)
+            "lambda": 1,  # forget rate (small values may be unstable)
         }
         prediction_string = "rls_linear"
         xcs.prediction(prediction_string, args)
@@ -203,11 +211,11 @@ def run(problem: str):
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    estimator = XCSF(None, random_state)
+    estimator = XCSF(random_state)
 
-    cross_validate(estimator, X, y, scoring=mean_squared_error, verbose=10)
+    #cross_validate(estimator, X, y, scoring=mean_squared_error, verbose=10)
 
-    exit()
+    #exit()
 
     shared_tuning_params = dict(
         estimator=estimator,
@@ -228,7 +236,8 @@ def run(problem: str):
 
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
-        params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000, 1000000)
+        params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000,
+                                                    1000000)
         params.POP_SIZE = trial.suggest_int('POP_SIZE', 250, 2500)
         params.P_CROSSOVER = trial.suggest_float('P_CROSSOVER', 0.5, 1)
         params.P_EXPLORE = trial.suggest_float('P_EXPLORE', 0.5, 0.9)
