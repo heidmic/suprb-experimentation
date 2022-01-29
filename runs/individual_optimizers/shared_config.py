@@ -98,7 +98,11 @@ optimizer_params = {
             'individual_optimizer__mutation__mutation_rate': 0.024,
             'individual_optimizer__elitist_ratio': 0.16,  # 5
         },
-        'aco': None,
+        'aco': {
+            'individual_optimizer__builder': aco.builder.Complete(alpha=1.45, beta=1.94),
+            'individual_optimizer__evaporation_rate': 0.66,
+            'individual_optimizer__selection__n': 2,
+        },
         'gwo': {
             'individual_optimizer__position': gwo.position.Sigmoid(),
             'individual_optimizer__n_leaders': 2,
@@ -122,10 +126,15 @@ optimizer_params = {
             'individual_optimizer__mutation__mutation_rate': 0.001,
             'individual_optimizer__elitist_ratio': 0.17,  # 5
         },
-        'aco': None,
+        'aco':  {'individual_optimizer__builder': aco.builder.Complete(alpha=1.51, beta=1.18),
+                 'individual_optimizer__evaporation_rate': 0.78,
+                 'individual_optimizer__selection__n': 3,
+                 },
         'gwo': {
-            'individual_optimizer__position': gwo.position.Crossover(),
-            'individual_optimizer__n_leaders': 11,
+            # 'individual_optimizer__position': gwo.position.Crossover(),
+            'individual_optimizer__position': gwo.position.Sigmoid(),
+            'individual_optimizer__n_leaders': 2,
+            # 'individual_optimizer__n_leaders': 11,
         },
         'pso': {
             'individual_optimizer__movement': pso.movement.Sigmoid(b=2.76, c=2.98),
