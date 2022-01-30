@@ -123,11 +123,6 @@ class XCSF(BaseEstimator, RegressorMixin):
     def __init__(self, random_state, MAX_TRIALS=1000, POP_SIZE=200, NU=5,
                  P_CROSSOVER=0.8, P_EXPLORE=0.9, THETA_EA=50,
                  EA_SUBSUMPTION=False, EA_SELECT_TYPE="tournament"):
-        #self.params = {"MAX_TRIALS": MAX_TRIALS, "POP_SIZE": POP_SIZE,
-        # "NU": NU,
-        #               "P_CROSSOVER": P_CROSSOVER, "P_EXPLORE": P_EXPLORE,
-        #               "THETA_EA": THETA_EA, "EA_SUBSUMPTION": EA_SUBSUMPTION,
-        #               "EA_SELECT_TYPE": EA_SELECT_TYPE}
         self.random_state = random_state
 
         self.MAX_TRIALS = MAX_TRIALS
@@ -150,20 +145,6 @@ class XCSF(BaseEstimator, RegressorMixin):
         xcs = xcsf.XCS(X.shape[1], 1, 1)  # only 1 (dummy) action
         xcs.seed(random_state.randint(np.iinfo(np.int32).max))
 
-        # if self.params is None:
-        #     set_xcs_params(xcs, default_xcs_params())
-        # else:
-        #     params = default_xcs_params()
-        #     params.update({"MAX_TRIALS": self.MAX_TRIALS,
-        #                    "POP_SIZE": self.POP_SIZE,
-        #                    "NU": self.NU,
-        #                    "P_CROSSOVER": self.P_CROSSOVER,
-        #                    "P_EXPLORE": self.P_EXPLORE,
-        #                    "THETA_EA": self.THETA_EA,
-        #                    "EA_SUBSUMPTION": self.EA_SUBSUMPTION,
-        #                    "EA_SELECT_TYPE": self.EA_SELECT_TYPE})
-        #     set_xcs_params(xcs, params)
-        #     print(params)
         params = default_xcs_params()
         configurables = {"MAX_TRIALS": self.MAX_TRIALS,
                          "POP_SIZE": self.POP_SIZE,
@@ -176,7 +157,6 @@ class XCSF(BaseEstimator, RegressorMixin):
         params.update(configurables)
         set_xcs_params(xcs, params)
         print(f"fitting with {configurables}")
-        # log_xcs_params(xcs)
 
         xcs.action("integer")  # (dummy) integer actions
 
@@ -188,11 +168,6 @@ class XCSF(BaseEstimator, RegressorMixin):
                 0,  # disable gradient descent of centers towards matched input mean
         }
         xcs.condition("hyperrectangle", args)
-        # mlflow.log_param("xcs.condition", "hyperrectangle")
-        # mlflow.log_param("xcs.condition.args.min", args["min"])
-        # mlflow.log_param("xcs.condition.args.max", args["max"])
-        # mlflow.log_param("xcs.condition.args.spread_min", args["spread_min"])
-        # mlflow.log_param("xcs.condition.args.eta", args["eta"])
 
         args = {
             "x0": 1,  # bias attribute
@@ -202,11 +177,6 @@ class XCSF(BaseEstimator, RegressorMixin):
         }
         prediction_string = "rls_linear"
         xcs.prediction(prediction_string, args)
-        # mlflow.log_param("xcs.prediction", prediction_string)
-        # mlflow.log_param("xcs.prediction.args.x0", args["x0"])
-        # mlflow.log_param("xcs.prediction.args.rls_scale_factor",
-        #                  args["rls_scale_factor"])
-        # mlflow.log_param("xcs.prediction.args.rls_lambda", args["rls_lambda"])
 
         xcs.fit(X, y, True)
 
@@ -253,12 +223,14 @@ def run(problem: str):
         cv=4,
         n_jobs_cv=4,
         n_jobs=4,
-        n_calls=128,
+        n_calls=1,#128,
         timeout=60,#90 * 60 * 60,  # 90 hours
         verbose=10
     )
 
-    tuner = OptunaTuner(X_train=X, y_train=y, scoring=mean_squared_error,
+    tuner = OptunaTuner(X_train=X, y_train=y,
+                        scoring='neg_mean_squared_error',
+                        #scoring=mean_squared_error,
                         **shared_tuning_params)
 
     # Create the base experiment, using some default tuner
@@ -267,7 +239,7 @@ def run(problem: str):
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
         params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000,
-                                              100000)
+                                              20000)
         params.POP_SIZE = trial.suggest_int('POP_SIZE', 250, 2500)
         params.P_CROSSOVER = trial.suggest_float('P_CROSSOVER', 0.5, 1)
         params.P_EXPLORE = trial.suggest_float('P_EXPLORE', 0.5, 0.9)
@@ -289,7 +261,6 @@ def run(problem: str):
                                random_state=random_state, verbose=10)
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
-    experiment.perform(evaluation=None)
 
     mlflow.set_experiment(problem)
     log_experiment(experiment)

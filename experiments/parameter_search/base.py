@@ -62,7 +62,7 @@ class ParameterTuner(metaclass=ABCMeta):
                 cv=self.cv,
                 scoring=self.scoring if _validate_sklearn_metric(self.scoring) else None,
                 n_jobs=self.n_jobs_cv,
-                return_estimator=True,
+                return_estimator=False,
                 verbose=self.verbose,
                 error_score='raise',
             )

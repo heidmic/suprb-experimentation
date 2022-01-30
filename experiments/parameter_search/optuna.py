@@ -62,6 +62,7 @@ class OptunaTuner(ParameterTuner):
             n_trials=self.n_calls,
             n_jobs=self.n_jobs if self.n_jobs is not None else 1,
             timeout=self.timeout,
+            catch=(TypeError,)
         )
 
         self.tuned_params_ = parameter_space(study.best_trial)
