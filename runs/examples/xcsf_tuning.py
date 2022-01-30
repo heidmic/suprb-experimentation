@@ -123,21 +123,21 @@ class XCSF(BaseEstimator, RegressorMixin):
     def __init__(self, random_state, MAX_TRIALS=1000, POP_SIZE=200, NU=5,
                  P_CROSSOVER=0.8, P_EXPLORE=0.9, THETA_EA=50,
                  EA_SUBSUMPTION=False, EA_SELECT_TYPE="tournament"):
-        self.params = {"MAX_TRIALS": MAX_TRIALS, "POP_SIZE": POP_SIZE, "NU": NU,
-                       "P_CROSSOVER": P_CROSSOVER, "P_EXPLORE": P_EXPLORE,
-                       "THETA_EA": THETA_EA, "EA_SUBSUMPTION": EA_SUBSUMPTION,
-                       "EA_SELECT_TYPE": EA_SELECT_TYPE}
+        #self.params = {"MAX_TRIALS": MAX_TRIALS, "POP_SIZE": POP_SIZE,
+        # "NU": NU,
+        #               "P_CROSSOVER": P_CROSSOVER, "P_EXPLORE": P_EXPLORE,
+        #               "THETA_EA": THETA_EA, "EA_SUBSUMPTION": EA_SUBSUMPTION,
+        #               "EA_SELECT_TYPE": EA_SELECT_TYPE}
         self.random_state = random_state
 
-        xcs = xcsf.XCS(1, 1, 1)
-        xcs.MAX_TRIALS = self.MAX_TRIALS = MAX_TRIALS
-        xcs.POP_SIZE = self.POP_SIZE = POP_SIZE
-        xcs.NU = self.NU = NU
-        xcs.P_CROSSOVER = self.P_CROSSOVER = P_CROSSOVER
-        xcs.P_EXPLORE = self.P_EXPLORE = P_EXPLORE
-        xcs.THETA_EA = self.THETA_EA = THETA_EA
-        xcs.EA_SUBSUMPTION = self.EA_SUBSUMPTION = EA_SUBSUMPTION
-        xcs.EA_SELECT_TYPE = self.EA_SELECT_TYPE = EA_SELECT_TYPE
+        self.MAX_TRIALS = MAX_TRIALS
+        self.POP_SIZE = POP_SIZE
+        self.NU = NU
+        self.P_CROSSOVER = P_CROSSOVER
+        self.P_EXPLORE = P_EXPLORE
+        self.THETA_EA = THETA_EA
+        self.EA_SUBSUMPTION = EA_SUBSUMPTION
+        self.EA_SELECT_TYPE = EA_SELECT_TYPE
 
     def fit(self, X, y):
         X, y = check_X_y(X, y)
@@ -150,13 +150,32 @@ class XCSF(BaseEstimator, RegressorMixin):
         xcs = xcsf.XCS(X.shape[1], 1, 1)  # only 1 (dummy) action
         xcs.seed(random_state.randint(np.iinfo(np.int32).max))
 
-        if self.params is None:
-            set_xcs_params(xcs, default_xcs_params())
-        else:
-            params = default_xcs_params()
-            params.update(self.params)
-            set_xcs_params(xcs, params)
-            print(params)
+        # if self.params is None:
+        #     set_xcs_params(xcs, default_xcs_params())
+        # else:
+        #     params = default_xcs_params()
+        #     params.update({"MAX_TRIALS": self.MAX_TRIALS,
+        #                    "POP_SIZE": self.POP_SIZE,
+        #                    "NU": self.NU,
+        #                    "P_CROSSOVER": self.P_CROSSOVER,
+        #                    "P_EXPLORE": self.P_EXPLORE,
+        #                    "THETA_EA": self.THETA_EA,
+        #                    "EA_SUBSUMPTION": self.EA_SUBSUMPTION,
+        #                    "EA_SELECT_TYPE": self.EA_SELECT_TYPE})
+        #     set_xcs_params(xcs, params)
+        #     print(params)
+        params = default_xcs_params()
+        configurables = {"MAX_TRIALS": self.MAX_TRIALS,
+                         "POP_SIZE": self.POP_SIZE,
+                         "NU": self.NU,
+                         "P_CROSSOVER": self.P_CROSSOVER,
+                         "P_EXPLORE": self.P_EXPLORE,
+                         "THETA_EA": self.THETA_EA,
+                         "EA_SUBSUMPTION": self.EA_SUBSUMPTION,
+                         "EA_SELECT_TYPE": self.EA_SELECT_TYPE}
+        params.update(configurables)
+        set_xcs_params(xcs, params)
+        print(f"fitting with {configurables}")
         # log_xcs_params(xcs)
 
         xcs.action("integer")  # (dummy) integer actions
@@ -235,7 +254,7 @@ def run(problem: str):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=128,
-        timeout=90 * 60 * 60,  # 90 hours
+        timeout=60,#90 * 60 * 60,  # 90 hours
         verbose=10
     )
 
@@ -248,7 +267,7 @@ def run(problem: str):
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
         params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000,
-                                              1000000)
+                                              100000)
         params.POP_SIZE = trial.suggest_int('POP_SIZE', 250, 2500)
         params.P_CROSSOVER = trial.suggest_float('P_CROSSOVER', 0.5, 1)
         params.P_EXPLORE = trial.suggest_float('P_EXPLORE', 0.5, 0.9)
