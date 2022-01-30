@@ -119,6 +119,7 @@ class XCSF(BaseEstimator, RegressorMixin):
     Almost a correct sklearn wrapper for ``xcsf.XCS``. For example, it can't yet
     be pickled and some parameters are missing
     """
+
     def __init__(self, random_state, MAX_TRIALS=1000, POP_SIZE=200, NU=5,
                  P_CROSSOVER=0.8, P_EXPLORE=0.9, THETA_EA=50,
                  EA_SUBSUMPTION=False, EA_SELECT_TYPE="tournament"):
@@ -127,6 +128,16 @@ class XCSF(BaseEstimator, RegressorMixin):
                        "THETA_EA": THETA_EA, "EA_SUBSUMPTION": EA_SUBSUMPTION,
                        "EA_SELECT_TYPE": EA_SELECT_TYPE}
         self.random_state = random_state
+
+        xcs = xcsf.XCS(1, 1, 1)
+        xcs.MAX_TRIALS = self.MAX_TRIALS = MAX_TRIALS
+        xcs.POP_SIZE = self.POP_SIZE = POP_SIZE
+        xcs.NU = self.NU = NU
+        xcs.P_CROSSOVER = self.P_CROSSOVER = P_CROSSOVER
+        xcs.P_EXPLORE = self.P_EXPLORE = P_EXPLORE
+        xcs.THETA_EA = self.THETA_EA = THETA_EA
+        xcs.EA_SUBSUMPTION = self.EA_SUBSUMPTION = EA_SUBSUMPTION
+        xcs.EA_SELECT_TYPE = self.EA_SELECT_TYPE = EA_SELECT_TYPE
 
     def fit(self, X, y):
         X, y = check_X_y(X, y)
@@ -215,7 +226,7 @@ def run(problem: str):
 
     #cross_validate(estimator, X, y, scoring=mean_squared_error, verbose=10)
 
-    #exit()
+    # exit()
 
     shared_tuning_params = dict(
         estimator=estimator,
@@ -237,7 +248,7 @@ def run(problem: str):
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
         params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000,
-                                                    1000000)
+                                              1000000)
         params.POP_SIZE = trial.suggest_int('POP_SIZE', 250, 2500)
         params.P_CROSSOVER = trial.suggest_float('P_CROSSOVER', 0.5, 1)
         params.P_EXPLORE = trial.suggest_float('P_EXPLORE', 0.5, 0.9)
@@ -267,4 +278,3 @@ def run(problem: str):
 
 if __name__ == '__main__':
     run()
-
