@@ -52,7 +52,6 @@ def log_experiment(experiment: Experiment):
 def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dict:
     run_name = f"{parent_name}/{experiment.name}"
     with mlflow.start_run(run_name=run_name, nested=depth > 0) as parent_run:
-
         # Set root tag
         if depth == 0:
             mlflow.set_tag("root", True)
