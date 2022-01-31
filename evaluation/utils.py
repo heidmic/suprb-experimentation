@@ -5,8 +5,10 @@ import re
 import mlflow.tracking
 import pandas as pd
 
+PROBLEMS = ('combined_cycle_power_plant', 'airfoil_self_noise', 'concrete_strength', 'energy_cool')
 
-def tex_escape(text):
+
+def tex_escape(text: str) -> str:
     """
         :param text: a plain text message
         :return: the message escaped to appear correctly in LaTeX
@@ -29,13 +31,18 @@ def tex_escape(text):
     return regex.sub(lambda match: conv[match.group()], text)
 
 
+def latex_props(formats: list[str]) -> str:
+    f = {'bold': 'textbf', 'italics': 'emph', 'underline': 'underline', }
+    return ';'.join([f"{fmt}:--rwrap" for fmt in {value for key, value in f.items() if key in formats}])
+
+
 def get_folds_with_name(problem: str, optimizer: str) -> pd.DataFrame:
     return mlflow.search_runs([mlflow.get_experiment_by_name(problem).experiment_id],
                               f"tags.`mlflow.runName` like '/{optimizer.upper()} Evaluation/%' and tags.fold = 'True'")
 
 
-def get_metrics(problem: str, optimizer, columns: list, rename: dict = None) -> pd.DataFrame:
-    runs = get_folds_with_name(problem, optimizer)
+def get_metrics(problem: str, optimizer: str, columns: list, rename: dict = None) -> pd.DataFrame:
+    runs = get_folds_with_name(problem=problem, optimizer=optimizer)
     metrics = runs[columns]
     metrics = metrics.rename(columns=lambda x: x.split('.')[1])
     metrics.rename(columns=rename, inplace=True)
@@ -45,17 +52,25 @@ def get_metrics(problem: str, optimizer, columns: list, rename: dict = None) -> 
     return metrics
 
 
-def get_relevant_metrics(problem: str, optimizer) -> pd.DataFrame:
+def get_relevant_metrics(problem: str, optimizer: str) -> pd.DataFrame:
     columns = ['metrics.test_r2', 'metrics.training_score', 'metrics.test_neg_mean_squared_error',
                'metrics.elitist_error', 'metrics.elitist_complexity', 'metrics.elitist_fitness']
     rename = {'training_score': 'train_r2', 'elitist_error': 'train_mean_squared_error',
               'test_neg_mean_squared_error': 'test_mean_squared_error'}
-    return get_metrics(problem, optimizer, columns=columns, rename=rename)
+    return get_metrics(problem=problem, optimizer=optimizer, columns=columns, rename=rename)
 
 
-def get_all_relevant_metrics(problem: str, optimizers=('RS', 'GA', 'ACO', 'GWO', 'PSO', 'ABC')) -> pd.DataFrame:
-    metrics = pd.concat({optimizer: get_relevant_metrics(problem, optimizer) for optimizer in optimizers})
+def get_relevant_metrics_for_optimizers(problem: str,
+                                        optimizers=('RS', 'GA', 'ACO', 'GWO', 'PSO', 'ABC')) -> pd.DataFrame:
+    metrics = pd.concat({optimizer: get_relevant_metrics(problem=problem, optimizer=optimizer)
+                         for optimizer in optimizers})
     metrics.index.names = ['optimizer', 'run']
+    return metrics
+
+
+def get_relevant_metrics_for_all_optimizers_and_problems():
+    metrics = pd.concat({problem: get_relevant_metrics_for_optimizers(problem) for problem in PROBLEMS})
+    metrics.index = metrics.index.rename('problem', level=0)
     return metrics
 
 
@@ -63,7 +78,13 @@ def metrics_summary(metrics: pd.DataFrame) -> pd.DataFrame:
     return metrics.groupby(by='optimizer').describe().drop(columns='count', level=1)
 
 
-def get_metrics_history_series(problem: str, optimizer: str, column: str) -> pd.Series:
+def concise_metrics_summary(metrics: pd.DataFrame) -> pd.DataFrame:
+    metrics = metrics.groupby(by='optimizer').describe().loc[:, (slice(None), ['mean', 'std', '50%'])]
+    metrics.rename(columns={'50%': 'median'}, level=1, inplace=True)
+    return metrics
+
+
+def get_metric_history(problem: str, optimizer: str, column: str) -> pd.Series:
     runs = get_folds_with_name(problem, optimizer)
     client = mlflow.tracking.MlflowClient()
 
@@ -77,15 +98,14 @@ def get_metrics_history_series(problem: str, optimizer: str, column: str) -> pd.
     return metrics_history
 
 
-def get_all_metrics_history_series(problem: str, column: str,
-                                   optimizers=('RS', 'GA', 'ACO', 'GWO', 'PSO', 'ABC')) -> pd.Series:
-    history = pd.concat({optimizer: get_metrics_history_series(problem, optimizer, column) for optimizer in optimizers})
+def get_metric_history_for_optimizers(problem: str, column: str,
+                                      optimizers=('RS', 'GA', 'ACO', 'GWO', 'PSO', 'ABC')) -> pd.Series:
+    history = pd.concat({optimizer: get_metric_history(problem, optimizer, column) for optimizer in optimizers})
     history.index = history.index.rename('optimizer', level=0)
     return history
 
 
-def get_all_metrics_histories_series(column: str) -> pd.Series:
-    histories = pd.concat({problem: get_all_metrics_history_series(problem, column) for problem in
-                           ('combined_cycle_power_plant', 'airfoil_self_noise', 'concrete_strength', 'energy_cool')})
+def get_metric_history_for_all_optimizers_and_problems(column: str) -> pd.Series:
+    histories = pd.concat({problem: get_metric_history_for_optimizers(problem, column) for problem in PROBLEMS})
     histories.index = histories.index.rename('problem', level=0)
     return histories
