@@ -217,14 +217,15 @@ def run(problem: str):
 
     # exit()
 
+    n_calls = 128
     shared_tuning_params = dict(
         estimator=estimator,
         random_state=random_state,
         cv=4,
         n_jobs_cv=4,
         n_jobs=4,
-        n_calls=1,#128,
-        timeout=60,#90 * 60 * 60,  # 90 hours
+        n_calls=n_calls,
+        timeout=24 * 60 * 60,  # 24 hours
         verbose=10
     )
 
@@ -238,8 +239,8 @@ def run(problem: str):
 
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
-        params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000,
-                                              20000)
+        params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 50000,
+                                              500000)
         params.POP_SIZE = trial.suggest_int('POP_SIZE', 250, 2500)
         params.P_CROSSOVER = trial.suggest_float('P_CROSSOVER', 0.5, 1)
         params.P_EXPLORE = trial.suggest_float('P_EXPLORE', 0.5, 0.9)
@@ -253,7 +254,7 @@ def run(problem: str):
 
     experiment.with_tuning(optuna_objective, tuner=tuner)
 
-    random_states = np.random.SeedSequence(random_state).generate_state(4)
+    random_states = np.random.SeedSequence(random_state).generate_state(8)
     experiment.with_random_states(random_states, n_jobs=4)
 
     # Evaluation using cross-validation and an external test set
@@ -262,7 +263,7 @@ def run(problem: str):
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
-    mlflow.set_experiment(problem)
+    mlflow.set_experiment(f"{problem}_opt{n_calls}x")
     log_experiment(experiment)
 
 
