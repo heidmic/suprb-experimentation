@@ -16,5 +16,5 @@ def param_space(prefix=''):
     return decorator
 
 
-def individual_optimizer_space(func):
-    return param_space('individual_optimizer')(func)
+def solution_optimizer_space(func):
+    return param_space('solution_optimizer')(func)
