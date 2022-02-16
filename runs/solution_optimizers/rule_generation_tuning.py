@@ -10,7 +10,7 @@ from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-from runs.individual_optimizers.shared_config import shared_tuning_params, load_dataset, global_params, dataset_params, \
+from runs.solution_optimizers.shared_config import shared_tuning_params, load_dataset, global_params, dataset_params, \
     random_state
 
 

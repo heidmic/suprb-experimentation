@@ -2,12 +2,12 @@ import click
 import mlflow
 from optuna import Trial
 from sklearn.utils import Bunch, shuffle
-from suprb2.optimizer.individual import ga
-from suprb2opt.individual import gwo, aco, pso, abc
+from suprb2.optimizer.solution import ga
+from suprb2opt.solution import gwo, aco, pso, abc
 
 from experiments import Experiment
 from experiments.mlflow import log_experiment
-from experiments.parameter_search import individual_optimizer_space
+from experiments.parameter_search import solution_optimizer_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
 from shared_config import load_dataset, shared_tuning_params, global_params, get_optimizer, dataset_params, random_state
@@ -34,7 +34,7 @@ def ga_space(trial: Trial, params: Bunch):
 def gwo_space(trial: Trial, params: Bunch):
     params.position = trial.suggest_categorical('position', ['Sigmoid', 'Crossover'])
     params.position = getattr(gwo.position, params.position)()
-    params.n_leaders = trial.suggest_int('n_leaders', 1, global_params.individual_optimizer__population_size // 2)
+    params.n_leaders = trial.suggest_int('n_leaders', 1, global_params.solution_optimizer__population_size // 2)
 
 
 def aco_space(trial: Trial, params: Bunch):
@@ -45,7 +45,7 @@ def aco_space(trial: Trial, params: Bunch):
 
     params.evaporation_rate = trial.suggest_float('evaporation_rate', 0, 0.9)
     params.selection__n = trial.suggest_int('selection__n', 1,
-                                            global_params.individual_optimizer__population_size // 2)
+                                            global_params.solution_optimizer__population_size // 2)
 
 
 def pso_space(trial: Trial, params: Bunch):
@@ -61,14 +61,14 @@ def pso_space(trial: Trial, params: Bunch):
     elif isinstance(params.movement, pso.movement.BinaryQuantum):
         params.movement.p_learning = trial.suggest_float('p_learning', 0.01, 1)
         params.movement.n_attractors = trial.suggest_int('n_attractors', 1,
-                                                         global_params.individual_optimizer__population_size // 2)
+                                                         global_params.solution_optimizer__population_size // 2)
 
 
 def abc_space(trial: Trial, params: Bunch):
     params.food = trial.suggest_categorical('food', ['Sigmoid', 'Bitwise', 'DimensionFlips'])
     params.food = getattr(abc.food, params.food)()
 
-    params.trials_limit = trial.suggest_int('trials_limit', 1, global_params.individual_optimizer__n_iter)
+    params.trials_limit = trial.suggest_int('trials_limit', 1, global_params.solution_optimizer__n_iter)
 
     if isinstance(params.food, abc.food.DimensionFlips):
         params.food.flip_rate = trial.suggest_float('flip_rate', 0.01, 1)
@@ -84,12 +84,12 @@ def run(problem: str, optimizer: str):
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    params = global_params | dataset_params.get(problem, {}) | {'individual_optimizer': get_optimizer(optimizer)}
+    params = global_params | dataset_params.get(problem, {}) | {'solution_optimizer': get_optimizer(optimizer)}
 
     experiment = Experiment(name=f'{optimizer.upper()} Tuning', params=params, verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, scoring='fitness', **shared_tuning_params)
-    experiment.with_tuning(individual_optimizer_space(globals()[f"{optimizer}_space"]), tuner=tuner)
+    experiment.with_tuning(solution_optimizer_space(globals()[f"{optimizer}_space"]), tuner=tuner)
 
     experiment.perform(evaluation=None)
 
