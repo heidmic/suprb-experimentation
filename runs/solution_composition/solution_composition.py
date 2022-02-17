@@ -21,7 +21,7 @@ def run(problem: str, optimizer: str):
     X, y = scale_X_y(X, y)
 
     params = global_params | dataset_params.get(problem, {}) | \
-        {'solution_optimizer': get_optimizer(optimizer)} | optimizer_params.get(problem, {}).get(optimizer, {})
+        {'solution_composition': get_optimizer(optimizer)} | optimizer_params.get(problem, {}).get(optimizer, {})
 
     experiment = Experiment(name=f'{optimizer.upper()} Evaluation', params=params, verbose=10)
 
