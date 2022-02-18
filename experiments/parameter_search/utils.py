@@ -16,5 +16,5 @@ def param_space(prefix=''):
     return decorator
 
 
-def solution_optimizer_space(func):
-    return param_space('solution_optimizer')(func)
+def solution_composition_space(func):
+    return param_space('solution_composition')(func)
