@@ -2,8 +2,8 @@
 # We could directly refer to a commit here, but we probably shouldn't merge unstable features into master, anyway.
 # If you are not logged into GitHub while running this command, you may need to install the package manually
 # Reference Link: https://docs.readthedocs.io/en/stable/guides/private-python-packages.html
--e git+https://github.com/heidmic/suprb2@master#egg=suprb2
--e git+https://github.com/heidmic/suprb2-optimizers@main#egg=suprb2opt
+-e git+https://github.com/heidmic/suprb2@novelty_search#egg=suprb2
+# -e git+https://github.com/heidmic/suprb2-optimizers@main#egg=suprb2opt
 
 # Other requirements
 numpy~=1.21.4

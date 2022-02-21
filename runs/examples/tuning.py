@@ -10,6 +10,7 @@ from suprb2.logging.combination import CombinedLogger
 from suprb2.logging.default import DefaultLogger
 from suprb2.logging.stdout import StdoutLogger
 from suprb2.optimizer.rule.es import ES1xLambda
+from suprb2.optimizer.rule.ns import NoveltySearch
 
 from experiments.parameter_search.skopt import SkoptTuner
 from problems import scale_X_y
@@ -27,9 +28,9 @@ if __name__ == '__main__':
     model = suprb2.SupRB2(
         n_iter=4,
         n_jobs=2,
-        rule_generation=ES1xLambda(
+        rule_generation=NoveltySearch(
             init=suprb2.rule.initialization.HalfnormInit(),
-            mutation=suprb2.optimizer.rule.es.mutation.Normal(),
+            mutation=suprb2.optimizer.rule.mutation.Normal(),
         ),
         logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )

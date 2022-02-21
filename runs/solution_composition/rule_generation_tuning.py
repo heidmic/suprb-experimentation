@@ -10,12 +10,13 @@ from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-from runs.solution_compositions.shared_config import shared_tuning_params, load_dataset, global_params, dataset_params, \
+from runs.solution_composition.shared_config import shared_tuning_params, load_dataset, global_params, dataset_params, \
     random_state
+import suprb2
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
 def run(problem: str):
     print(f"Problem is {problem}")
 
@@ -25,19 +26,21 @@ def run(problem: str):
 
     @param_space('rule_generation')
     def rule_generation_space(trial: Trial, params: Bunch):
-        sigma_space = [0, math.sqrt(X.shape[1])]
+        sigma_space = [0, 1]
 
-        # params.mutation = trial.suggest_categorical('mutation', ['HalfnormIncrease', 'Normal'])
-        # params.mutation = getattr(es.mutation, params.mutation)()
-        params.mutation__sigma = trial.suggest_float('mutation__sigma', *sigma_space)
-        params.delay = trial.suggest_int('delay', 1, 200)
-        params.init__fitness__alpha = trial.suggest_float('init__fitness__alpha', 0.05, 1)
+        # params.mutation = trial.suggest_categorical('mutation', ['Uniform'])
+        # params.mutation = getattr(suprb2.optimizer.rule.mutation, params.mutation)()
+        # params.mutation__sigma = trial.suggest_float('mutation__sigma', *sigma_space)
+        # params.init__fitness__alpha = trial.suggest_float('init__fitness__alpha', 0.05, 1)
+
+        params.n_iter = trial.suggest_int('n_iter', 1, 500)
 
         # if isinstance(params.mutation, es.mutation.HalfnormIncrease):
         #     params.init = rule.initialization.MeanInit()
         # else:
         #     params.init = rule.initialization.HalfnormInit()
         #     params.init__sigma = trial.suggest_float('init__sigma', *sigma_space)
+        pass
 
     params = global_params | dataset_params.get(problem, {})
 
