@@ -1,5 +1,6 @@
 import mlflow
 import numpy as np
+import suprb2.rule.initialization
 from optuna import Trial
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
@@ -45,7 +46,9 @@ def run(problem: str):
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB2(
-        rule_generation=ns.NoveltySearch(),
+        rule_generation=ns.NoveltySearch(
+            init=suprb2.rule.initialization.HalfnormInit()
+        ),
         solution_composition=optimizer.solution.ga.GeneticAlgorithm(),
         n_iter=4,
         n_rules=4,
@@ -78,22 +81,21 @@ def run(problem: str):
 
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
-        sigma_space = [0, 1]
+        sigma_space = [0, 2]
 
-        params.rule_generation__n_iter = trial.suggest_int('n_iter', 1, 10)
-        params.rule_generation__mu = trial.suggest_int('mu', 4, 16)
-        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 1, 25)
+        params.rule_generation__n_iter = trial.suggest_int('n_iter', 1, 100)
+        params.rule_generation__mu = trial.suggest_int('mu', 4, 32)
+        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 1, 64)
 
         params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
-                                                                              ['UniformInputOrigin',
-                                                                               'UniformSamplesOrigin',
+                                                                              ['UniformSamplesOrigin',
                                                                                'Matching',
                                                                                'SquaredError'])
         params.rule_generation__origin_generation = getattr(optimizer.rule.origin,
                                                             params.rule_generation__origin_generation)()
 
-        params.rule_generation__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
-        params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
+        # params.rule_generation__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
+        # params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
 
         params.rule_generation__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
         params.rule_generation__mutation = trial.suggest_categorical('mutation',
