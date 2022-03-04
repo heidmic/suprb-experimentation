@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-#SBATCH --time=96:00:00
 #SBATCH --partition=cpu
-#SBATCH --output=output/output-%j.txt
+#SBATCH --output=/data/oc-compute03/volgerbe/output
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=1000
 
-USER = # TODO
-JOB_DIR=/data/oc-compute01/$USER/suprb2-experimentation
-EXPERIMENT=runs/run.py
+USER = volgerbe
+JOB_DIR=/data/oc-compute03/$USER/suprb2-experimentation
+EXPERIMENT=runs/examples/ns_tuning.py
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH python $JOB_DIR/$EXPERIMENT"
