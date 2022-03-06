@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #SBATCH --partition=cpu
-#SBATCH --output=/data/oc-compute03/volgerbe/output
+#SBATCH --output=/data/oc-compute03/volgerbe/output/output-%j.txt
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=1000
 
