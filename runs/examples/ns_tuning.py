@@ -50,8 +50,8 @@ def run(problem: str):
             init=suprb2.rule.initialization.HalfnormInit()
         ),
         solution_composition=optimizer.solution.ga.GeneticAlgorithm(),
-        n_iter=4,
-        n_rules=4,
+        n_iter=32,
+        n_rules=8,
         verbose=10,
         logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
@@ -84,7 +84,7 @@ def run(problem: str):
         sigma_space = [0, 2]
 
         params.rule_generation__n_iter = trial.suggest_int('n_iter', 1, 100)
-        params.rule_generation__mu = trial.suggest_int('mu', 4, 32)
+        params.rule_generation__mu = trial.suggest_int('mu', 8, 32)
         params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 1, 64)
 
         params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
