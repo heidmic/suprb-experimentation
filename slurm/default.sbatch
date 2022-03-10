@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+#SBATCH --time=96:00:00
 #SBATCH --partition=cpu
 #SBATCH --output=/data/oc-compute03/volgerbe/output/output-%j.txt
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=30
 #SBATCH --mem-per-cpu=1000
 
 USER=volgerbe

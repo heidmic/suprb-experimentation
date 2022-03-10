@@ -25,6 +25,7 @@ import click
 import optuna
 from sklearn.base import BaseEstimator, RegressorMixin  # type: ignore
 from sklearn.model_selection import ShuffleSplit
+from suprb2.optimizer.solution import ga
 
 random_state = 42
 
@@ -37,7 +38,7 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
+@click.option('-p', '--problem', type=click.STRING, default='gas_turbine')
 def run(problem: str):
     print(f"Problem is {problem}")
 
@@ -68,7 +69,7 @@ def run(problem: str):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=n_calls,
-        timeout=24 * 60 * 60,  # 24 hours
+        timeout=24 * 60 * 60 * 4,  # 96 hours
         verbose=10
     )
 
@@ -121,6 +122,23 @@ def run(problem: str):
         params.rule_generation__novelty_fitness_combination = trial.suggest_categorical('novelty_fitness_combination',
                                                                                         ['novelty', '50/50', '75/25',
                                                                                          'pmcns', 'pareto'])
+
+        # GA
+        params.solution_composition__selection = trial.suggest_categorical('ga_selection',
+                                                     ['RouletteWheel', 'Tournament', 'LinearRank', 'Random'])
+
+        params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
+
+        if isinstance(params.solution_composition__selection, ga.selection.Tournament):
+            params.solution_composition__selection__k = trial.suggest_int('ga_selection__k', 3, 10)
+
+        params.solution_composition__crossover = trial.suggest_categorical('ga_crossover', ['NPoint', 'Uniform'])
+        params.solution_composition__crossover = getattr(ga.crossover, params.solution_composition__crossover)()
+
+        if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
+            params.solution_composition__crossover__n = trial.suggest_int('ga_crossover__n', 1, 10)
+
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float('mutation_rate', 0, 0.1)
 
     experiment.with_tuning(optuna_objective, tuner=tuner)
 
