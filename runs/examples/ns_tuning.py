@@ -67,7 +67,7 @@ def run(problem: str):
         random_state=random_state,
         cv=4,
         n_jobs_cv=4,
-        n_jobs=4,
+        n_jobs=15,
         n_calls=n_calls,
         timeout=24 * 60 * 60 * 4,  # 96 hours
         verbose=10
@@ -84,9 +84,9 @@ def run(problem: str):
     def optuna_objective(trial: optuna.Trial, params: Bunch):
         sigma_space = [0, 2]
 
-        params.rule_generation__n_iter = trial.suggest_int('n_iter', 1, 100)
-        params.rule_generation__mu = trial.suggest_int('mu', 8, 32)
-        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 1, 64)
+        params.rule_generation__n_iter = trial.suggest_int('n_iter', 1, 20)
+        params.rule_generation__mu = trial.suggest_int('mu', 8, 16)
+        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 3, 10)
 
         params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
                                                                               ['UniformSamplesOrigin',
@@ -115,7 +115,7 @@ def run(problem: str):
         params.rule_generation__ns_type = trial.suggest_categorical('ns_type', ['NS', 'NSLC', 'MCNS'])
 
         if params.rule_generation__ns_type == 'MCNS':
-            params.rule_generation__MCNS_threshold_matched = trial.suggest_int('MCNS_threshold_matched', 1, 100)
+            params.rule_generation__MCNS_threshold_matched = trial.suggest_int('MCNS_threshold_matched', 10, 20)
 
         params.rule_generation__archive = trial.suggest_categorical('archive', ['novelty', 'random', 'none'])
 
