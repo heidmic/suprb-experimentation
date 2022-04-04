@@ -1,9 +1,9 @@
 from sklearn.model_selection import train_test_split
-from suprb2 import suprb2, rule
-from suprb2.logging.combination import CombinedLogger
-from suprb2.logging.default import DefaultLogger
-from suprb2.logging.stdout import StdoutLogger
-from suprb2.optimizer.rule import es
+from suprb import suprb, rule
+from suprb.logging.combination import CombinedLogger
+from suprb.logging.default import DefaultLogger
+from suprb.logging.stdout import StdoutLogger
+from suprb.optimizer.rule import es
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidateTest
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     X, y = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
-    estimator = suprb2.SupRB2(
+    estimator = suprb.SupRB(
         n_iter=4,
         n_jobs=2,
         rule_generation=es.ES1xLambda(

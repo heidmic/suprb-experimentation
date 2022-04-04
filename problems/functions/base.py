@@ -2,7 +2,7 @@ from typing import Union, Callable
 
 import numpy as np
 from sklearn.utils import Bunch, shuffle as apply_shuffle
-from suprb2.utils import check_random_state
+from suprb.utils import check_random_state
 
 from ..base import scale_X_y, ProblemRepr
 
@@ -73,7 +73,7 @@ def load_test_function(
         # and not `random_state_` (the `np.random.Generator` instance)
         # because `sklearn.utils.check_random_state()` does currently not support `np.random.Generator`.
         # See https://github.com/scikit-learn/scikit-learn/issues/16988 for the current status.
-        # Our `suprb2.utils.check_random_state()` can handle `np.random.Generator`.
+        # Our `suprb.utils.check_random_state()` can handle `np.random.Generator`.
         X, y = apply_shuffle(X, y, random_state=random_state)
 
     # Return arrays directly or use Bunch, depending on parameter
