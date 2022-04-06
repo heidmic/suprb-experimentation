@@ -1,13 +1,13 @@
 import numpy as np
 from sklearn.linear_model import Ridge
 from sklearn.utils import Bunch
-from suprb2 import rule, SupRB2
-from suprb2.logging.combination import CombinedLogger
-from suprb2.logging.default import DefaultLogger
-from suprb2.logging.stdout import StdoutLogger
-from suprb2.optimizer.solution import ga
-from suprb2.optimizer.rule import es, origin
-from suprb2opt.solution import aco, gwo, pso, abc, rs
+from suprb import rule, SupRB
+from suprb.logging.combination import CombinedLogger
+from suprb.logging.default import DefaultLogger
+from suprb.logging.stdout import StdoutLogger
+from suprb.optimizer.solution import ga
+from suprb.optimizer.rule import es, origin
+from suprbopt.solution import aco, gwo, pso, abc, rs
 
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
@@ -176,7 +176,7 @@ optimizer_params = {
     },
 }
 
-estimator = SupRB2(
+estimator = SupRB(
     rule_generation=es.ES1xLambda(
         operator='&',
         n_iter=10_000,

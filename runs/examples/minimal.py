@@ -1,8 +1,8 @@
 import mlflow
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
-from suprb2 import SupRB2
-from suprb2.logging.default import DefaultLogger
+from suprb import SupRB
+from suprb.logging.default import DefaultLogger
 
 from problems import scale_X_y
 
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     X, y = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
-    model = SupRB2(n_iter=4, logger=DefaultLogger())
+    model = SupRB(n_iter=4, logger=DefaultLogger())
 
     model.fit(X_train, y_train)
 

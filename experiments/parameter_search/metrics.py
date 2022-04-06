@@ -1,7 +1,7 @@
-from suprb2 import SupRB2
+from suprb import SupRB
 
 __all__ = ['fitness']
 
 
-def fitness(model: SupRB2):
+def fitness(model: SupRB):
     return model.elitist_.fitness_

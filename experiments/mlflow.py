@@ -5,9 +5,9 @@ from typing import Optional
 import mlflow
 import numpy as np
 from sklearn.base import BaseEstimator
-from suprb2 import SupRB2
-from suprb2.logging.combination import CombinedLogger
-from suprb2.logging.default import DefaultLogger
+from suprb import SupRB
+from suprb.logging.combination import CombinedLogger
+from suprb.logging.default import DefaultLogger
 
 from experiments import Experiment
 
@@ -24,7 +24,7 @@ def _expand_list(l: list) -> dict:
 
 
 def _get_default_logger(estimator: BaseEstimator) -> Optional[DefaultLogger]:
-    if isinstance(estimator, SupRB2):
+    if isinstance(estimator, SupRB):
         logger = estimator.logger_
         if isinstance(logger, DefaultLogger):
             return logger
