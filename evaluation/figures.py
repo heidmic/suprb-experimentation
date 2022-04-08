@@ -1,8 +1,9 @@
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
 
 from evaluation.utils import tex_escape
+
+sns.set_theme(font_scale=1.35, style='whitegrid', palette='colorblind', font='serif')
 
 
 def plot_metric(
@@ -23,4 +24,11 @@ def plot_metric(
     return ax
 
 
+def plot_metric_history(history: pd.Series, x='it', y='elitist_fitness'):
+    history = history.reset_index().rename(columns=tex_escape)
 
+    grid = sns.relplot(data=history, col='problem', x=tex_escape(x), y=tex_escape(y), hue='optimizer', kind='line',
+                       markers=True,
+                       style='optimizer', col_wrap=2)
+
+    return grid

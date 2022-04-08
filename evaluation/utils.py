@@ -5,7 +5,23 @@ import re
 import mlflow.tracking
 import pandas as pd
 
-PROBLEMS = ('combined_cycle_power_plant', 'airfoil_self_noise', 'concrete_strength', 'energy_cool')
+OPTIMIZERS = ('RS', 'GA', 'ACO', 'GWO', 'PSO', 'ABC')
+
+PROBLEMS = {
+    'combined_cycle_power_plant': 'CCPP',
+    'airfoil_self_noise': 'ASN',
+    'concrete_strength': 'CS',
+    'energy_cool': 'EEC',
+}
+
+PRETTY_COLUMNS = {
+    'elitist_fitness': r'$F$',
+    'elitist_complexity': r'$C$',
+    'test_r2': r'R^2_{\text{test}}',
+    'train_r2': r'R^2_{\text{train}}',
+    'test_mean_squared_error': r'\text{MSE}_{\text{test}}',
+    'train_mean_squared_error': r'\text{MSE}_{\text{train}}',
+}
 
 
 def tex_escape(text: str) -> str:
@@ -60,8 +76,7 @@ def get_relevant_metrics(problem: str, optimizer: str) -> pd.DataFrame:
     return get_metrics(problem=problem, optimizer=optimizer, columns=columns, rename=rename)
 
 
-def get_relevant_metrics_for_optimizers(problem: str,
-                                        optimizers=('RS', 'GA', 'ACO', 'GWO', 'PSO', 'ABC')) -> pd.DataFrame:
+def get_relevant_metrics_for_optimizers(problem: str, optimizers=OPTIMIZERS) -> pd.DataFrame:
     metrics = pd.concat({optimizer: get_relevant_metrics(problem=problem, optimizer=optimizer)
                          for optimizer in optimizers})
     metrics.index.names = ['optimizer', 'run']
@@ -78,9 +93,13 @@ def metrics_summary(metrics: pd.DataFrame) -> pd.DataFrame:
     return metrics.groupby(by='optimizer').describe().drop(columns='count', level=1)
 
 
-def concise_metrics_summary(metrics: pd.DataFrame) -> pd.DataFrame:
-    metrics = metrics.groupby(by='optimizer').describe().loc[:, (slice(None), ['mean', 'std', '50%'])]
-    metrics.rename(columns={'50%': 'median'}, level=1, inplace=True)
+def concise_metrics_summary(metrics: pd.DataFrame, include_median=False) -> pd.DataFrame:
+    columns = ['mean', 'std']
+    if include_median:
+        columns.append('50%')
+    metrics = metrics.groupby(by='optimizer').describe().loc[:, (slice(None), columns)]
+    if include_median:
+        metrics.rename(columns={'50%': 'median'}, level=1, inplace=True)
     return metrics
 
 
