@@ -3,13 +3,14 @@ import numpy as np
 import suprb
 from sklearn.datasets import make_regression
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from skopt.space import Real
 from skopt.utils import point_asdict
 from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.rule.es import ES1xLambda
+from suprb.optimizer.rule.mutation import Normal
+
 
 from experiments.parameter_search.skopt import SkoptTuner
 from problems import scale_X_y
@@ -29,7 +30,7 @@ if __name__ == '__main__':
         n_jobs=2,
         rule_generation=ES1xLambda(
             init=suprb.rule.initialization.HalfnormInit(),
-            mutation=suprb.optimizer.rule.es.mutation.Normal(),
+            mutation=Normal(),
         ),
         logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     tuner = SkoptTuner(model, X_train, y_train, scoring='r2', n_calls=10, cv=2,
                        n_jobs_cv=2,
                        verbose=10, random_state=random_state)
-    tuned_params, _ = tuner(parameter_space=param_space)
+    tuned_params, _ = tuner(parameter_space=param_space, local_params={})
 
     model.set_params(**tuned_params)
     model.fit(X_train, y_train)

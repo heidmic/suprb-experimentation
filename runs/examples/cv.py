@@ -4,6 +4,8 @@ from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.rule import es
+from suprb.optimizer.rule.mutation import Normal
+
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidateTest
@@ -22,7 +24,7 @@ if __name__ == '__main__':
         n_jobs=2,
         rule_generation=es.ES1xLambda(
             init=rule.initialization.HalfnormInit(sigma=0.8),
-            mutation=es.mutation.Normal(sigma=0.4),
+            mutation=Normal(sigma=0.4),
         ),
         logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
