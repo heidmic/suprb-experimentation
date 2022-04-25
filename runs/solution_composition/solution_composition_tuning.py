@@ -3,7 +3,6 @@ import mlflow
 from optuna import Trial
 from sklearn.utils import Bunch, shuffle
 from suprb.optimizer.solution import ga
-from suprbopt.solution import gwo, aco, pso, abc
 
 from experiments import Experiment
 from experiments.mlflow import log_experiment
