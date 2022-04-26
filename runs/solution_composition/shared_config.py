@@ -99,7 +99,7 @@ estimator = SupRB(
         origin_generation=origin.SquaredError(),
     ),
     solution_composition=ga.GeneticAlgorithm(),
-    n_iter=1,
+    n_iter=12,
     n_rules=4,
     verbose=10,
     logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
@@ -108,10 +108,10 @@ estimator = SupRB(
 shared_tuning_params = dict(
     estimator=estimator,
     random_state=random_state,
-    cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state),
+    cv=4,
     n_jobs_cv=4,
     n_jobs=4,
-    n_calls=1,
+    n_calls=64,
     timeout=90 * 60 * 60,  # 90 hours
     verbose=10
 )

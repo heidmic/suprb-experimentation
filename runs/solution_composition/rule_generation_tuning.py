@@ -5,6 +5,8 @@ import mlflow
 from optuna import Trial
 from sklearn.model_selection import ShuffleSplit
 from sklearn.utils import Bunch, shuffle
+from suprb import rule
+from suprb.optimizer.rule import mutation
 
 from experiments import Experiment
 from experiments.mlflow import log_experiment
@@ -28,16 +30,16 @@ def run(problem: str):
     def rule_generation_space(trial: Trial, params: Bunch):
         sigma_space = [0, math.sqrt(X.shape[1])]
 
-        # params.mutation = trial.suggest_categorical('mutation', ['HalfnormIncrease', 'Normal'])
-        # params.mutation = getattr(es.mutation, params.mutation)()
+        params.mutation = trial.suggest_categorical('mutation', ['HalfnormIncrease', 'Normal', 'UniformIncrease'])
+        params.mutation = getattr(mutation, params.mutation)()
         params.mutation__sigma = trial.suggest_float('mutation__sigma', *sigma_space)
         params.delay = trial.suggest_int('delay', 1, 200)
         params.init__fitness__alpha = trial.suggest_float('init__fitness__alpha', 0.05, 1)
-        # if isinstance(params.mutation, es.mutation.HalfnormIncrease):
-        #     params.init = rule.initialization.MeanInit()
-        # else:
-        #     params.init = rule.initialization.HalfnormInit()
-        #     params.init__sigma = trial.suggest_float('init__sigma', *sigma_space)
+        if isinstance(params.mutation, mutation.HalfnormIncrease):
+            params.init = rule.initialization.MeanInit()
+        else:
+            params.init = rule.initialization.HalfnormInit()
+            params.init__sigma = trial.suggest_float('init__sigma', *sigma_space)
 
     params = global_params | dataset_params.get(problem, {})
 
