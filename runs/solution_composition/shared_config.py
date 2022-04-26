@@ -92,14 +92,14 @@ optimizer_params = {
 estimator = SupRB(
     rule_generation=es.ES1xLambda(
         operator='&',
-        n_iter=10_000,
+        n_iter=1,
         init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                           model=Ridge(alpha=0.01, random_state=random_state)),
         mutation=mutation.HalfnormIncrease(),
         origin_generation=origin.SquaredError(),
     ),
     solution_composition=ga.GeneticAlgorithm(),
-    n_iter=32,
+    n_iter=1,
     n_rules=4,
     verbose=10,
     logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
@@ -111,7 +111,7 @@ shared_tuning_params = dict(
     cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state),
     n_jobs_cv=4,
     n_jobs=4,
-    n_calls=128,
+    n_calls=1,
     timeout=90 * 60 * 60,  # 90 hours
     verbose=10
 )

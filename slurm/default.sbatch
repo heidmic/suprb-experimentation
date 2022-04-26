@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --time=96:00:00
+#SBATCH --time=00:10:00
 #SBATCH --partition=cpu
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=16
