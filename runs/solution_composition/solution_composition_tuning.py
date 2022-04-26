@@ -1,5 +1,6 @@
 import click
 import mlflow
+import os
 from optuna import Trial
 from sklearn.utils import Bunch, shuffle
 from suprb.optimizer.solution import ga
@@ -30,10 +31,15 @@ def ga_space(trial: Trial, params: Bunch):
     params.elitist_ratio = trial.suggest_float('elitist_ratio', 0, 0.2)
 
 
+datasets = {0: 'airfoil_self_noise', 1: 'combined_cycle_power_plant', 2: 'concrete_strength'}
+
+
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
 @click.option('-o', '--optimizer', type=click.STRING, default='ga')
 def run(problem: str, optimizer: str):
+    # my_index = int(os.getenv("SLURM_ARRAY_TASK_ID"))
+    # problem = datasets.get(my_index)
     print(f"Problem is {problem}, optimizer is {optimizer}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
