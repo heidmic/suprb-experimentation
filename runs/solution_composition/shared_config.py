@@ -1,6 +1,5 @@
 import numpy as np
 from sklearn.linear_model import Ridge
-from sklearn.model_selection import ShuffleSplit
 from sklearn.utils import Bunch
 from suprb import SupRB, rule
 from suprb.logging.combination import CombinedLogger
@@ -29,6 +28,8 @@ global_params = Bunch(**{
     'solution_composition__n_iter': 32,
     'solution_composition__population_size': 32,
 })
+
+# TODO Determine optimal values for all 6 Datasets (Both optimizers)
 
 dataset_params = {
     'combined_cycle_power_plant': {

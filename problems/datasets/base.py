@@ -14,14 +14,11 @@ DATASETS_PATH = (pathlib.Path(__file__).parent / 'data').resolve()
 def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool,
                  remove_columns: list = None) -> ProblemRepr:
     frame = pd.read_csv(DATASETS_PATH / filename, sep=',')
-
     data = frame.drop(columns=[target_column] + (remove_columns if remove_columns is not None else []))
     target = frame[target_column]
-
     if not as_frame:
         data = data.to_numpy(dtype=np.float)
         target = target.to_numpy(dtype=np.float)
-
     if return_X_y:
         return data, target
     elif as_frame:
@@ -174,3 +171,52 @@ def load_parkinson_motor(return_X_y: bool = True, as_frame: bool = False):
 
     return load_dataset(filename='parkinson.csv', target_column='motor_UPDRS', return_X_y=return_X_y,
                         as_frame=as_frame, remove_columns=['subject#', 'test_time', 'total_UPDRS'])
+
+
+def load_online_news(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Online News Popularity dataset.
+
+        ==============   ==================
+        Samples total    39797
+        Dimensionality   58
+        Features         real, TODO: ranges
+        Targets          real, TODO: ranges
+        ==============   ==================
+
+        Downloaded from https://archive.ics.uci.edu/ml/datasets/online+news+popularity.
+        """
+    return load_dataset(filename='online_news.csv', target_column='shares', return_X_y=return_X_y,
+                        as_frame=as_frame, remove_columns=['url', 'timedelta'])
+
+
+def load_protein_structure(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Protein Structure dataset.
+
+        ==============   ==================
+        Samples total    45730
+        Dimensionality   9
+        Features         real, TODO: ranges
+        Targets          real, TODO: ranges
+        ==============   ==================
+
+        Downloaded from
+        https://https://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure.
+        """
+    return load_dataset(filename='protein_structure.csv', target_column='RMSD', return_X_y=return_X_y,
+                        as_frame=as_frame)
+
+
+def load_superconductivity(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Superconductivity dataset.
+
+        ==============   ==================
+        Samples total    21263
+        Dimensionality   81
+        Features         real, TODO: ranges
+        Targets          real, TODO: ranges
+        ==============   ==================
+
+        Downloaded from https://archive.ics.uci.edu/ml/datasets/superconductivty+data.
+        """
+    return load_dataset(filename='superconductivity.csv', target_column='critical_temp', return_X_y=return_X_y,
+                        as_frame=as_frame)

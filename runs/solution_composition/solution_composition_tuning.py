@@ -31,7 +31,9 @@ def ga_space(trial: Trial, params: Bunch):
     params.elitist_ratio = trial.suggest_float('elitist_ratio', 0, 0.2)
 
 
-datasets = {0: 'airfoil_self_noise', 1: 'combined_cycle_power_plant', 2: 'concrete_strength'}
+# Used to control dataset which dataset gets selected through slurm
+datasets = {0: 'airfoil_self_noise', 1: 'combined_cycle_power_plant', 2: 'concrete_strength',
+            3: 'online_news', 4: 'protein_structure', 5: 'superconductivity'}
 
 
 @click.command()
