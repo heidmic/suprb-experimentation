@@ -35,28 +35,28 @@ global_params = Bunch(**{
 
 individual_dataset_params = {
     'airfoil_self_noise': {
-        'n_iter': 4,
+        'n_iter': 32,
         'n_rules': 4
     },
     'combined_cycle_power_plant': {
-        'n_iter': 4,
+        'n_iter': 24,
         'n_rules': 4
     },
     'concrete_strength': {
-        'n_iter': 4,
+        'n_iter': 32,
         'n_rules': 4
     },
     'online_news': {
-        'n_iter': 4,
-        'n_rules': 4
+        'n_iter': 48,
+        'n_rules': 8
     },
     'protein_structure': {
-        'n_iter': 4,
-        'n_rules': 6
+        'n_iter': 24,
+        'n_rules': 4
     },
     'superconductivity': {
-        'n_iter': 4,
-        'n_rules': 6
+        'n_iter': 48,
+        'n_rules': 8
     }
 }
 
