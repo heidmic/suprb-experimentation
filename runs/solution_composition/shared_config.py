@@ -24,12 +24,43 @@ def get_optimizer(name: str) -> type:
 
 random_state = 42
 
+# Values that will be chosen as default for all combinations
 global_params = Bunch(**{
     'solution_composition__n_iter': 32,
     'solution_composition__population_size': 32,
+    'rule_generation__n_iter': 10,
+    'rule_generation__lmbda': 20,
+    'solution_composition__elitist_ratio': 0.17
 })
 
-# TODO Determine optimal values for all 6 Datasets (Both optimizers)
+individual_dataset_params = {
+    'airfoil_self_noise': {
+        'n_iter': 4,
+        'n_rules': 4
+    },
+    'combined_cycle_power_plant': {
+        'n_iter': 4,
+        'n_rules': 4
+    },
+    'concrete_strength': {
+        'n_iter': 4,
+        'n_rules': 4
+    },
+    'online_news': {
+        'n_iter': 4,
+        'n_rules': 4
+    },
+    'protein_structure': {
+        'n_iter': 4,
+        'n_rules': 6
+    },
+    'superconductivity': {
+        'n_iter': 4,
+        'n_rules': 6
+    }
+}
+
+# TODO Set optimal values, once tuning is finished
 
 dataset_params = {
     'combined_cycle_power_plant': {
@@ -107,13 +138,14 @@ estimator = SupRB(
     logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
 )
 
+# Default values to be used for all tunings
 shared_tuning_params = dict(
     estimator=estimator,
     random_state=random_state,
     cv=4,
     n_jobs_cv=4,
     n_jobs=4,
-    n_calls=100,
+    n_calls=256,
     timeout=90 * 60 * 60,  # 90 hours
     verbose=10
 )
