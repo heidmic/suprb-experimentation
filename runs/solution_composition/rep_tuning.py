@@ -24,13 +24,17 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.rule_generation__mutation = \
         trial.suggest_categorical('mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])
     params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
-    params.rule_generation__mutation__sigma = trial.suggest_float('sigma_mutate', *sigma_space)
+    # Unique to MPR
+    params.rule_generation__mutation__sigma_lower = trial.suggest_float('sigma_mutate_low', *sigma_space)
+    params.rule_generation__mutation__sigma_prop = trial.suggest_float('sigma_mutate_prop', *sigma_space)
 
     params.rule_generation__init = \
         trial.suggest_categorical('initialization', ['MeanInit', 'NormalInit'])
     params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
     if isinstance(params.rule_generation__init, rule.initialization.NormalInit):
-        params.rule_generation__init__sigma = trial.suggest_float('sigma_init', *sigma_space)
+        # Unique to MPR
+        params.rule_generation__init__sigma_lower = trial.suggest_float('sigma_init_low', *sigma_space)
+        params.rule_generation__init__sigma_prop = trial.suggest_float('sigma_init_prop', *sigma_space)
 
     alpha_space = [0, 0.1]
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
