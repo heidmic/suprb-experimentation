@@ -24,17 +24,17 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.rule_generation__mutation = \
         trial.suggest_categorical('mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])
     params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
-    # Unique to MPR
-    params.rule_generation__mutation__sigma_lower = trial.suggest_float('sigma_mutate_low', *sigma_space)
-    params.rule_generation__mutation__sigma_prop = trial.suggest_float('sigma_mutate_prop', *sigma_space)
+    # Unique to CSR
+    params.rule_generation__mutation__sigma_center = trial.suggest_float('sigma_mutate_center', *sigma_space)
+    params.rule_generation__mutation__sigma_spread = trial.suggest_float('sigma_mutate_spread', *sigma_space)
 
     params.rule_generation__init = \
         trial.suggest_categorical('initialization', ['MeanInit', 'NormalInit'])
     params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
     if isinstance(params.rule_generation__init, rule.initialization.NormalInit):
-        # Unique to MPR
-        params.rule_generation__init__sigma_lower = trial.suggest_float('sigma_init_low', *sigma_space)
-        params.rule_generation__init__sigma_prop = trial.suggest_float('sigma_init_prop', *sigma_space)
+        # Unique to CSR
+        params.rule_generation__init__sigma_center = trial.suggest_float('sigma_init_center', *sigma_space)
+        params.rule_generation__init__sigma_spread = trial.suggest_float('sigma_init_spread', *sigma_space)
 
     alpha_space = [0, 0.1]
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
