@@ -65,25 +65,25 @@ individual_dataset_params = {
 dataset_params = {
     'combined_cycle_power_plant': {
         'rule_generation__init__fitness__alpha': 0.05,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
+        'rule_generation__mutation': mutation.Normal(),
         'rule_generation__mutation__sigma': 0.58,
         'rule_generation__delay': 84,
     },
     'concrete_strength': {
         'rule_generation__init__fitness__alpha': 0.07,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
+        'rule_generation__mutation': mutation.Normal(),
         'rule_generation__mutation__sigma': 2.62,
         'rule_generation__delay': 124,
     },
     'airfoil_self_noise': {
         'rule_generation__init__fitness__alpha': 0.05,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
+        'rule_generation__mutation': mutation.Normal(),
         'rule_generation__mutation__sigma': 2.01,
         'rule_generation__delay': 146,
     },
     'energy_cool': {
         'rule_generation__init__fitness__alpha': 0.05,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
+        'rule_generation__mutation': mutation.Normal(),
         'rule_generation__mutation__sigma': 1.22,
         'rule_generation__delay': 69,
     },
@@ -128,7 +128,7 @@ estimator = SupRB(
         lmbda=20,
         init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                           model=Ridge(alpha=0.01, random_state=random_state)),
-        mutation=mutation.HalfnormIncrease(),
+        mutation=mutation.Normal(),
         origin_generation=origin.SquaredError(),
     ),
     solution_composition=ga.GeneticAlgorithm(),

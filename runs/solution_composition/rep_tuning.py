@@ -22,7 +22,7 @@ def rule_generation_space(trial: Trial, params: Bunch):
     sigma_space = [0, 3]
 
     params.rule_generation__mutation = \
-        trial.suggest_categorical('mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])
+        trial.suggest_categorical('mutation', ['Normal'])
     params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
     params.rule_generation__mutation__sigma = trial.suggest_float('sigma_mutate', *sigma_space)
 
