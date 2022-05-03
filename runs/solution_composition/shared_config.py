@@ -64,29 +64,23 @@ individual_dataset_params = {
 
 dataset_params = {
     'combined_cycle_power_plant': {
-        'rule_generation__init__fitness__alpha': 0.05,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 0.58,
-        'rule_generation__delay': 84,
+
     },
     'concrete_strength': {
-        'rule_generation__init__fitness__alpha': 0.07,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 2.62,
-        'rule_generation__delay': 124,
+
     },
     'airfoil_self_noise': {
-        'rule_generation__init__fitness__alpha': 0.05,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 2.01,
-        'rule_generation__delay': 146,
+
     },
-    'energy_cool': {
-        'rule_generation__init__fitness__alpha': 0.05,
-        'rule_generation__mutation': mutation.HalfnormIncrease(),
-        'rule_generation__mutation__sigma': 1.22,
-        'rule_generation__delay': 69,
+    'online_news': {
+
     },
+    'protein_structure': {
+
+    },
+    'superconductivity': {
+
+    }
 }
 
 optimizer_params = {
@@ -118,6 +112,33 @@ optimizer_params = {
             'solution_composition__elitist_ratio': 0.16,  # 5
         },
     },
+    'online_news': {
+        'ga': {
+            'solution_composition__selection': ga.selection.Tournament(),
+            'solution_composition__selection__k': 5,
+            'solution_composition__crossover': ga.crossover.Uniform(),
+            'solution_composition__mutation__mutation_rate': 0.024,
+            'solution_composition__elitist_ratio': 0.16,  # 5
+        },
+    },
+    'protein_structure': {
+        'ga': {
+            'solution_composition__selection': ga.selection.Tournament(),
+            'solution_composition__selection__k': 5,
+            'solution_composition__crossover': ga.crossover.Uniform(),
+            'solution_composition__mutation__mutation_rate': 0.024,
+            'solution_composition__elitist_ratio': 0.16,  # 5
+        },
+    },
+    'superconductivity': {
+        'ga': {
+            'solution_composition__selection': ga.selection.Tournament(),
+            'solution_composition__selection__k': 5,
+            'solution_composition__crossover': ga.crossover.Uniform(),
+            'solution_composition__mutation__mutation_rate': 0.024,
+            'solution_composition__elitist_ratio': 0.16,  # 5
+        },
+    }
 
 }
 
