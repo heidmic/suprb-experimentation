@@ -149,7 +149,7 @@ estimator = SupRB(
         lmbda=20,
         init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                           model=Ridge(alpha=0.01, random_state=random_state)),
-        mutation=mutation.HalfnormIncrease(),
+        mutation=mutation.Normal(),
         origin_generation=origin.SquaredError(),
     ),
     solution_composition=ga.GeneticAlgorithm(),
