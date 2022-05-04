@@ -153,6 +153,7 @@ estimator = SupRB(
     ),
     solution_composition=ga.GeneticAlgorithm(),
     verbose=10,
+    n_initial_rules=20,
     logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
 )
 
