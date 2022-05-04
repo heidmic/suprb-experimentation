@@ -35,15 +35,15 @@ global_params = Bunch(**{
 
 individual_dataset_params = {
     'airfoil_self_noise': {
-        'n_iter': 27,
+        'n_iter': 32,
         'n_rules': 4
     },
     'combined_cycle_power_plant': {
-        'n_iter': 27,
+        'n_iter': 32,
         'n_rules': 4
     },
     'concrete_strength': {
-        'n_iter': 27,
+        'n_iter': 32,
         'n_rules': 4
     },
     'online_news': {
@@ -153,7 +153,6 @@ estimator = SupRB(
     ),
     solution_composition=ga.GeneticAlgorithm(),
     verbose=10,
-    n_initial_rules=20,
     logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
 )
 
