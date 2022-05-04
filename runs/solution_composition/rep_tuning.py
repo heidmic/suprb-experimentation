@@ -40,7 +40,7 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
 
     # Delay being larger than n_iter of rule_generation is pointless?
-    params.rule_generation__delay = trial.suggest_int('delay', low=0, high=100)
+    params.rule_generation__delay = trial.suggest_int('delay', low=1, high=100)
 
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
     params.solution_composition__selection = \
@@ -81,7 +81,7 @@ def run(problem: str):
 
     experiment.perform(evaluation=None)
 
-    mlflow.set_experiment("Representation Tuning")
+    mlflow.set_experiment(problem)
     log_experiment(experiment)
 
 
