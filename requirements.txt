@@ -3,7 +3,6 @@
 # If you are not logged into GitHub while running this command, you may need to install the package manually
 # Reference Link: https://docs.readthedocs.io/en/stable/guides/private-python-packages.html
 -e git+https://github.com/heidmic/suprb@master#egg=suprb
--e git+https://github.com/heidmic/suprb-optimizers@main#egg=suprbopt
 
 # Other requirements
 numpy~=1.21.4
