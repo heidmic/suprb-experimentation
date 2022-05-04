@@ -58,7 +58,7 @@ datasets = {0: 'airfoil_self_noise', 1: 'combined_cycle_power_plant', 2: 'concre
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-p', '--problem', type=click.STRING, default='superconductivity')
 def run(problem: str):
     # my_index = int(os.getenv("SLURM_ARRAY_TASK_ID"))
     # problem = datasets.get(my_index)
