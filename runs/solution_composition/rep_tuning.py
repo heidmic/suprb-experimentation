@@ -40,7 +40,7 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
 
     # Delay being larger than n_iter of rule_generation is pointless?
-    params.rule_generation__delay = trial.suggest_int('delay', low=1, high=10)
+    params.rule_generation__delay = trial.suggest_int('delay', low=0, high=100)
 
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
     params.solution_composition__selection = \
@@ -62,7 +62,7 @@ datasets = {0: 'airfoil_self_noise', 1: 'combined_cycle_power_plant', 2: 'concre
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-p', '--problem', type=click.STRING, default='combined_cycle_power_plant')
 def run(problem: str):
     # my_index = int(os.getenv("SLURM_ARRAY_TASK_ID"))
     # problem = datasets.get(my_index)
