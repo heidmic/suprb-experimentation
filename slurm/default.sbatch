@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --time=96:00:00
+#SBATCH --time=73:00:00
 #SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=1000
 
