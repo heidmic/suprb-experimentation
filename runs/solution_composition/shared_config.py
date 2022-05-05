@@ -163,6 +163,7 @@ shared_tuning_params = dict(
     cv=4,
     n_jobs_cv=4,
     n_jobs=4,
+    n_calls=512,
     timeout=72 * 60 * 60,  # 72 hours
     verbose=10
 )
