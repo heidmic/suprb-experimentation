@@ -51,12 +51,12 @@ individual_dataset_params = {
         'n_rules': 6
     },
     'protein_structure': {
-        'n_iter': 32,
-        'n_rules': 6
+        'n_iter': 36,
+        'n_rules': 4
     },
-    'superconductivity': {
-        'n_iter': 32,
-        'n_rules': 6
+    'parkinson_total': {
+        'n_iter': 36,
+        'n_rules': 4
     }
 }
 
