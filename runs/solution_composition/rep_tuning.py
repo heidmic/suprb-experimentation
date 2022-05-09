@@ -53,8 +53,8 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.solution_composition__mutation__mutation_rate = trial.suggest_float('mutation_rate', 0, 0.1)
 
 
-datasets = {0: 'superconductivity', 1: 'protein_structure', 2: 'online_news',
-            3: 'concrete_strength', 4: 'combined_cycle_power_plant', 5: 'airfoil_self_noise'}
+datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
+            3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 
 
 @click.command()
