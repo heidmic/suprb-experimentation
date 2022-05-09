@@ -24,13 +24,17 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.rule_generation__mutation = \
         trial.suggest_categorical('mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])
     params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
-    params.rule_generation__mutation__sigma = trial.suggest_float('sigma_mutate', *sigma_space)
+    # Unique to MPR
+    params.rule_generation__mutation__sigma_lower = trial.suggest_float('sigma_mutate_low', *sigma_space)
+    params.rule_generation__mutation__sigma_prop = trial.suggest_float('sigma_mutate_prop', *sigma_space)
 
     params.rule_generation__init = \
         trial.suggest_categorical('initialization', ['MeanInit', 'NormalInit'])
     params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
     if isinstance(params.rule_generation__init, rule.initialization.NormalInit):
-        params.rule_generation__init__sigma = trial.suggest_float('sigma_init', *sigma_space)
+        # Unique to MPR
+        params.rule_generation__init__sigma_lower = trial.suggest_float('sigma_init_low', *sigma_space)
+        params.rule_generation__init__sigma_prop = trial.suggest_float('sigma_init_prop', *sigma_space)
 
     alpha_space = [0, 0.1]
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
@@ -53,8 +57,8 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.solution_composition__mutation__mutation_rate = trial.suggest_float('mutation_rate', 0, 0.1)
 
 
-datasets = {0: 'superconductivity', 1: 'protein_structure', 2: 'online_news',
-            3: 'concrete_strength', 4: 'combined_cycle_power_plant', 5: 'airfoil_self_noise'}
+datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
+            3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 
 
 @click.command()
