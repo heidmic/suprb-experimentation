@@ -7,12 +7,14 @@ from experiments import Experiment
 from experiments.evaluation import CrossValidate
 from experiments.mlflow import log_experiment
 from problems import scale_X_y
-from shared_config import load_dataset, global_params, estimator, random_state, dataset_params, get_optimizer, \
-    optimizer_params
+from shared_config import load_dataset, global_params, estimator, random_state, dataset_params, \
+    individual_dataset_params
 
+datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
+            3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
+@click.option('-p', '--problem', type=click.STRING, default='parkinson_total')
 @click.option('-o', '--optimizer', type=click.STRING, default='ga')
 def run(problem: str, optimizer: str):
     print(f"Problem is {problem}, optimizer is {optimizer}")
@@ -20,8 +22,7 @@ def run(problem: str, optimizer: str):
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
 
-    params = global_params | dataset_params.get(problem, {}) | \
-        {'solution_composition': get_optimizer(optimizer)} | optimizer_params.get(problem, {}).get(optimizer, {})
+    params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
     experiment = Experiment(name=f'{optimizer.upper()} Evaluation', params=params, verbose=10)
 
