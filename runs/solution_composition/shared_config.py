@@ -7,6 +7,7 @@ from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import mutation, es, origin
+from suprb.rule import initialization
 
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
@@ -46,10 +47,6 @@ individual_dataset_params = {
         'n_iter': 32,
         'n_rules': 4
     },
-    'online_news': {
-        'n_iter': 32,
-        'n_rules': 6
-    },
     'protein_structure': {
         'n_iter': 36,
         'n_rules': 4
@@ -60,88 +57,74 @@ individual_dataset_params = {
     }
 }
 
-
 # TODO Set optimal values, once tuning is finished
 
 dataset_params = {
     'combined_cycle_power_plant': {
-
-    },
-    'concrete_strength': {
-
+        'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
+        'rule_generation__mutation__sigma_lower': 2.7864,
+        'rule_generation__mutation__sigma_prop': 2.0135,
+        'rule_generation__init': getattr(initialization, 'NormalInit')(),
+        'rule_generation__init__sigma_lower': 0.9921,
+        'rule_generation__init__sigma_prop': 0.5306,
+        'rule_generation__init__fitness__alpha': 0.0960,
+        'rule_generation__delay': 28,
+        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
+        'solution_composition__selection__k': 7,
+        'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
+        'solution_composition__crossover__n': 8,
+        'solution_composition__mutation__mutation_rate': 0.0256
     },
     'airfoil_self_noise': {
-
+        'rule_generation__mutation': getattr(mutation, 'Normal')(),
+        'rule_generation__mutation__sigma_lower': 1.3353,
+        'rule_generation__mutation__sigma_prop': 1.6574,
+        'rule_generation__init': getattr(initialization, 'MeanInit')(),
+        'rule_generation__init__fitness__alpha': 0.0313,
+        'rule_generation__delay': 96,
+        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
+        'solution_composition__selection__k': 9,
+        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
+        'solution_composition__mutation__mutation_rate': 0.0213
     },
-    'online_news': {
-
+    'concrete_strength': {
+        'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
+        'rule_generation__mutation__sigma_lower': 2.6256,
+        'rule_generation__mutation__sigma_prop': 2.7129,
+        'rule_generation__init': getattr(initialization, 'MeanInit')(),
+        'rule_generation__init__fitness__alpha': 0.0715,
+        'rule_generation__delay': 90,
+        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
+        'solution_composition__selection__k': 9,
+        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
+        'solution_composition__mutation__mutation_rate': 0.0392
     },
     'protein_structure': {
-
+        'rule_generation__mutation': getattr(mutation, 'HalfnormIncrease')(),
+        'rule_generation__mutation__sigma_lower': 0.2100,
+        'rule_generation__mutation__sigma_prop': 0.3480,
+        'rule_generation__init': getattr(initialization, 'MeanInit')(),
+        'rule_generation__init__fitness__alpha': 0.0059,
+        'rule_generation__delay': 62,
+        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
+        'solution_composition__selection__k': 4,
+        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
+        'solution_composition__mutation__mutation_rate': 0.0204
     },
-    'superconductivity': {
-
+    'parkinson_total': {
+        'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
+        'rule_generation__mutation__sigma_lower': 0.5031,
+        'rule_generation__mutation__sigma_prop': 2.7744,
+        'rule_generation__init': getattr(initialization, 'MeanInit')(),
+        'rule_generation__init__fitness__alpha': 0.0194,
+        'rule_generation__delay': 60,
+        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
+        'solution_composition__selection__k': 8,
+        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
+        'solution_composition__mutation__mutation_rate': 0.0226
     }
 }
 
-optimizer_params = {
-    'combined_cycle_power_plant': {
-        'ga': {
-            'solution_composition__selection': ga.selection.Tournament(),
-            'solution_composition__selection__k': 6,
-            'solution_composition__crossover': ga.crossover.NPoint(),
-            'solution_composition__crossover__n': 5,
-            'solution_composition__mutation__mutation_rate': 0.026,
-            'solution_composition__elitist_ratio': 0.17,  # 5
-        },
-    },
-    'airfoil_self_noise': {
-        'ga': {
-            'solution_composition__selection': ga.selection.LinearRank(),
-            'solution_composition__crossover': ga.crossover.NPoint(),
-            'solution_composition__crossover__n': 3,
-            'solution_composition__mutation__mutation_rate': 0.001,
-            'solution_composition__elitist_ratio': 0.17,  # 5
-        },
-    },
-    'concrete_strength': {
-        'ga': {
-            'solution_composition__selection': ga.selection.Tournament(),
-            'solution_composition__selection__k': 5,
-            'solution_composition__crossover': ga.crossover.Uniform(),
-            'solution_composition__mutation__mutation_rate': 0.024,
-            'solution_composition__elitist_ratio': 0.16,  # 5
-        },
-    },
-    'online_news': {
-        'ga': {
-            'solution_composition__selection': ga.selection.Tournament(),
-            'solution_composition__selection__k': 5,
-            'solution_composition__crossover': ga.crossover.Uniform(),
-            'solution_composition__mutation__mutation_rate': 0.024,
-            'solution_composition__elitist_ratio': 0.16,  # 5
-        },
-    },
-    'protein_structure': {
-        'ga': {
-            'solution_composition__selection': ga.selection.Tournament(),
-            'solution_composition__selection__k': 5,
-            'solution_composition__crossover': ga.crossover.Uniform(),
-            'solution_composition__mutation__mutation_rate': 0.024,
-            'solution_composition__elitist_ratio': 0.16,  # 5
-        },
-    },
-    'superconductivity': {
-        'ga': {
-            'solution_composition__selection': ga.selection.Tournament(),
-            'solution_composition__selection__k': 5,
-            'solution_composition__crossover': ga.crossover.Uniform(),
-            'solution_composition__mutation__mutation_rate': 0.024,
-            'solution_composition__elitist_ratio': 0.16,  # 5
-        },
-    }
-
-}
 
 estimator = SupRB(
     rule_generation=es.ES1xLambda(
