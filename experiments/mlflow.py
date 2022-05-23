@@ -142,7 +142,6 @@ def log_run(estimator: BaseEstimator):
             for step, value in values.items():
                 mlflow.log_metric(key=key, value=value, step=step)
         try_log_dict(logger.genomes_, "genome.json")
-        try_log_dict(logger.bounds_, "bounds.json")
 
 
 def log_run_result(result: dict):
