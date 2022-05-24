@@ -28,7 +28,7 @@ random_state = 42
 # Values that will be chosen as default for all combinations
 global_params = Bunch(**{
     'solution_composition__n_iter': 32,
-    'rule_generation__n_iter': 1000,
+    'rule_generation__n_iter': 250,
     'solution_composition__population_size': 32,
     'rule_generation__lmbda': 20,
     'solution_composition__elitist_ratio': 0.17

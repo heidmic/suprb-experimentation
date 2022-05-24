@@ -35,9 +35,13 @@ def rule_generation_space(trial: Trial, params: Bunch):
     alpha_space = [0, 0.1]
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
 
-    # Delay being larger than n_iter of rule_generation is pointless?
-    params.rule_generation__delay = trial.suggest_int('delay', low=1, high=100)
+    params.rule_generation__operator = \
+        trial.suggest_categorical('operator', ['&', ',', '+'])
 
+    if params.rule_generation__operator == ',' or params.rule_generation__operator == '+':
+        params.rule_generation__n_iter = trial.suggest_int('n_iter (es)', low=1, high=100)
+    else:
+        params.rule_generation__delay = trial.suggest_int('delay', low=1, high=25)
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
     params.solution_composition__selection = \
         trial.suggest_categorical('selection', ['RouletteWheel', 'Tournament', 'LinearRank', 'Random'])
