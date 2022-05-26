@@ -38,8 +38,8 @@ def rule_generation_space(trial: Trial, params: Bunch):
     params.rule_generation__operator = \
         trial.suggest_categorical('operator', ['&', ',', '+'])
 
-    if params.rule_generation__operator == ',' or params.rule_generation__operator == '+':
-        params.rule_generation__n_iter = trial.suggest_int('n_iter (es)', low=1, high=100)
+    if params.rule_generation__operator in ('+', ','):
+        params.rule_generation__n_iter = trial.suggest_int('n_iter_es', low=1, high=50)
     else:
         params.rule_generation__delay = trial.suggest_int('delay', low=1, high=25)
 
