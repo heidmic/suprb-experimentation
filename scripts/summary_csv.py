@@ -1,7 +1,4 @@
 import pandas as pd
-from baycomp import two_on_single
-import numpy as np
-import seaborn as sns
 
 """
 Extracts values from csv-Files gained from mlflow, performs calculations and
@@ -12,9 +9,7 @@ stores the results in a new csv-File for all Models specified
 datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
             3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 # The used representations (or models) on which runs were performed
-dirs = {0 : 'OBR', 1 : 'UBR', 2 : 'CSR', 3 : 'MPR'}
-
-
+dirs = {0: 'OBR', 1: 'UBR', 2: 'CSR', 3: 'MPR'}
 
 for i in dirs:
     # Head of csv-File
@@ -22,16 +17,13 @@ for i in dirs:
         f"FIN_ITER_MAX,FIN_ITER_MIN,FIN_ITER_MEAN,THRESH_0_MEAN,THRESH_0_MIN,THRESH_0_MAX," \
         f"THRESH_1_MEAN,THRESH_1_MIN,THRESH_1_MAX,THRESH_2_MEAN,THRESH_2_MIN,THRESH_2_MAX"
     # Current working directory
-    dir = dirs[i]
+    directory = dirs[i]
 
-    # Store results for all datasets for each used model separately
-    file = open(f"../{dir}/Results.csv", "w")
-
-    for i in datasets:
-        problem = datasets[i]
-        print(f"WORKING ON DATASET {problem} WITH {dir}")
+    for j in datasets:
+        problem = datasets[j]
+        print(f"WORKING ON DATASET {problem} WITH {directory}")
         # Read from csv-File in directory named after model and named after dataset
-        df = pd.read_csv(f"../{dir}/{problem}.csv")
+        df = pd.read_csv(f"../{directory}/{problem}.csv")
         # Filter out individual runs (Removes averaged values)
         fold_df = df[df['Name'].str.contains('fold')]
 
@@ -79,6 +71,6 @@ for i in dirs:
         {mean_final_iter},{mean_t0},{min_t0},{max_t0},{mean_t1},{min_t1},\
         {max_t1},{mean_t2},{min_t2},{max_t2}"
 
-    print(f"{dir} FINISHED")
-    file.write(s)
-    file.close()
+    print(f"{directory} FINISHED")
+    with open(f"../{directory}/Results.csv", "w") as file:
+        file.write(s)
