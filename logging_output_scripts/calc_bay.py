@@ -26,7 +26,7 @@ def load_error_list():
     for current_dir in dirs:
         res_var = np.zeros((len(datasets)))
         for problem, j in zip(datasets, range(len(datasets))):
-            # Folder in same directory as scripts-Folder
+            # Folder in same directory as logging_output_scripts-Folder
             df = pd.read_csv(f"../{current_dir}/{problem}.csv")
             fold_df = df[df['Name'].str.contains('fold')]
             mse = -fold_df['test_neg_mean_squared_error'].mean()
