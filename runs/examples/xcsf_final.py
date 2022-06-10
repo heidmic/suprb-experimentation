@@ -188,6 +188,7 @@ class XCSF(BaseEstimator, RegressorMixin):
         check_is_fitted(self)
 
         X = check_array(X)
+        self.xcs_.print_pset(True, True, True)
 
         return self.xcs_.predict(X)
 
