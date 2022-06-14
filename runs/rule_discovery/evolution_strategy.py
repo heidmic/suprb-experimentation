@@ -1,5 +1,4 @@
-import math
-
+import numpy as np
 import click
 import mlflow
 from optuna import Trial
@@ -14,7 +13,6 @@ from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-from runs.solution_composition.shared_config import load_dataset, random_state
 
 from suprb import rule, SupRB
 from suprb.logging.combination import CombinedLogger
@@ -22,6 +20,16 @@ from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import es, origin, mutation
+
+
+random_state = 42
+
+
+def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
+    method_name = f"load_{name}"
+    from problems import datasets
+    if hasattr(datasets, method_name):
+        return getattr(datasets, method_name)(**kwargs)
 
 
 @click.command()
@@ -65,7 +73,7 @@ def run(problem: str):
     @param_space('suprb_ES_GA')
     def suprb_ES_GA_space(trial: Trial, params: Bunch):
         # ES
-        sigma_space = [0, math.sqrt(X.shape[1])]
+        sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.mutation__sigma = trial.suggest_float('mutation__sigma', *sigma_space)
         params.delay = trial.suggest_int('delay', 10, 100)
