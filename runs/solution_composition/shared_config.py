@@ -62,64 +62,67 @@ individual_dataset_params = {
 dataset_params = {
     'combined_cycle_power_plant': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': 3.0000,
-        'rule_generation__init': getattr(initialization, 'NormalInit')(),
-        'rule_generation__init__sigma': 2.6654,
-        'rule_generation__init__fitness__alpha': 0.0914,
-        'rule_generation__delay': 94,
+        'rule_generation__mutation__sigma': 2.7917,
+        'rule_generation__init': getattr(initialization, 'MeanInit')(),
+        'rule_generation__init__fitness__alpha': 0.0889,
+        'rule_generation__operator': ',',
+        'rule_generation__n_iter': 23,
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
-        'solution_composition__selection__k': 8,
+        'solution_composition__selection__k': 6,
         'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
-        'solution_composition__crossover__n': 6,
-        'solution_composition__mutation__mutation_rate': 0.0365
+        'solution_composition__crossover__n': 1,
+        'solution_composition__mutation__mutation_rate': 0.0173
     },
     'airfoil_self_noise': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': 3.0000,
+        'rule_generation__mutation__sigma': 1.4984,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.0757,
-        'rule_generation__delay': 93,
+        'rule_generation__init__fitness__alpha': 0.0472,
+        'rule_generation__operator': ',',
+        'rule_generation__n_iter': 1,
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
-        'solution_composition__selection__k': 7,
+        'solution_composition__selection__k': 8,
         'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
-        'solution_composition__crossover__n': 1,
-        'solution_composition__mutation__mutation_rate': 0.0234
+        'solution_composition__crossover__n': 9,
+        'solution_composition__mutation__mutation_rate': 0.0158
     },
     'concrete_strength': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': 2.8901,
+        'rule_generation__mutation__sigma': 2.1105,
         'rule_generation__init': getattr(initialization, 'NormalInit')(),
-        'rule_generation__init__sigma': 2.0514,
-        'rule_generation__init__fitness__alpha': 0.0719,
-        'rule_generation__delay': 96,
+        'rule_generation__init__sigma': 1.46936,
+        'rule_generation__init__fitness__alpha': 0.0644,
+        'rule_generation__operator': ',',
+        'rule_generation__n_iter': 44,
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
-        'solution_composition__selection__k': 6,
+        'solution_composition__selection__k': 7,
         'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
-        'solution_composition__mutation__mutation_rate': 0.0221
+        'solution_composition__mutation__mutation_rate': 0.0157
     },
     'protein_structure': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': 1.8686,
+        'rule_generation__mutation__sigma': 0.3523,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.0954,
-        'rule_generation__delay': 99,
+        'rule_generation__init__fitness__alpha': 0.0966,
+        'rule_generation__operator': '+',
+        'rule_generation__n_iter': 5,
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
-        'solution_composition__selection__k': 6,
-        'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
-        'solution_composition__crossover__n': 4,
-        'solution_composition__mutation__mutation_rate': 0.0124
+        'solution_composition__selection__k': 3,
+        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
+        'solution_composition__mutation__mutation_rate': 0.0163
     },
     'parkinson_total': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': 2.8686,
-        'rule_generation__init': getattr(initialization, 'NormalInit')(),
-        'rule_generation__init__sigma': 0.9155,
-        'rule_generation__init__fitness__alpha': 0.0375,
-        'rule_generation__delay': 98,
-        'solution_composition__selection': getattr(ga.selection, 'LinearRank')(),
+        'rule_generation__mutation__sigma': 2.3444,
+        'rule_generation__init': getattr(initialization, 'MeanInit')(),
+        'rule_generation__init__fitness__alpha': 0.0067,
+        'rule_generation__operator': ',',
+        'rule_generation__n_iter': 50,
+        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
+        'solution_composition__selection__k': 9,
         'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
-        'solution_composition__crossover__n': 10,
-        'solution_composition__mutation__mutation_rate': 0.0163
+        'solution_composition__crossover__n': 3,
+        'solution_composition__mutation__mutation_rate': 0.0030
     }
 }
 
