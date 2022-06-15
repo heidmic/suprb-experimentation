@@ -57,64 +57,65 @@ individual_dataset_params = {
     }
 }
 
-# TODO Set optimal values, once tuning is finished
-
 dataset_params = {
     'combined_cycle_power_plant': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': 2.2561,
+        'rule_generation__mutation__sigma': 2.8124,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.0693,
-        'rule_generation__delay': 84,
-        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
-        'solution_composition__selection__k': 6,
-        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
-        'solution_composition__mutation__mutation_rate': 0.0184
-    },
-    'airfoil_self_noise': {
-        'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
-        'rule_generation__mutation__sigma': 2.1400,
-        'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.0019,
-        'rule_generation__delay': 71,
+        'rule_generation__init__fitness__alpha': 0.0980,
+        'rule_generation__operator': ',',
+        'rule_generation__n_iter': 30,
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
         'solution_composition__selection__k': 7,
-        'solution_composition__crossover' : getattr(ga.crossover, 'NPoint')(),
-        'solution_composition__crossover__n': 5,
-        'solution_composition__mutation__mutation_rate': 0.0181
+        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
+        'solution_composition__mutation__mutation_rate': 0.04578
+    },
+    'airfoil_self_noise': {
+        'rule_generation__mutation': getattr(mutation, 'HalfnormIncrease')(),
+        'rule_generation__mutation__sigma': 2.4025,
+        'rule_generation__init': getattr(initialization, 'MeanInit')(),
+        'rule_generation__init__fitness__alpha': 0.0116,
+        'rule_generation__operator': '+',
+        'rule_generation__n_iter': 43,
+        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
+        'solution_composition__selection__k': 5,
+        'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
+        'solution_composition__crossover__n': 7,
+        'solution_composition__mutation__mutation_rate': 0.0140
     },
     'concrete_strength': {
         'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
-        'rule_generation__mutation__sigma': 2.6196,
+        'rule_generation__mutation__sigma': 1.6492,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.0294,
-        'rule_generation__delay': 84,
+        'rule_generation__init__fitness__alpha': 0.0186,
+        'rule_generation__operator': '+',
+        'rule_generation__n_iter': 50,
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
-        'solution_composition__selection__k': 6,
-        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
-        'solution_composition__mutation__mutation_rate': 0.0174
+        'solution_composition__selection__k': 10,
+        'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
+        'solution_composition__mutation__mutation_rate': 0.0164
     },
     'protein_structure': {
-        'rule_generation__mutation': getattr(mutation, 'HalfnormIncrease')(),
-        'rule_generation__mutation__sigma': 2.7480,
+        'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
+        'rule_generation__mutation__sigma': 1.6547,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.0029,
-        'rule_generation__delay': 84,
-        'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
-        'solution_composition__selection__k': 7,
-        'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
-        'solution_composition__crossover__n': 8,
-        'solution_composition__mutation__mutation_rate': 0.0263
+        'rule_generation__init__fitness__alpha': 0.0001,
+        'rule_generation__operator': '+',
+        'rule_generation__n_iter': 14,
+        'solution_composition__selection': getattr(ga.selection, 'LinearRank')(),
+        'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
+        'solution_composition__mutation__mutation_rate': 0.0149
     },
     'parkinson_total': {
-        'rule_generation__mutation': getattr(mutation, 'HalfnormIncrease')(),
-        'rule_generation__mutation__sigma': 2.9434,
+        'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
+        'rule_generation__mutation__sigma': 2.2728,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0018,
-        'rule_generation__delay': 2,
-        'solution_composition__selection': getattr(ga.selection, 'RouletteWheel')(),
+        'rule_generation__operator': '&',
+        'rule_generation__delay': 19,
+        'solution_composition__selection': getattr(ga.selection, 'LinearRank')(),
         'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
-        'solution_composition__mutation__mutation_rate': 0.0037
+        'solution_composition__mutation__mutation_rate': 0.0093
     }
 }
 
