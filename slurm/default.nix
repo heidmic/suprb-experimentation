@@ -8,11 +8,15 @@ mkShell {
   venvDir = "./_venv";
   # Add dependencies that pip can't fetch here (or that we don't want to
   # install using pip).
-  buildInputs = (with pkgs.python39Packages; [ python venvShellHook wheel numpy ])
-    ++ (import ./system-dependencies.nix { inherit pkgs; });
+  buildInputs = (with pkgs.python39Packages; [ python39 venvShellHook wheel ])
+     ++ (import ./system-dependencies.nix { inherit pkgs; });
   postShellHook = ''
     unset SOURCE_DATE_EPOCH
-    export LD_LIBRARY_PATH=${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [pkgs.stdenv.cc.cc]}:${pkgs.lib.makeLibraryPath [pkgs.zlib]}:$LD_LIBRARY_PATH"
+    export PYTHONPATH=$venvDir/${python39.sitePackages}:$PYTHONPATH
+  '';
+  postVenvCreation = ''
+    unset SOURCE_DATE_EPOCH
     pip install -r requirements.txt
   '';
 }
