@@ -99,7 +99,7 @@ def run(problem: str):
     experiment = Experiment(name=f'{problem} ES Tuning', verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
-    experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
+    experiment.with_tuning(suprb_RS_GA_space, tuner=tuner)
 
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
