@@ -70,34 +70,36 @@ def run(problem: str):
         verbose=10
     )
 
-    @param_space('suprb_ES_GA')
+    @param_space()
     def suprb_ES_GA_space(trial: Trial, params: Bunch):
         # ES
         sigma_space = [0, np.sqrt(X.shape[1])]
 
-        params.mutation__sigma = trial.suggest_float('mutation__sigma', *sigma_space)
-        params.delay = trial.suggest_int('delay', 10, 100)
-        params.init__fitness__alpha = trial.suggest_float(
-            'init__fitness__alpha', 0.01, 0.2)
+        params.rule_generation__mutation__sigma = trial.suggest_float(
+            'rule_generation__mutation__sigma', *sigma_space)
+        params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 100)
+        params.rule_generation__init__fitness__alpha = trial.suggest_float(
+            'rule_generation__init__fitness__alpha', 0.01, 0.2)
 
         # GA
-        params.selection = trial.suggest_categorical('selection',
+        params.solution_composition__selection = trial.suggest_categorical(
+            'solution_composition__selection',
                                                      ['RouletteWheel',
                                                       'Tournament',
                                                       'LinearRank', 'Random'])
-        params.selection = getattr(ga.selection, params.selection)()
+        params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
 
-        if isinstance(params.selection, ga.selection.Tournament):
-            params.selection__k = trial.suggest_int('selection__k', 3, 10)
+        if isinstance(params.solution_composition__selection, ga.selection.Tournament):
+            params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)
 
-        params.crossover = trial.suggest_categorical('crossover',
+        params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover',
                                                      ['NPoint', 'Uniform'])
-        params.crossover = getattr(ga.crossover, params.crossover)()
+        params.solution_composition__crossover = getattr(ga.crossover, params.solution_composition__crossover)()
 
-        if isinstance(params.crossover, ga.crossover.NPoint):
-            params.crossover__n = trial.suggest_int('crossover__n', 1, 10)
+        if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
+            params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)
 
-        params.mutation__mutation_rate = trial.suggest_float('mutation_rate', 0,
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float('solution_composition__mutation_rate', 0,
                                                              0.1)
 
     experiment = Experiment(name=f'{problem} ES Tuning', verbose=10)
