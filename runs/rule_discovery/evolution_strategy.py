@@ -66,7 +66,8 @@ def run(problem: str):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=10_000,
-        timeout=90 * 60 * 60,  # 90 hours
+        timeout=24 * 60 * 60,  # 24 hours
+        scoring='neg_mean_squared_error',
         verbose=10
     )
 
@@ -106,6 +107,9 @@ def run(problem: str):
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
+
+    random_states = np.random.SeedSequence(random_state).generate_state(8)
+    experiment.with_random_states(random_states, n_jobs=2)
 
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
