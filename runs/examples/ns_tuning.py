@@ -2,8 +2,8 @@ import numpy as np
 import click
 import mlflow
 from optuna import Trial
+import suprb
 
-from sklearn.linear_model import Ridge
 from sklearn.utils import Bunch, shuffle
 from sklearn.model_selection import ShuffleSplit
 
@@ -19,8 +19,8 @@ from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
-from suprb.optimizer.rule import ns, origin, mutation
-import suprb
+from suprb.optimizer.rule import ns
+from suprb.optimizer.rule.mutation import HalfnormIncrease
 
 
 random_state = 42
@@ -45,7 +45,7 @@ def run(problem: str, ns_type: str):
 
     estimator = SupRB(
         rule_generation=ns.NoveltySearch(
-            init=rule.initialization.HalfnormInit(), ns_type=ns_type
+            init=rule.initialization.MeanInit(), ns_type=ns_type, mutation=HalfnormIncrease()
         ),
         solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32),
         n_iter=32,
@@ -70,11 +70,12 @@ def run(problem: str, ns_type: str):
     @param_space()
     def suprb_NS_GA_space(trial: Trial, params: Bunch):
         # NS
-        sigma_space = [0, 2]
+        # sigma_space = [0, 2]
+        sigma_space = [0, np.sqrt(X.shape[1])]
 
-        params.rule_generation__n_iter = trial.suggest_int('n_iter', 1, 20)
-        params.rule_generation__mu = trial.suggest_int('mu', 8, 16)
-        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 3, 10)
+        params.rule_generation__n_iter = trial.suggest_int('n_iter', 0, 20)
+        params.rule_generation__mu = trial.suggest_int('mu', 7, 20)
+        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 5, 15)
 
         params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
                                                                               ['UniformSamplesOrigin',
@@ -83,15 +84,15 @@ def run(problem: str, ns_type: str):
         params.rule_generation__origin_generation = getattr(suprb.optimizer.rule.origin,
                                                             params.rule_generation__origin_generation)()
 
-        params.rule_generation__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
-        params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
+        # params.rule_generation__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
+        # params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
 
         params.rule_generation__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
-        params.rule_generation__mutation = trial.suggest_categorical('mutation',
-                                                                     ['Normal', 'Halfnorm',
-                                                                      'HalfnormIncrease', 'Uniform',
-                                                                      'UniformIncrease', ])
-        params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()
+        # params.rule_generation__mutation = trial.suggest_categorical('mutation',
+        #                                                              ['Normal', 'Halfnorm',
+        #                                                               'HalfnormIncrease', 'Uniform',
+        #                                                               'UniformIncrease', ])
+        # params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()
 
         params.rule_generation__selection = trial.suggest_categorical('selection',
                                                                       ['RouletteWheel', 'Random'])
