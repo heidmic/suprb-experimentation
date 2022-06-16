@@ -14,19 +14,19 @@ datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise
 
 dict_list = {}
 
-for i in datasets:
-    problem = datasets[i]
+for problem in datasets.values():
     res_var = 0
-    for j in dirs:
-        directory = dirs[j]
+    first = True
+    for directory in dirs.values():
         df = pd.read_csv(f"../{directory}/{problem}.csv")
         fold_df = df[df['Name'].str.contains('fold')]
         name = []
         for x in range(fold_df.shape[0]):
             name.append(directory)
         # Adds additional column for plotting
-        if j == 0:
+        if first:
             res_var = fold_df.assign(Used_Representation=name)
+            first = False
         else:
             res_var = pd.concat([res_var, fold_df.assign(Used_Representation=name)])
 

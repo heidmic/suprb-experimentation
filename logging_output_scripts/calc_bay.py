@@ -24,47 +24,45 @@ def load_error_list():
     dict_list = {}
 
     for current_dir in dirs:
-        res_var = np.zeros((len(datasets)))
-        for problem, j in zip(datasets, range(len(datasets))):
+        res_var = []
+        for problem in datasets:
             # Folder in same directory as logging_output_scripts-Folder
             df = pd.read_csv(f"../{current_dir}/{problem}.csv")
             fold_df = df[df['Name'].str.contains('fold')]
-            mse = -fold_df['test_neg_mean_squared_error'].mean()
-            res_var[j] = mse
-        a = {current_dir: res_var}
-        dict_list.update(a)
+            mse_df = -fold_df['test_neg_mean_squared_error'].mean()
+            res_var.append(mse_df)
+        dict_list.update({current_dir: res_var})
     return dict_list
 
 
 # Performs calculation, stores both simplex plots and csv File
 def calc_bayes(save_csv: bool = True, save_plots: bool = True, rope: float = 0.1):
-    result_dict = {}
-    # Header of .csv-File
-    s = "COMPARED REPS, PLEFT, ROPE, PRIGHT\n"
+    header = "COMPARED REPS, PLEFT, ROPE, PRIGHT\n"
     dict_list = load_error_list()
+    # Matches each possible combination
     result_list = list(map(dict, combinations(dict_list.items(), 2)))
 
     # Compare all unique combinations between the used models
     for combination in result_list:
         dir_1 = list(combination.keys())[0]
         dir_2 = list(combination.keys())[1]
-        comparison = dir_1 + " VS. " + dir_2
+        comparison_title = dir_1 + " VS. " + dir_2
         # Perform SignedRankTest on average MSE for two Models
         posterior = SignedRankTest(x=dict_list[dir_1], y=(dict_list[dir_2]), rope=rope)
         print(f"Considered values - {dir_1} : {dict_list[dir_1]} vs {dir_2} : {dict_list[dir_2]} ")
-        calc_res = posterior.probs()
-        print(f"Probs: {calc_res[0]} {calc_res[1]} {calc_res[2]}")
+        probabilities = posterior.probs()
+        print(f"Probs: {probabilities[0]} {probabilities[1]} {probabilities[2]}")
         # Plot simplex, histogram doesnt work properly
-        res_plot = posterior.plot_simplex(names=(dir_1, "rope", dir_2))
+        simplex_plot = posterior.plot_simplex(names=(dir_1, "rope", dir_2))
         if save_plots:
-            res_plot.savefig(f'Bayesian/{comparison}.png')
+            simplex_plot.savefig(f'Bayesian/{comparison_title}.png')
 
         # Store probabilities for each comparison as a row
-        s += f"{comparison}, {calc_res[0]}, {calc_res[1]}, {calc_res[2]}\n"
+        header += f"{comparison_title}, {probabilities[0]}, {probabilities[1]}, {probabilities[2]}\n"
 
     if save_csv:
         with open("Bayesian/Resulting_probs.csv", "w") as file:
-            file.write(s)
+            file.write(header)
 
 
 if __name__ == '__main__':
