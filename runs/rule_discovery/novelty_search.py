@@ -4,6 +4,7 @@ import mlflow
 from optuna import Trial
 import suprb
 
+from sklearn.linear_model import Ridge
 from sklearn.utils import Bunch, shuffle
 from sklearn.model_selection import ShuffleSplit
 
@@ -19,7 +20,7 @@ from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
-from suprb.optimizer.rule import ns
+from suprb.optimizer.rule import ns, origin
 from suprb.optimizer.rule.mutation import HalfnormIncrease
 
 
@@ -45,7 +46,12 @@ def run(problem: str, ns_type: str):
 
     estimator = SupRB(
         rule_generation=ns.NoveltySearch(
-            init=rule.initialization.MeanInit(), ns_type=ns_type, mutation=HalfnormIncrease()
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
+                                              model=Ridge(alpha=0.01,
+                                                          random_state=random_state)),
+            ns_type=ns_type,
+            origin_generation=origin.SquaredError(),
+            mutation=HalfnormIncrease()
         ),
         solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32),
         n_iter=32,
@@ -72,27 +78,11 @@ def run(problem: str, ns_type: str):
         # NS
         # sigma_space = [0, 2]
         sigma_space = [0, np.sqrt(X.shape[1])]
+        params.rule_generation__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
 
         params.rule_generation__n_iter = trial.suggest_int('n_iter', 0, 20)
         params.rule_generation__mu = trial.suggest_int('mu', 7, 20)
         params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 5, 15)
-
-        params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
-                                                                              ['UniformSamplesOrigin',
-                                                                               'Matching',
-                                                                               'SquaredError'])
-        params.rule_generation__origin_generation = getattr(suprb.optimizer.rule.origin,
-                                                            params.rule_generation__origin_generation)()
-
-        # params.rule_generation__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
-        # params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
-
-        params.rule_generation__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
-        # params.rule_generation__mutation = trial.suggest_categorical('mutation',
-        #                                                              ['Normal', 'Halfnorm',
-        #                                                               'HalfnormIncrease', 'Uniform',
-        #                                                               'UniformIncrease', ])
-        # params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()
 
         params.rule_generation__selection = trial.suggest_categorical('selection',
                                                                       ['RouletteWheel', 'Random'])
@@ -100,9 +90,10 @@ def run(problem: str, ns_type: str):
 
         params.rule_generation__archive = trial.suggest_categorical('archive', ['novelty', 'random', 'none'])
 
-        params.rule_generation__novelty_fitness_combination = trial.suggest_categorical('novelty_fitness_combination',
-                                                                                        ['novelty', '50/50', '75/25',
-                                                                                         'pmcns', 'pareto'])
+        params.rule_generation__novelty_fitness_combination = \
+            trial.suggest_categorical('novelty_fitness_combination',
+                                      ['novelty', '50/50', '75/25',
+                                       'pmcns', 'pareto'])
 
         if ns_type == 'MCNS':
             params.rule_generation__MCNS_threshold_matched = trial.suggest_int('MCNS_threshold_matched', 10, 20)
