@@ -121,7 +121,7 @@ def run(problem: str, ns_type: str):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-    experiment = Experiment(name=f'{problem} NS Tuning', verbose=10)
+    experiment = Experiment(name=f'{problem} {ns_type} Tuning', verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_NS_GA_space, tuner=tuner)
@@ -133,7 +133,7 @@ def run(problem: str, ns_type: str):
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
-    mlflow.set_experiment("NS Tuning")
+    mlflow.set_experiment("{ns_type} Tuning & Experiment")
     log_experiment(experiment)
 
 
