@@ -115,16 +115,16 @@ dataset_params = {
         'solution_composition__mutation__mutation_rate': 0.0122
     },
     'parkinson_total': {
-        'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma_center': 0.0014,
-        'rule_generation__mutation__sigma_spread': 2.9468,
+        'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
+        'rule_generation__mutation__sigma_center': 0.0005,
+        'rule_generation__mutation__sigma_spread': 2.6483,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.0022,
+        'rule_generation__init__fitness__alpha': 0.0028,
         'rule_generation__operator': '+',
-        'rule_generation__n_iter': 38,
+        'rule_generation__n_iter': 48,
         'solution_composition__selection': getattr(ga.selection, 'LinearRank')(),
         'solution_composition__crossover': getattr(ga.crossover, 'Uniform')(),
-        'solution_composition__mutation__mutation_rate': 0.0055
+        'solution_composition__mutation__mutation_rate': 0.0085
     }
 }
 
