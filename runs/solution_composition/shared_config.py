@@ -93,6 +93,7 @@ dataset_params = {
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
         'solution_composition__selection__k': 10,
         'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
+        'solution_composition__crossover__n': 10,
         'solution_composition__mutation__mutation_rate': 0.0164
     },
     'protein_structure': {
