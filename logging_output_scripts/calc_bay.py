@@ -38,9 +38,9 @@ def load_error_list():
 # Performs calculation, stores both simplex plots and csv File
 def calc_bayes(save_csv: bool = True, save_plots: bool = True, rope: float = 0.1):
     header = "COMPARED REPS, PLEFT, ROPE, PRIGHT\n"
-    dict_list = load_error_list()
+    error_list = load_error_list()
     # Matches each possible combination
-    result_list = list(map(dict, combinations(dict_list.items(), 2)))
+    result_list = list(map(dict, combinations(error_list.items(), 2)))
 
     # Compare all unique combinations between the used models
     for combination in result_list:
@@ -48,10 +48,10 @@ def calc_bayes(save_csv: bool = True, save_plots: bool = True, rope: float = 0.1
         dir_2 = list(combination.keys())[1]
         comparison_title = dir_1 + " VS. " + dir_2
         # Perform SignedRankTest on average MSE for two Models
-        posterior = SignedRankTest(x=dict_list[dir_1], y=(dict_list[dir_2]), rope=rope)
-        print(f"Considered values - {dir_1} : {dict_list[dir_1]} vs {dir_2} : {dict_list[dir_2]} ")
+        posterior = SignedRankTest(x=error_list[dir_1], y=(error_list[dir_2]), rope=rope)
+        print(f"Considered values - {dir_1} : {error_list[dir_1]} vs {dir_2} : {error_list[dir_2]} ")
         probabilities = posterior.probs()
-        print(f"Probs: {probabilities[0]} {probabilities[1]} {probabilities[2]}")
+        print(f"Probabilities: {probabilities[0]} {probabilities[1]} {probabilities[2]}")
         # Plot simplex, histogram doesnt work properly
         simplex_plot = posterior.plot_simplex(names=(dir_1, "rope", dir_2))
         if save_plots:

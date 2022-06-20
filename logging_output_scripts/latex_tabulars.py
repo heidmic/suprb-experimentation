@@ -3,8 +3,9 @@ from tabulate import tabulate
 import pandas as pd
 
 """
-This script uses tabulate package to create LaTex tables based on the values
-calculated in Summary_csv.py (Except for Genomes-Tables which use a Json)
+This script uses the tabulate package (https://pypi.org/project/tabulate/)
+to create LaTex tables based on the values calculated in Summary_csv.py 
+(Except for Genomes-Tables which use a Json)
 """
 
 dirs = {0: 'OBR', 1: 'UBR', 2: 'CSR', 3: 'MPR'}
@@ -35,7 +36,7 @@ def load_problem_columns(df, column_name):
     for problem in datasets.values():
         res = df[df['Problem'].str.contains(problem)]
         data_res.append(float(res[column_name]))
-        return data_res
+    return data_res
 
 
 # COMPLEXITY TABLES
@@ -52,7 +53,7 @@ def write_complexity():
             file.write(res)
 
 
-# GENOMES
+# GENOMES (Requires Genomes to be Stored as a .json in the respective Folder) [Leave out if not needed]
 def write_genomes():
     for directory in dirs.values():
         for problem in datasets.values():
@@ -75,12 +76,13 @@ def write_genomes():
 # MSE TABLES (Creates individual tables to be combined into a larger tabular)
 def write_mse():
     """
-    Creates table of shape:
-            [Problem i]
-    [REP 1]     ...
-    [REP 2]     ...
-    ...
-    To be fused into a larger table
+    Creates tables of shape:
+             [Problem i]
+    [MODEL 1]     ...
+    [MODEL 2]     ...
+        ...
+    [MODEL n]
+    To be fused into a larger table (needs to be done manually)
     """
     # Each column features all models for one problem
     column = []
@@ -94,58 +96,18 @@ def write_mse():
         column.append(row)
 
     headers = ['MSE', 'STD']
-    table_1 = tabulate(column[0], tablefmt="latex", headers=headers)
-    table_2 = tabulate(column[1], tablefmt="latex", headers=headers)
-    table_3 = tabulate(column[2], tablefmt="latex", headers=headers)
-    table_4 = tabulate(column[3], tablefmt="latex", headers=headers)
-    table_5 = tabulate(column[4], tablefmt="latex", headers=headers)
+    problem_1 = tabulate(column[0], tablefmt="latex", headers=headers)
+    problem_2 = tabulate(column[1], tablefmt="latex", headers=headers)
+    problem_3 = tabulate(column[2], tablefmt="latex", headers=headers)
+    problem_4 = tabulate(column[3], tablefmt="latex", headers=headers)
+    problem_5 = tabulate(column[4], tablefmt="latex", headers=headers)
 
     with open(f"MSE/MSE.txt", "w") as file:
-        file.write(table_1 + "\n\n" + table_2 + "\n\n" + table_3 + "\n\n" + table_4 + "\n\n" + table_5)
-
-
-# CONVERGENCE TABLES
-def write_convergence():
-    for directory in dirs.values():
-        df = pd.read_csv(f"../{directory}/Results.csv")
-        comp_list = []
-        for column_index in thresh_column:
-            column_name = thresh_column[column_index]
-            data_res = load_problem_columns(df, column_name)
-            threshold_string = " "
-            if column_index % 3 == 0:
-                threshold = int(column_index / 3)
-                threshold_string = f'Threshold = {threshold}'
-
-            comp_list.append((threshold_string, thresh_column_short[column_index], data_res[0],
-                              data_res[1], data_res[2], data_res[3], data_res[4]))
-
-        new_header = list(datasets_short.values())
-        new_header.insert(0, " ")
-        convergence_table = tabulate(comp_list, tablefmt="latex", headers=new_header)
-        with open(f"Convergence/convergence-{directory}.txt", "w") as file:
-            file.write(convergence_table)
-
-
-# Final iter TABLES
-def write_final_iter():
-    for directory in dirs.values():
-        df = pd.read_csv(f"../{directory}/Results.csv")
-        comp_list = []
-        for column_name, column_name_short in zip(iter_column.values(), iter_column_short.values()):
-            data_res = load_problem_columns(df, column_name)
-            comp_list.append((column_name_short, data_res[0], data_res[1],
-                              data_res[2], data_res[3], data_res[4]))
-
-        final_iter_table = tabulate(comp_list, tablefmt="latex", headers=datasets_short.values())
-        with open(f"Iter/iter-{directory}.txt", "w") as file:
-            file.write(final_iter_table)
+        file.write(problem_1 + "\n\n" + problem_2 + "\n\n" + problem_3 + "\n\n" + problem_4 + "\n\n" + problem_5)
 
 
 # Add / leave out certain tables
 if __name__ == '__main__':
     write_complexity()
     write_genomes()
-    write_convergence()
     write_mse()
-    write_final_iter()

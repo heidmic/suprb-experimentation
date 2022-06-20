@@ -3,6 +3,7 @@ import pandas as pd
 """
 Extracts values from csv-Files gained from mlflow, performs calculations and
 stores the results in a new csv-File for all Models specified
+Leave out/add metrics that you want to evaluate
 """
 
 # Datasets runs were performed on, responds to one csv file each
@@ -30,39 +31,14 @@ for directory in dirs.values():
         elitist_complexity = fold_df['elitist_complexity']
         values += "," + elitist_complexity.min()
         values += "," + elitist_complexity.max()
-        values += "," + elitist_complexity.mean()
-        values += "," + elitist_complexity.std()
+        values += "," + round(elitist_complexity.mean(), 2)
+        values += "," + round(elitist_complexity.std(), 2)
         values += "," + elitist_complexity.median()
 
         # Calculates both mse and std of mse between all runs (Changes MSE to positive value)
         mse = -fold_df['test_neg_mean_squared_error']
-        values += "," + mse.mean()
-        values += "," + mse.std()
-
-        # Calculates the amount of iterations during rule discovery (mean, max, min)
-        values += "," + fold_df['delay_mean'].mean()
-        values += "," + fold_df['delay_max'].max()
-        values += "," + fold_df['delay_min'].min()
-
-        # Calculates the iterations the elitist remained unchanged (t = 0, 1, 2)
-        thresh_0 = fold_df['elitist_convergence_thresh_0']
-        thresh_1 = fold_df['elitist_convergence_thresh_1']
-        thresh_2 = fold_df['elitist_convergence_thresh_2']
-
-        values += "," + thresh_0.mean()
-        values += "," + thresh_0.max()
-        values += "," + thresh_0.min()
-        values += "," + thresh_0.std()
-
-        values += "," + thresh_1.mean()
-        values += "," + thresh_1.max()
-        values += "," + thresh_1.min()
-        values += "," + thresh_1.std()
-
-        values += "," + thresh_2.mean()
-        values += "," + thresh_2.max()
-        values += "," + thresh_2.min()
-        values += "," + thresh_2.std()
+        values += "," + round(mse.mean(), 4)
+        values += "," + round(mse.std(), 4)
 
         values += '\n\n'
 
