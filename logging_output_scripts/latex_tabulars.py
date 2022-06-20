@@ -1,10 +1,11 @@
 import json
+import os
 from tabulate import tabulate
 import pandas as pd
 
 """
 This script uses the tabulate package (https://pypi.org/project/tabulate/)
-to create LaTex tables based on the values calculated in Summary_csv.py 
+to create LaTex tables based on the values calculated in Summary_csv.py
 (Except for Genomes-Tables which use a Json)
 """
 
@@ -15,19 +16,10 @@ datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise
             3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 
 # Empty string needed for formatting purposes
-datasets_short = {-1: ' ', 0: 'PT', 1: 'PTTS', 2: 'ASN',
-                  3: 'CS', 4: 'CCPP'}
+datasets_short = {-1: ' ', 0: 'PT', 1: 'PTTS', 2: 'ASN', 3: 'CS', 4: 'CCPP'}
 
 comp_column = {0: 'MEAN_COMP', 1: 'STD_COMP', 2: 'MEDIAN_COMP', 3: 'MIN_COMP', 4: 'MAX_COMP'}
 comp_column_short = {0: 'mean', 1: 'standard deviation', 2: 'median', 3: 'min', 4: 'max'}
-
-thresh_column = {0: 'THRESH_0_MEAN', 1: 'THRESH_0_MIN', 2: 'THRESH_0_MAX', 3: 'THRESH_1_MEAN', 4: 'THRESH_1_MIN',
-                 5: 'THRESH_1_MAX', 6: 'THRESH_2_MEAN', 7: 'THRESH_2_MIN', 8: 'THRESH_2_MAX'}
-thresh_column_short = {0: 'mean', 1: 'min', 2: 'max', 3: 'mean', 4: 'min',
-                       5: 'max', 6: 'mean', 7: 'min', 8: 'max'}
-
-iter_column = {0: 'FIN_ITER_MAX', 1: 'FIN_ITER_MIN', 2: 'FIN_ITER_MEAN'}
-iter_column_short = {0: 'max', 1: 'min', 2: 'mean'}
 
 
 # Returns column with name "column_name" of "problem"
@@ -37,6 +29,12 @@ def load_problem_columns(df, column_name):
         res = df[df['Problem'].str.contains(problem)]
         data_res.append(float(res[column_name]))
     return data_res
+
+
+def create_folder(folder_name):
+    directory = folder_name
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
 
 # COMPLEXITY TABLES
@@ -49,6 +47,9 @@ def write_complexity():
             comp_list.append((column_name_short, data_res[0], data_res[1], data_res[2], data_res[3], data_res[4]))
 
         res = tabulate(comp_list, tablefmt="latex", headers=datasets_short.values())
+
+        create_folder("Complexity")
+
         with open(f"Complexity/Complexity-{directory}.txt", "w") as file:
             file.write(res)
 
@@ -69,6 +70,9 @@ def write_genomes():
 
             headers = ['Iteration', 'Genome']
             genome_table = tabulate(genome_list, tablefmt="latex", headers=headers)
+
+            create_folder("Genomes")
+
             with open(f"Genomes/{directory}-{problem}.txt", "w") as file:
                 file.write(genome_table)
 
@@ -102,6 +106,8 @@ def write_mse():
     problem_4 = tabulate(column[3], tablefmt="latex", headers=headers)
     problem_5 = tabulate(column[4], tablefmt="latex", headers=headers)
 
+    create_folder("MSE")
+
     with open(f"MSE/MSE.txt", "w") as file:
         file.write(problem_1 + "\n\n" + problem_2 + "\n\n" + problem_3 + "\n\n" + problem_4 + "\n\n" + problem_5)
 
@@ -109,5 +115,6 @@ def write_mse():
 # Add / leave out certain tables
 if __name__ == '__main__':
     write_complexity()
-    write_genomes()
+    # Only use if genomes are actually tracked.
+    # write_genomes()
     write_mse()

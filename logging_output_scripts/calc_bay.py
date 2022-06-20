@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 from baycomp import SignedRankTest
@@ -31,7 +32,7 @@ def load_error_list():
             fold_df = df[df['Name'].str.contains('fold')]
             mse_df = -fold_df['test_neg_mean_squared_error'].mean()
             res_var.append(mse_df)
-        dict_list.update({current_dir: res_var})
+        dict_list.update({current_dir: np.array(res_var)})
     return dict_list
 
 
@@ -66,4 +67,9 @@ def calc_bayes(save_csv: bool = True, save_plots: bool = True, rope: float = 0.1
 
 
 if __name__ == '__main__':
+    # Create dedicated folder
+    directory = "Bayesian"
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
     calc_bayes()

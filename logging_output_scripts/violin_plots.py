@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 """
 Uses seaborn-package to create violin-Plots comparing model performances
@@ -36,4 +37,10 @@ for problem in datasets.values():
     fig, ax = plt.subplots()
     ax = sns.violinplot(x='Used_Representation', y='test_neg_mean_squared_error', palette="muted", data=res_var)
     ax.set(ylabel='MSE')
+
+    # Create folder if not yet done
+    directory = "Violins"
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
     fig.savefig(f'Violins/{problem}.png')
