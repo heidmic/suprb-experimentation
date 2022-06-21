@@ -71,12 +71,10 @@ def run(problem: str):
     @param_space()
     def suprb_RS_GA_space(trial: Trial, params: Bunch):
         # RS
-        params.rule_generation__n_iter = trial.suggest_int(
-            'rule_generation__n_iter', 10, 20)
         params.rule_generation__rules_generated_ratio = trial.suggest_int(
-            'rule_generation__rules_generated_ratio', 5, 12)
+            'rule_generation__rules_generated', 5, 500)
         params.rule_generation__init__sigma = trial.suggest_float(
-                 'rule_generation__init__sigma', 0.01, 0.25)
+                 'rule_generation__init__sigma', 0.01, 1)
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
