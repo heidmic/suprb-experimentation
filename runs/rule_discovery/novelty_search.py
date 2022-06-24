@@ -133,7 +133,7 @@ def run(problem: str, ns_type: str):
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
-    mlflow.set_experiment("{ns_type} Tuning & Experiment")
+    mlflow.set_experiment(f"{ns_type} Tuning & Experiment")
     log_experiment(experiment)
 
 
