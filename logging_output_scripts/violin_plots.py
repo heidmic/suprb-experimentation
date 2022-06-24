@@ -8,18 +8,21 @@ Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
 
-dirs = {0: 'OBR', 1: 'UBR', 2: 'CSR', 3: 'MPR'}
+path_to_csvs = r"C:\Users\m\Documents\SupRB\rule_discovery_paper\run_csvs"
+plots = r"C:\Users\m\Documents\SupRB\rule_discovery_paper"
 
-datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
-            3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
+heur = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+
+datasets = ["concrete_strength", 'combined_cycle_power_plant',
+            'airfoil_self_noise', 'energy_cool']
 
 dict_list = {}
 
-for problem in datasets.values():
+for problem in datasets:
     res_var = 0
     first = True
-    for directory in dirs.values():
-        df = pd.read_csv(f"../{directory}/{problem}.csv")
+    for directory in heur:
+        df = pd.read_csv(f"{path_to_csvs}/{directory}/{problem}.csv")
         fold_df = df[df['Name'].str.contains('fold')]
         name = []
         for x in range(fold_df.shape[0]):
@@ -40,7 +43,7 @@ for problem in datasets.values():
 
     # Create folder if not yet done
     directory = "Violins"
-    if not os.path.exists(directory):
-        os.mkdir(directory)
+    if not os.path.exists(plots+'\\'+directory):
+        os.mkdir(plots+'\\'+directory)
 
-    fig.savefig(f'Violins/{problem}.png')
+    fig.savefig(fr'{plots}/Violins/{problem}.png')
