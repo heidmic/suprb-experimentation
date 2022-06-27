@@ -108,6 +108,29 @@ def write_mse():
 
     create_folder("MSE")
 
+def single_table():
+    columns = []
+    for problem in datasets:
+        # Each row features one problem for one model
+        row = []
+        row.append(problem)
+        for directory in heur:
+            df = pd.read_csv(f"{path_to_csvs}/{directory}/summary.csv")
+            res = df[df['Problem'].str.contains(problem)]
+            row.append(str(round(float(res['MEAN_MSE']), 2))+u"\u00B1"+
+                       str(round(float(res['STD_MSE']), 2)))
+            row.append(str(round(float(res['MEAN_COMP']), 2))+u"\u00B1"+
+                       str(round(float(res['STD_COMP']), 2)))
+        columns.append(row)
+    frame = pd.DataFrame(columns)
+    headers = [x for y in [['MSE', 'Complexity'] for i in range(
+        frame.shape[1]-1)] for x in y ]
+    latex = tabulate(frame, tablefmt="latex_booktabs", headers=headers)
+    splits = latex.split("\\toprule")
+    methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in heur])
+    latex = splits[0]+"\\toprule"+methods+splits[1]
+    with open(f"{tables}/combined.txt", "w") as file:
+        file.write(latex)
     with open(f"MSE/MSE.txt", "w") as file:
         file.write(problem_1 + "\n\n" + problem_2 + "\n\n" + problem_3 + "\n\n" + problem_4 + "\n\n" + problem_5)
 
