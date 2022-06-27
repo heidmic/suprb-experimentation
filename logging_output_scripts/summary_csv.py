@@ -6,24 +6,26 @@ stores the results in a new csv-File for all Models specified
 Leave out/add metrics that you want to evaluate
 """
 
-# Datasets runs were performed on, responds to one csv file each
-datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
-            3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
-# The used representations (or models) on which runs were performed
-dirs = {0: 'OBR', 1: 'UBR', 2: 'CSR', 3: 'MPR'}
+path_to_csvs = r"C:\Users\m\Documents\SupRB\rule_discovery_paper\run_csvs"
 
-for directory in dirs.values():
+# Datasets runs were performed on, responds to one csv file each
+datasets = ["concrete_strength", 'combined_cycle_power_plant',
+            'airfoil_self_noise', 'energy_cool']
+# The used representations (or models) on which runs were performed
+heur = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+
+for directory in heur:
     # Head of csv-File
     header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP," \
              f"MEAN_MSE,STD_MSE"
 
     values = "\n"
-    for problem in datasets.values():
+    for problem in datasets:
         values += problem
 
         print(f"WORKING ON DATASET {problem} WITH {directory}")
         # Read from csv-File in directory named after model and named after dataset
-        df = pd.read_csv(f"../{directory}/{problem}.csv")
+        df = pd.read_csv(f"{path_to_csvs}/{directory}/{problem}.csv")
         # Filter out individual runs (Removes averaged values)
         fold_df = df[df['Name'].str.contains('fold')]
 
@@ -43,5 +45,5 @@ for directory in dirs.values():
         values += '\n\n'
 
     print(f"{directory} FINISHED")
-    with open(f"../{directory}/Results.csv", "w") as file:
+    with open(f"{path_to_csvs}/{directory}/summary.csv", "w") as file:
         file.write(header + values)
