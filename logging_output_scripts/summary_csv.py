@@ -14,7 +14,8 @@ dirs = {0: 'OBR', 1: 'UBR', 2: 'CSR', 3: 'MPR'}
 
 for directory in dirs.values():
     # Head of csv-File
-    header = f"Problem,MEAN_COMP,STD_COMP,MEDIAN_COMP,MIN_COMP,MAX_COMP,MEAN_MSE,STD_MSE"
+    header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP," \
+             f"MEAN_MSE,STD_MSE"
 
     values = "\n"
     for problem in datasets.values():
