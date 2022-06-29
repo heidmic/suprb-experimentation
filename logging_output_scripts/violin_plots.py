@@ -7,6 +7,7 @@ import os
 Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
+sns.set_style("whitegrid")
 
 path_to_csvs = r"C:\Users\m\Documents\SupRB\rule_discovery_paper\run_csvs"
 plots = r"C:\Users\m\Documents\SupRB\rule_discovery_paper"
@@ -38,7 +39,8 @@ for problem in datasets:
     res_var['test_neg_mean_squared_error'] = -res_var['test_neg_mean_squared_error']
     # Store violin-plots of all models in one plot
     fig, ax = plt.subplots()
-    ax = sns.violinplot(x='Used_Representation', y='test_neg_mean_squared_error', palette="muted", data=res_var)
+    ax = sns.violinplot(x='Used_Representation', y='test_neg_mean_squared_error', data=res_var)
+    ax.set(xlabel='RD method')
     ax.set(ylabel='MSE')
 
     # Create folder if not yet done
