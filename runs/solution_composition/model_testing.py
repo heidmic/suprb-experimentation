@@ -31,15 +31,15 @@ def run(problem: str = 'parkinson_total', optimizer: str = 'ga', sigma_choice: i
     experiment = Experiment(name=f'{problem}Ada Evaluation', params=params, verbose=10)
 
     # Repeat evaluations with several random states
-    random_states = np.random.SeedSequence(random_state).generate_state(1)
-    experiment.with_random_states(random_states, n_jobs=1)
+    random_states = np.random.SeedSequence(random_state).generate_state(8)
+    experiment.with_random_states(random_states, n_jobs=2)
 
     # Evaluation
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=1, test_size=0.25, random_state=random_state), n_jobs=1)
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
-    mlflow.set_experiment(problem + "_sigma_" + str(sigma[sigma_choice]))
+    mlflow.set_experiment(problem + "_" + str(sigma[sigma_choice]))
     log_experiment(experiment)
 
 
