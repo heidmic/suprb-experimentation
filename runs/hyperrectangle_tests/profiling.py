@@ -25,7 +25,7 @@ matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': OrderedBound(np.array
 
 
 def run(problem: str, optimizer: str, _random_state: int):
-    print(f"Problem is {problem}, optimizer is {optimizer}")
+    print(f"Problem is {problem}, Representation is {representation}")
 
     dataset_params = representation_params[representation]
     estimator.matching_type = matching_type[representation]
