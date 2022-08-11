@@ -2,7 +2,7 @@ import click
 import mlflow
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
-from suprb.rule.matching import OrderedBound
+from suprb.rule.matching import OrderedBound, UnorderedBound, CentreSpread, MinPercentage
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
@@ -20,9 +20,9 @@ representation = 'OBR'
 
 # The individual parameters for the respective Representation
 representation_params = {'OBR': params_obr, 'UBR': params_ubr, 'CSR': params_csr, 'MPR': params_mpr}
-# Which representation SupRB should be set to TODO
-matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': OrderedBound(np.array([])),
-                 'CSR': OrderedBound(np.array([])), 'MPR': OrderedBound(np.array([]))}
+# Which representation SupRB should be set to
+matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': UnorderedBound(np.array([])),
+                 'CSR': CentreSpread(np.array([])), 'MPR': MinPercentage(np.array([]))}
 
 sigma_obr = {0: 0.25, 1: 1.00, 2: 1.75, 3: 2.50}
 sigma_ubr = {0: 0.25, 1: 1.00, 2: 1.75, 3: 2.50}
@@ -44,7 +44,8 @@ def run(problem: str = 'parkinson_total', sigma_choice: int = 0):
     dataset_params = representation_params[representation]
     estimator.matching_type = matching_type[representation]
     sigma = sigma_representations[representation]
-
+    # Use the heuristic to be adapted
+    estimator.rule_generation.adaptive_mutation = True
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
     # Replace the current sigma

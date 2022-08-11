@@ -2,7 +2,7 @@ import click
 import mlflow
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
-from suprb.rule.matching import OrderedBound
+from suprb.rule.matching import OrderedBound, UnorderedBound, CentreSpread, MinPercentage
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
@@ -20,13 +20,13 @@ representation = 'OBR'
 
 # The individual parameters for the respective Representation
 representation_params = {'OBR': params_obr, 'UBR': params_ubr, 'CSR': params_csr, 'MPR': params_mpr}
-# Which representation SupRB should be set to TODO
-matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': OrderedBound(np.array([])),
-                 'CSR': OrderedBound(np.array([])), 'MPR': OrderedBound(np.array([]))}
+# Which representation SupRB should be set to
+matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': UnorderedBound(np.array([])),
+                 'CSR': CentreSpread(np.array([])), 'MPR': MinPercentage(np.array([]))}
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='combined_cycle_power_plant')
+@click.option('-p', '--problem', type=click.STRING, default='parkinson_total')
 def run(problem: str):
     print(f"Problem is {problem}, Representation is {representation}")
 
@@ -36,18 +36,17 @@ def run(problem: str):
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
-
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
     experiment = Experiment(name=f'{representation}-{problem} Evaluation', params=params, verbose=10)
 
     # Repeat evaluations with several random states
     random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=2)
+    experiment.with_random_states(random_states, n_jobs=1)
 
     # Evaluation
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=1)
 
     mlflow.set_experiment(f'{representation}_{problem}')
     log_experiment(experiment)

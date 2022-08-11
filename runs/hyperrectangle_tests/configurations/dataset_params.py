@@ -1,3 +1,4 @@
+import numpy as np
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import mutation
 from suprb.rule import initialization
@@ -136,7 +137,7 @@ params_ubr = {
 params_csr = {
     'combined_cycle_power_plant': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': [0.0810, 2.5713],
+        'rule_generation__mutation__sigma': np.array([0.0810, 2.5713]),
         'rule_generation__init': getattr(initialization, 'NormalInit')(),
         'rule_generation__init__sigma': [2.6555, 0.5714],
         'rule_generation__init__fitness__alpha': 0.0968,
@@ -149,7 +150,7 @@ params_csr = {
     },
     'airfoil_self_noise': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': [0.0012, 0.9136],
+        'rule_generation__mutation__sigma': np.array([0.0012, 0.9136]),
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0356,
         'rule_generation__operator': '+',
@@ -160,7 +161,7 @@ params_csr = {
     },
     'concrete_strength': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': [0.0025, 0.0983],
+        'rule_generation__mutation__sigma': np.array([0.0025, 0.0983]),
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0327,
         'rule_generation__operator': '&',
@@ -172,9 +173,9 @@ params_csr = {
     },
     'protein_structure': {
         'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
-        'rule_generation__mutation__sigma': [0.0010, 0.1596],
+        'rule_generation__mutation__sigma': np.array([0.0010, 0.1596]),
         'rule_generation__init': getattr(initialization, 'NormalInit')(),
-        'rule_generation__init__sigma': [0.0896, 0.3163],
+        'rule_generation__init__sigma': np.array([0.0896, 0.3163]),
         'rule_generation__init__fitness__alpha': 0.0016,
         'rule_generation__operator': '+',
         'rule_generation__n_iter': 30,
@@ -184,7 +185,7 @@ params_csr = {
     },
     'parkinson_total': {
         'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
-        'rule_generation__mutation__sigma': [0.0005, 2.6483],
+        'rule_generation__mutation__sigma': np.array([0.0005, 2.6483]),
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0028,
         'rule_generation__operator': '+',
@@ -198,7 +199,7 @@ params_csr = {
 params_mpr = {
     'combined_cycle_power_plant': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': [2.9949, 2.7095],
+        'rule_generation__mutation__sigma': np.array([2.9949, 2.7095]),
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0225,
         'rule_generation__operator': ',',
@@ -211,7 +212,7 @@ params_mpr = {
     },
     'airfoil_self_noise': {
         'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
-        'rule_generation__mutation__sigma': [2.8271, 2.3035],
+        'rule_generation__mutation__sigma': np.array([2.8271, 2.3035]),
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0056,
         'rule_generation__operator': '+',
@@ -223,9 +224,9 @@ params_mpr = {
     },
     'concrete_strength': {
         'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
-        'rule_generation__mutation__sigma': [2.8565, 2.7411],
+        'rule_generation__mutation__sigma': np.array([2.8565, 2.7411]),
         'rule_generation__init': getattr(initialization, 'NormalInit')(),
-        'rule_generation__init__sigma': [0.0501, 1.4967],
+        'rule_generation__init__sigma': np.array([0.0501, 1.4967]),
         'rule_generation__init__fitness__alpha': 0.0855,
         'rule_generation__operator': '+',
         'rule_generation__n_iter': 42,
@@ -235,7 +236,7 @@ params_mpr = {
     },
     'protein_structure': {
         'rule_generation__mutation': getattr(mutation, 'HalfnormIncrease')(),
-        'rule_generation__mutation__sigma': [0.0567, 0.1027],
+        'rule_generation__mutation__sigma': np.array([0.0567, 0.1027]),
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0029,
         'rule_generation__operator': '+',
@@ -246,7 +247,7 @@ params_mpr = {
     },
     'parkinson_total': {
         'rule_generation__mutation': getattr(mutation, 'UniformIncrease')(),
-        'rule_generation__mutation__sigma': [0.4429, 1.7216],
+        'rule_generation__mutation__sigma': np.array([0.4429, 1.7216]),
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
         'rule_generation__init__fitness__alpha': 0.0107,
         'rule_generation__operator': '+',
