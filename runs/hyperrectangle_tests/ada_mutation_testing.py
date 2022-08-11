@@ -16,7 +16,7 @@ datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise
             3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 
 # CHANGE FOR TESTING (Choices: OBR, UBR, CSR and MPR)
-representation = 'OBR'
+representation = 'CSR'
 
 # The individual parameters for the respective Representation
 representation_params = {'OBR': params_obr, 'UBR': params_ubr, 'CSR': params_csr, 'MPR': params_mpr}
@@ -26,13 +26,13 @@ matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': UnorderedBound(np.arr
 
 sigma_obr = {0: 0.25, 1: 1.00, 2: 1.75, 3: 2.50}
 sigma_ubr = {0: 0.25, 1: 1.00, 2: 1.75, 3: 2.50}
-sigma_csr = {0: [0.02, 0.25], 1: [0.02, 1.00], 2: [0.02, 1.75], 3: [0.02, 2.50]}
-sigma_mpr = {0: [0.25, 0.25], 1: [1.00, 1.00], 2: [1.75, 1.75], 3: [2.50, 2.50]}
+sigma_csr = {0: np.array([0.02, 0.25]), 1: np.array([0.02, 1.00]), 2: np.array([0.02, 1.75]), 3: np.array([0.02, 2.50])}
+sigma_mpr = {0: np.array([0.25, 0.25]), 1: np.array([1.00, 1.00]), 2: np.array([1.75, 1.75]), 3: np.array([2.50, 2.50])}
 
 sigma_representations = {'OBR': sigma_obr, 'UBR': sigma_ubr, 'CSR': sigma_csr, 'MPR': sigma_mpr}
 
 
-def run(problem: str = 'parkinson_total', sigma_choice: int = 0):
+def run(problem: str = 'airfoil_self_noise', sigma_choice: int = 0):
     # my_index = int(os.getenv("SLURM_ARRAY_TASK_ID"))
     # problem = datasets.get(my_index)
     print(f"Problem is {problem}, Representation is {representation},"
@@ -44,6 +44,7 @@ def run(problem: str = 'parkinson_total', sigma_choice: int = 0):
     dataset_params = representation_params[representation]
     estimator.matching_type = matching_type[representation]
     sigma = sigma_representations[representation]
+
     # Use the heuristic to be adapted
     estimator.rule_generation.adaptive_mutation = True
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
@@ -54,12 +55,12 @@ def run(problem: str = 'parkinson_total', sigma_choice: int = 0):
 
     # Repeat evaluations with several random states
     random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=2)
+    experiment.with_random_states(random_states, n_jobs=1)
 
     # Evaluation
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=1)
 
     mlflow.set_experiment(f'{representation}_{problem}_{sigma[sigma_choice]}')
     log_experiment(experiment)

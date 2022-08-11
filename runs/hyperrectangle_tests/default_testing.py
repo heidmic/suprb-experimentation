@@ -16,7 +16,7 @@ datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise
             3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 
 # CHANGE FOR TESTING (Choices: OBR, UBR, CSR and MPR)
-representation = 'OBR'
+representation = 'MPR'
 
 # The individual parameters for the respective Representation
 representation_params = {'OBR': params_obr, 'UBR': params_ubr, 'CSR': params_csr, 'MPR': params_mpr}
@@ -26,7 +26,7 @@ matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': UnorderedBound(np.arr
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='parkinson_total')
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 def run(problem: str):
     print(f"Problem is {problem}, Representation is {representation}")
 
@@ -42,11 +42,11 @@ def run(problem: str):
 
     # Repeat evaluations with several random states
     random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=1)
+    experiment.with_random_states(random_states, n_jobs=2)
 
     # Evaluation
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=1)
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
     mlflow.set_experiment(f'{representation}_{problem}')
     log_experiment(experiment)
