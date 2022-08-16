@@ -34,6 +34,7 @@ sigma_representations = {'OBR': sigma_obr, 'UBR': sigma_ubr, 'CSR': sigma_csr, '
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-c', '--sigma_choice', type=click.INT, default=0)
 def run(problem: str = 'airfoil_self_noise', sigma_choice: int = 0):
     print(f"Problem is {problem}, Representation is {representation},"
           f" sigma is {sigma_representations[representation][sigma_choice]}")
@@ -68,5 +69,4 @@ def run(problem: str = 'airfoil_self_noise', sigma_choice: int = 0):
 
 
 if __name__ == '__main__':
-    for choice in range(4):
-        run(sigma_choice=choice)
+    run()
