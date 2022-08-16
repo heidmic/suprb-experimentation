@@ -2,7 +2,7 @@ import click
 import mlflow
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
-from suprb.rule.matching import OrderedBound, UnorderedBound, CentreSpread, MinPercentage
+from suprb.rule.matching import OrderedBound, UnorderedBound, CenterSpread, MinPercentage
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
@@ -22,7 +22,7 @@ representation = 'CSR'
 representation_params = {'OBR': params_obr, 'UBR': params_ubr, 'CSR': params_csr, 'MPR': params_mpr}
 # Which representation SupRB should be set to
 matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': UnorderedBound(np.array([])),
-                 'CSR': CentreSpread(np.array([])), 'MPR': MinPercentage(np.array([]))}
+                 'CSR': CenterSpread(np.array([])), 'MPR': MinPercentage(np.array([]))}
 
 sigma_obr = {0: 0.25, 1: 1.00, 2: 1.75, 3: 2.50}
 sigma_ubr = {0: 0.25, 1: 1.00, 2: 1.75, 3: 2.50}
@@ -32,9 +32,9 @@ sigma_mpr = {0: np.array([0.25, 0.25]), 1: np.array([1.00, 1.00]), 2: np.array([
 sigma_representations = {'OBR': sigma_obr, 'UBR': sigma_ubr, 'CSR': sigma_csr, 'MPR': sigma_mpr}
 
 
+@click.command()
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 def run(problem: str = 'airfoil_self_noise', sigma_choice: int = 0):
-    # my_index = int(os.getenv("SLURM_ARRAY_TASK_ID"))
-    # problem = datasets.get(my_index)
     print(f"Problem is {problem}, Representation is {representation},"
           f" sigma is {sigma_representations[representation][sigma_choice]}")
     X, y = load_dataset(name=problem, return_X_y=True)

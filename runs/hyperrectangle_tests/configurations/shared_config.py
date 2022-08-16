@@ -7,7 +7,6 @@ from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import mutation, es, origin
-from suprb.rule.matching import OrderedBound
 
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:

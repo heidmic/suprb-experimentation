@@ -1,5 +1,3 @@
-import math
-import os
 import click
 import mlflow
 import numpy as np
@@ -8,7 +6,7 @@ from sklearn.utils import Bunch, shuffle
 from suprb.optimizer.rule import mutation
 from suprb.optimizer.solution import ga
 from suprb import rule
-from suprb.rule.matching import OrderedBound
+from suprb.rule.matching import MinPercentage
 
 from experiments import Experiment
 from experiments.mlflow import log_experiment
@@ -21,8 +19,8 @@ from runs.hyperrectangle_tests.configurations.shared_config import shared_tuning
 
 @param_space()
 def rule_generation_space(trial: Trial, params: Bunch):
-    # Matching type TODO
-    params.matching_type = OrderedBound(np.array([]))
+    # Matching type
+    params.matching_type = MinPercentage(np.array([]))
     # Evolution Strategy - Mutation, Mutation_sigma, Initialization, Init_sigma, Delay (delta) and fitness_alpha
     sigma_space = [0, 3]
 
@@ -74,8 +72,6 @@ datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='combined_cycle_power_plant')
 def run(problem: str):
-    # my_index = int(os.getenv("SLURM_ARRAY_TASK_ID"))
-    # problem = datasets.get(my_index)
     print(f"Problem is {problem}")
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)

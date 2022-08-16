@@ -2,7 +2,7 @@ import click
 import mlflow
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
-from suprb.rule.matching import OrderedBound, UnorderedBound, CentreSpread, MinPercentage
+from suprb.rule.matching import OrderedBound, UnorderedBound, CenterSpread, MinPercentage
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
@@ -22,7 +22,7 @@ representation = 'MPR'
 representation_params = {'OBR': params_obr, 'UBR': params_ubr, 'CSR': params_csr, 'MPR': params_mpr}
 # Which representation SupRB should be set to
 matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': UnorderedBound(np.array([])),
-                 'CSR': CentreSpread(np.array([])), 'MPR': MinPercentage(np.array([]))}
+                 'CSR': CenterSpread(np.array([])), 'MPR': MinPercentage(np.array([]))}
 
 
 @click.command()

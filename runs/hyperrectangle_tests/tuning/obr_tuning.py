@@ -1,5 +1,3 @@
-import math
-import os
 import click
 import mlflow
 import numpy as np
@@ -71,8 +69,6 @@ datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='parkinson_total')
 def run(problem: str):
-    # my_index = int(os.getenv("SLURM_ARRAY_TASK_ID"))
-    # problem = datasets.get(my_index)
     print(f"Problem is {problem}")
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
