@@ -174,3 +174,18 @@ def load_parkinson_motor(return_X_y: bool = True, as_frame: bool = False):
 
     return load_dataset(filename='parkinson.csv', target_column='motor_UPDRS', return_X_y=return_X_y,
                         as_frame=as_frame, remove_columns=['subject#', 'test_time', 'total_UPDRS'])
+
+
+def load_protein_structure(return_X_y: bool = True, as_frame: bool = False, sample: bool = True):
+    """ Load and return the Protein Structure dataset.
+        ==============   ==================
+        Samples total    45730
+        Dimensionality   9
+        Features         real, TODO: ranges
+        Targets          real, TODO: ranges
+        ==============   ==================
+        Downloaded from
+        https://https://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure.
+        """
+    return load_dataset(filename='protein_structure.csv', target_column='RMSD', return_X_y=return_X_y,
+                        as_frame=as_frame)
