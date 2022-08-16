@@ -24,7 +24,7 @@ matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': OrderedBound(np.array
                  'CSR': OrderedBound(np.array([])), 'MPR': OrderedBound(np.array([]))}
 
 
-def run(problem: str, optimizer: str, _random_state: int):
+def run(problem: str, _random_state: int):
     print(f"Problem is {problem}, Representation is {representation}")
 
     dataset_params = representation_params[representation]
@@ -35,7 +35,7 @@ def run(problem: str, optimizer: str, _random_state: int):
 
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
-    experiment = Experiment(name=f'Performance Testing {problem}', params=params, verbose=10)
+    experiment = Experiment(name=f'Profiling {representation}_{problem}', params=params, verbose=10)
 
     # Repeat evaluations with several random states
     random_states = np.random.SeedSequence(_random_state).generate_state(1)
@@ -60,6 +60,7 @@ def prof_to_csv(prof: cProfile.Profile):
 datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
             3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
 
+# Performs 10 different runs for each Representation/Learning Task-combination and stores information in csv-Files
 if __name__ == "__main__":
     random_states_ = np.random.SeedSequence(random_state).generate_state(10)
     for learning_task in datasets.values():
@@ -70,7 +71,7 @@ if __name__ == "__main__":
         for seed in random_states_:
             pr = cProfile.Profile()
             pr.enable()
-            run(problem=learning_task, optimizer='ga', _random_state=seed)
+            run(problem=learning_task, _random_state=seed)
             pr.disable()
             csv = prof_to_csv(pr)
             with open(f"{representation}/{learning_task}/{count}.csv", 'w+') as f:

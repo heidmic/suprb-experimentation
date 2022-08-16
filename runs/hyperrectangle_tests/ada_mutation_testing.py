@@ -45,8 +45,9 @@ def run(problem: str = 'airfoil_self_noise', sigma_choice: int = 0):
     estimator.matching_type = matching_type[representation]
     sigma = sigma_representations[representation]
 
-    # Use the heuristic to be adapted
+    # USE ADAPTIVE HEURISTIC IN ES
     estimator.rule_generation.adaptive_mutation = True
+
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
     # Replace the current sigma
