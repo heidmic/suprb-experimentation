@@ -46,7 +46,7 @@ def run(problem: str = 'airfoil_self_noise', sigma_choice: int = 0):
     sigma = sigma_representations[representation]
 
     # USE ADAPTIVE HEURISTIC IN ES
-    estimator.rule_generation.adaptive_mutation = True
+    estimator.rule_generation.adaptive_sigma = True
 
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
