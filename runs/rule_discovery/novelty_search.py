@@ -22,6 +22,10 @@ from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import ns, origin
 from suprb.optimizer.rule.mutation import HalfnormIncrease
+from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
+from suprb.optimizer.rule.ns.archive import ArchiveNovel
+from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
+
 
 
 random_state = 42
@@ -102,9 +106,15 @@ def run(problem: str, ns_type: str):
                                                                      ['Normal', 'Halfnorm',
                                                                       'HalfnormIncrease', 'Uniform',
                                                                       'UniformIncrease', ])
+        params.rule_generation__mutation = getattr(
+            suprb.optimizer.rule.mutation, params.rule_generation__mutation)()
+
 
         params.rule_generation__novelty_calculation__novelty_search_type = trial.suggest_categorical(
             'novelty_search_type', ["NoveltySearchType", "MinimalCriteria", "LocalCompetition"])
+
+        params.rule_generation__novelty_calculation__novelty_search_type = getattr(
+            suprb.optimizer.rule.ns.novelty_search_type, params.rule_generation__novelty_calculation__novelty_search_type)()
 
         if isinstance(params.rule_generation__novelty_calculation__novelty_search_type,
                       suprb.optimizer.rule.ns.novelty_search_type.MinimalCriteria):
@@ -113,9 +123,6 @@ def run(problem: str, ns_type: str):
         elif isinstance(params.rule_generation__novelty_calculation__novelty_search_type, suprb.optimizer.rule.ns.novelty_search_type.LocalCompetition):
             params.rule_generation__novelty_calculation__novelty_search_type__max_neighborhood_range = \
                 trial.suggest_int('max_neighborhood_range', 10, 20)
-
-        params.rule_generation__novelty_calculation__novelty_search_type = getattr(
-            suprb.optimizer.rule.ns.novelty_search_type, params.rule_generation__novelty_calculation__novelty_search_type)()
 
         params.rule_generation__novelty_calculation__archive = trial.suggest_categorical(
             'archive', ["ArchiveNovel", "ArchiveRandom", "ArchiveNone"])
@@ -130,11 +137,13 @@ def run(problem: str, ns_type: str):
                                                                                  "NovelityFitnessPareto",
                                                                                  "NoveltyFitnessBiased"])
 
-        if isinstance(params.rule_generation__novelty_calculation, suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
-            params.rule_generation__novelty_calculation__novelty_bias = trial.suggest_int('novelty_bias', 30, 70)
-
         params.rule_generation__novelty_calculation = getattr(
             suprb.optimizer.rule.ns.novelty_calculation, params.rule_generation__novelty_calculation)()
+
+        if isinstance(params.rule_generation__novelty_calculation,
+                      suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
+            params.rule_generation__novelty_calculation__novelty_bias = trial.suggest_int(
+                'novelty_bias', 30, 70)
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
