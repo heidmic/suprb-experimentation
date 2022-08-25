@@ -85,7 +85,6 @@ def run(problem: str, ns_type: str):
 
         params.rule_generation__n_iter = trial.suggest_int('n_iter', 0, 20)
         params.rule_generation__mu = trial.suggest_int('mu', 7, 20)
-        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 5, 15)
 
         params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
                                                                               ['UniformSamplesOrigin',
@@ -129,7 +128,6 @@ def run(problem: str, ns_type: str):
         params.rule_generation__novelty_calculation__archive = getattr(
             suprb.optimizer.rule.ns.archive, params.rule_generation__novelty_calculation__archive)()
 
-        params.rule_generation__novelty_calculation__k_neighbor = trial.suggest_int('k_neighbor', 10, 20)
 
         params.rule_generation__novelty_calculation = trial.suggest_categorical('novelty_calculation',
                                                                                 ["NoveltyCalculation",
@@ -140,10 +138,14 @@ def run(problem: str, ns_type: str):
         params.rule_generation__novelty_calculation = getattr(
             suprb.optimizer.rule.ns.novelty_calculation, params.rule_generation__novelty_calculation)()
 
+        if not isinstance(params.rule_generation__novelty_calculation,
+                          suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
+            params.rule_generation__novelty_calculation__k_neighbor = trial.suggest_int('k_neighbor', 10, 20)
+
         if isinstance(params.rule_generation__novelty_calculation,
                       suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
-            params.rule_generation__novelty_calculation__novelty_bias = trial.suggest_int(
-                'novelty_bias', 30, 70)
+            params.rule_generation__novelty_calculation__novelty_bias = \
+                trial.suggest_float('novelty_bias', 0.3, 0.7)
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
