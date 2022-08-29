@@ -22,6 +22,10 @@ from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import ns, origin
 from suprb.optimizer.rule.mutation import HalfnormIncrease
+from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
+from suprb.optimizer.rule.ns.archive import ArchiveNovel
+from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
+
 
 
 random_state = 42
@@ -36,9 +40,10 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
-@click.option('-t', '--ns_type', type=click.STRING, default='NS')
-def run(problem: str, ns_type: str):
-    print(f"{ns_type} is tuned with problem {problem}")
+@click.option('-t', '--ns_type', type=click.STRING, default=None)
+@click.option('-i', '--job_id', type=click.INT, default=None
+def run(problem: str, ns_type: str, job_id: int):
+    print(f"{ns_type} is tuned and tested with problem {problem}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
@@ -49,7 +54,6 @@ def run(problem: str, ns_type: str):
             init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                               model=Ridge(alpha=0.01,
                                                           random_state=random_state)),
-            ns_type=ns_type,
             origin_generation=origin.SquaredError(),
             mutation=HalfnormIncrease()
         ),
@@ -82,23 +86,75 @@ def run(problem: str, ns_type: str):
 
         params.rule_generation__n_iter = trial.suggest_int('n_iter', 0, 20)
         params.rule_generation__mu = trial.suggest_int('mu', 7, 20)
-        params.rule_generation__lm_ratio = trial.suggest_int('lm_ratio', 5, 15)
+        params.rule_generation__lmbda = trial.suggest_int('lmbda', 28, 200)
+        params.rule_generation__roh = trial.suggest_int('roh', 10, 75)
+
+        params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
+                                                                              ['UniformSamplesOrigin',
+                                                                               'Matching',
+                                                                               'SquaredError'])
+        params.rule_generation__origin_generation = getattr(suprb.optimizer.rule.origin,
+                                                            params.rule_generation__origin_generation)()
+
+        params.rule_generation__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
+        params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
 
         params.rule_generation__selection = trial.suggest_categorical('selection',
                                                                       ['RouletteWheel', 'Random'])
         params.rule_generation__selection = getattr(suprb.optimizer.rule.selection, params.rule_generation__selection)()
 
-        params.rule_generation__archive = trial.suggest_categorical('archive', ['novelty', 'random', 'none'])
+        params.rule_generation__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
+        params.rule_generation__mutation = trial.suggest_categorical('mutation',
+                                                                     ['Normal', 'Halfnorm',
+                                                                      'HalfnormIncrease', 'Uniform',
+                                                                      'UniformIncrease', ])
+        params.rule_generation__mutation = getattr(
+            suprb.optimizer.rule.mutation, params.rule_generation__mutation)()
 
-        params.rule_generation__novelty_fitness_combination = \
-            trial.suggest_categorical('novelty_fitness_combination',
-                                      ['novelty', '50/50', '75/25',
-                                       'pmcns', 'pareto'])
+        if ns_type is None:
+            params.rule_generation__novelty_calculation__novelty_search_type = trial.suggest_categorical(
+                'novelty_search_type', ["NoveltySearchType", "MinimalCriteria", "LocalCompetition"])
+        elif ns_type is 'NS':
+            params.rule_generation__novelty_calculation__novelty_search_type = "NoveltySearchType"
+        elif ns_type is 'MCNS':
+            params.rule_generation__novelty_calculation__novelty_search_type = "MinimalCriteria"
+        elif ns_type is 'NSLC':
+            params.rule_generation__novelty_calculation__novelty_search_type = "LocalCompetition"
 
-        if ns_type == 'MCNS':
-            params.rule_generation__MCNS_threshold_matched = trial.suggest_int('MCNS_threshold_matched', 10, 20)
-        elif ns_type == 'NSLC':
-            params.rule_generation__NSLC_threshold = trial.suggest_int('rule_generation__NSLC_threshold', 10, 20)
+        params.rule_generation__novelty_calculation__novelty_search_type = getattr(
+            suprb.optimizer.rule.ns.novelty_search_type, params.rule_generation__novelty_calculation__novelty_search_type)()
+
+        if isinstance(params.rule_generation__novelty_calculation__novelty_search_type,
+                      suprb.optimizer.rule.ns.novelty_search_type.MinimalCriteria):
+            params.rule_generation__novelty_calculation__novelty_search_type__min_examples_matched = \
+                trial.suggest_int('min_examples_matched', 5, 15)
+        elif isinstance(params.rule_generation__novelty_calculation__novelty_search_type, suprb.optimizer.rule.ns.novelty_search_type.LocalCompetition):
+            params.rule_generation__novelty_calculation__novelty_search_type__max_neighborhood_range = \
+                trial.suggest_int('max_neighborhood_range', 10, 20)
+
+        params.rule_generation__novelty_calculation__archive = trial.suggest_categorical(
+            'archive', ["ArchiveNovel", "ArchiveRandom", "ArchiveNone"])
+        params.rule_generation__novelty_calculation__archive = getattr(
+            suprb.optimizer.rule.ns.archive, params.rule_generation__novelty_calculation__archive)()
+
+
+        params.rule_generation__novelty_calculation = trial.suggest_categorical('novelty_calculation',
+                                                                                ["NoveltyCalculation",
+                                                                                 "ProgressiveMinimalCriteria",
+                                                                                 "NovelityFitnessPareto",
+                                                                                 "NoveltyFitnessBiased"])
+
+        params.rule_generation__novelty_calculation = getattr(
+            suprb.optimizer.rule.ns.novelty_calculation, params.rule_generation__novelty_calculation)()
+
+        if not isinstance(params.rule_generation__novelty_calculation,
+                          suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
+            params.rule_generation__novelty_calculation__k_neighbor = trial.suggest_int('k_neighbor', 10, 20)
+
+        if isinstance(params.rule_generation__novelty_calculation,
+                      suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
+            params.rule_generation__novelty_calculation__novelty_bias = \
+                trial.suggest_float('novelty_bias', 0.3, 0.7)
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
@@ -121,7 +177,8 @@ def run(problem: str, ns_type: str):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-    experiment = Experiment(name=f'{problem} {ns_type} Tuning & Experimentation', verbose=10)
+    experiment = Experiment(name=f'{problem} {ns_type} Tuning & Experimentation' if job_id is None
+                            else f'{job_id}: {problem} {ns_type} Tuning & Experimentation', verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_NS_GA_space, tuner=tuner)
