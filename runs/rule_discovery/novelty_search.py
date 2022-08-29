@@ -40,9 +40,10 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
-@click.option('-t', '--ns_type', type=click.STRING, default='NS')
-def run(problem: str, ns_type: str):
-    print(f"{ns_type} is tuned with problem {problem}")
+@click.option('-t', '--ns_type', type=click.STRING, default=None)
+@click.option('-i', '--job_id', type=click.INT, default=None
+def run(problem: str, ns_type: str, job_id: int):
+    print(f"{ns_type} is tuned and tested with problem {problem}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
@@ -85,6 +86,8 @@ def run(problem: str, ns_type: str):
 
         params.rule_generation__n_iter = trial.suggest_int('n_iter', 0, 20)
         params.rule_generation__mu = trial.suggest_int('mu', 7, 20)
+        params.rule_generation__lmbda = trial.suggest_int('lmbda', 28, 200)
+        params.rule_generation__roh = trial.suggest_int('roh', 10, 75)
 
         params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
                                                                               ['UniformSamplesOrigin',
@@ -108,9 +111,15 @@ def run(problem: str, ns_type: str):
         params.rule_generation__mutation = getattr(
             suprb.optimizer.rule.mutation, params.rule_generation__mutation)()
 
-
-        params.rule_generation__novelty_calculation__novelty_search_type = trial.suggest_categorical(
-            'novelty_search_type', ["NoveltySearchType", "MinimalCriteria", "LocalCompetition"])
+        if ns_type is None:
+            params.rule_generation__novelty_calculation__novelty_search_type = trial.suggest_categorical(
+                'novelty_search_type', ["NoveltySearchType", "MinimalCriteria", "LocalCompetition"])
+        elif ns_type is 'NS':
+            params.rule_generation__novelty_calculation__novelty_search_type = "NoveltySearchType"
+        elif ns_type is 'MCNS':
+            params.rule_generation__novelty_calculation__novelty_search_type = "MinimalCriteria"
+        elif ns_type is 'NSLC':
+            params.rule_generation__novelty_calculation__novelty_search_type = "LocalCompetition"
 
         params.rule_generation__novelty_calculation__novelty_search_type = getattr(
             suprb.optimizer.rule.ns.novelty_search_type, params.rule_generation__novelty_calculation__novelty_search_type)()
@@ -168,7 +177,8 @@ def run(problem: str, ns_type: str):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-    experiment = Experiment(name=f'{problem} {ns_type} Tuning & Experimentation', verbose=10)
+    experiment = Experiment(name=f'{problem} {ns_type} Tuning & Experimentation' if job_id is None
+                            else f'{job_id}: {problem} {ns_type} Tuning & Experimentation', verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_NS_GA_space, tuner=tuner)
