@@ -41,7 +41,7 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 @click.option('-t', '--ns_type', type=click.STRING, default=None)
-@click.option('-i', '--job_id', type=click.INT, default=None
+@click.option('-i', '--job_id', type=click.INT, default=None)
 def run(problem: str, ns_type: str, job_id: int):
     print(f"{ns_type} is tuned and tested with problem {problem}")
 
@@ -114,11 +114,11 @@ def run(problem: str, ns_type: str, job_id: int):
         if ns_type is None:
             params.rule_generation__novelty_calculation__novelty_search_type = trial.suggest_categorical(
                 'novelty_search_type', ["NoveltySearchType", "MinimalCriteria", "LocalCompetition"])
-        elif ns_type is 'NS':
+        elif ns_type.upper() == 'NS':
             params.rule_generation__novelty_calculation__novelty_search_type = "NoveltySearchType"
-        elif ns_type is 'MCNS':
+        elif ns_type.upper() == 'MCNS':
             params.rule_generation__novelty_calculation__novelty_search_type = "MinimalCriteria"
-        elif ns_type is 'NSLC':
+        elif ns_type.upper() == 'NSLC':
             params.rule_generation__novelty_calculation__novelty_search_type = "LocalCompetition"
 
         params.rule_generation__novelty_calculation__novelty_search_type = getattr(
