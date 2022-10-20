@@ -51,8 +51,8 @@ def write_complexity():
         res = tabulate(comp_list, tablefmt="latex_booktabs", headers=datasets_short.values())
 
         with open(f"{tables}/Complexity-{directory}.txt", "w") as file:
-            file.write(res)
 
+            file.write(res)
 
 # GENOMES (Requires Genomes to be Stored as a .json in the respective Folder) [Leave out if not needed]
 def write_genomes():
@@ -68,7 +68,7 @@ def write_genomes():
             for x in range(len(genomes)):
                 genome_list.append((str(x), genomes[x]))
 
-            headers = ['Iteration', 'Genome']
+            headers = ['Iteration', 'Genome'
             genome_table = tabulate(genome_list, tablefmt="latex_booktabs", headers=headers)
 
             create_folder("Genomes")

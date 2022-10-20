@@ -5,7 +5,6 @@ Extracts values from csv-Files gained from mlflow, performs calculations and
 stores the results in a new csv-File for all Models specified
 Leave out/add metrics that you want to evaluate
 """
-
 path_to_csvs = r"C:\Users\m\Documents\SupRB\rule_discovery_paper\run_csvs"
 
 # Datasets runs were performed on, responds to one csv file each
@@ -25,7 +24,9 @@ for directory in heur:
 
         print(f"WORKING ON DATASET {problem} WITH {directory}")
         # Read from csv-File in directory named after model and named after dataset
+
         df = pd.read_csv(f"{path_to_csvs}/{directory}/{problem}.csv")
+
         # Filter out individual runs (Removes averaged values)
         fold_df = df[df['Name'].str.contains('fold')]
 

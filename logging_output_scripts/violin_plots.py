@@ -48,4 +48,3 @@ for problem in datasets:
     if not os.path.exists(plots+'\\'+directory):
         os.mkdir(plots+'\\'+directory)
 
-    fig.savefig(fr'{plots}/Violins/{problem}.png')
