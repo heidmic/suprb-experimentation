@@ -2,4 +2,7 @@
 
 with pkgs;
 
-[ zlib ]
+[ ]
+# Not necessary to include zlib due to including it directly in
+# LD_LIBRARY_PATH.
+# [ zlib ]
