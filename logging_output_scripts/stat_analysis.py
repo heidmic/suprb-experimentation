@@ -214,7 +214,7 @@ def calvo(latex, all_variants, check_mcmc, small_set):
                     sample[ylabel] == "NSLC"][xlabel]
                 add_prob = pd.DataFrame({
                     ylabel:
-                    np.repeat("ES $\wedge$ NSLC", len(add_prob)),
+                    np.repeat(r"ES $\vee{} NSLC", len(add_prob)),
                     xlabel:
                     add_prob
                 })
@@ -224,7 +224,7 @@ def calvo(latex, all_variants, check_mcmc, small_set):
                                                                == "NS"][xlabel]
                 add_prob = pd.DataFrame({
                     ylabel:
-                    np.repeat("ES $\wedge$ NSLC $\wedge$ NS", len(add_prob)),
+                    np.repeat(r"ES $\vee{} NSLC $\vee{} NS", len(add_prob)),
                     xlabel:
                     add_prob
                 })
