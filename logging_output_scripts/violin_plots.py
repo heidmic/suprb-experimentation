@@ -2,10 +2,8 @@ from logging_output_scripts.utils import check_and_create_dir, get_dataframe, ge
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
-import json
-from sklearn.preprocessing import MinMaxScaler
-
+import os
+from mlflow_utils import get_dataframe
 
 """
 Uses seaborn-package to create violin-Plots comparing model performances
@@ -22,71 +20,45 @@ sns.set_theme(style="whitegrid",
                   "ps.fonttype": 42
               })
 
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-plt.tight_layout()
-
+heur = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
 
 def create_plots(metricname = 'test_neg_mean_squared_error'):
     metric = 'metrics.' + metricname
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
-    final_output_dir = f"{config['output_directory']}"
 
-    output_dir = "violin_plots"
-    check_and_create_dir(final_output_dir, output_dir)
+dict_list = {}
 
-    final_output_dir = f"{config['output_directory']}"
-    scaler = MinMaxScaler()
-    
-    for problem in config['datasets']:
-        first = True
-        res_var = 0
-        counter = 0
-        for heuristic, renamed_heuristic in config['heuristics'].items():
-            fold_df = get_df(heuristic, problem)
-            if fold_df is not None:
-                counter += 1
-                name = [renamed_heuristic] * fold_df.shape[0]
-                current_res = fold_df.assign(Used_Representation=name)
-                if first:
-                    first = False
-                    res_var = current_res
-                else:
-                    # Adds additional column for plotting
-                    res_var = pd.concat([res_var, current_res])
-
-                print(f"Done for {problem} with {renamed_heuristic}")
-
-        if counter and config["normalize_datasets"]:
-            reshaped_var = np.array(res_var[metric])[-counter*64:].reshape(counter, -1) * -1
-            scaler.fit(reshaped_var)
-            scaled_var = scaler.transform(reshaped_var)
-            scaled_var = scaled_var.reshape(1, -1)[0]
-            res_var[metric][-len(scaled_var):] = scaled_var
-
-        # Invert values since they are stored as negatives
-        if not config["normalize_datasets"]:
-            if metric == 'metrics.test_neg_mean_squared_error':
-                res_var[metric] *= -1
-
-        def ax_config(axis):
-            ax.set_xlabel('Optimierer')
-            if metric == 'metrics.test_neg_mean_squared_error':
-                ax.set_ylabel('MSE')
+for problem in datasets:
+    res_var = 0
+    first = True
+    for directory in heur:
+        fold_df = get_dataframe(directory, problem)
+        if not fold_df.empty:
+            name = []
+            for x in range(fold_df.shape[0]):
+                name.append(directory)
+            # Adds additional column for plotting
+            if first:
+                res_var = fold_df.assign(Used_Representation=name)
+                first = False
             else:
-                ax.set_ylabel('Komplexitaet')
-            ax.set_box_aspect(1)
+                res_var = pd.concat([res_var, fold_df.assign(Used_Representation=name)])
 
-        problem = problem if not config["normalize_datasets"] else "normalized"
+            print(f"Done for {problem} with {directory}")
 
-        # Store violin-plots of all models in one plot
-        fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y=metric, data=res_var, density_norm="width", hue='Used_Representation')
-        ax_config(ax)
-        fig.savefig(f"{final_output_dir}/{output_dir}/{problem}_{metricname}.png")
+    # Invert values since they are stored as negatives
+    res_var['metrics.test_neg_mean_squared_error'] = -res_var['metrics.test_neg_mean_squared_error']
+    # Store violin-plots of all models in one plot
+    fig, ax = plt.subplots()
+    ax = sns.violinplot(x='Used_Representation', y='metrics.test_neg_mean_squared_error', data=res_var)
+    ax.set(xlabel='RD method')
+    ax.set(ylabel='MSE')
 
+    # TODO Change directory
+    output_dir = "Violins"
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
 
-if __name__ == '__main__':
-    create_plots()
+    fig.savefig(f"{output_dir}/{problem}.png")
