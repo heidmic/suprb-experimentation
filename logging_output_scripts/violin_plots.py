@@ -20,7 +20,7 @@ sns.set_theme(style="whitegrid",
                   "ps.fonttype": 42
               })
 
-heur = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+heuristics = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
 
 def create_plots(metricname = 'test_neg_mean_squared_error'):
     metric = 'metrics.' + metricname
@@ -33,12 +33,12 @@ dict_list = {}
 for problem in datasets:
     res_var = 0
     first = True
-    for directory in heur:
-        fold_df = get_dataframe(directory, problem)
+    for heuristic in heuristics:
+        fold_df = get_dataframe(heuristic, problem)
         if not fold_df.empty:
             name = []
             for x in range(fold_df.shape[0]):
-                name.append(directory)
+                name.append(heuristic)
             # Adds additional column for plotting
             if first:
                 res_var = fold_df.assign(Used_Representation=name)
@@ -46,7 +46,7 @@ for problem in datasets:
             else:
                 res_var = pd.concat([res_var, fold_df.assign(Used_Representation=name)])
 
-            print(f"Done for {problem} with {directory}")
+            print(f"Done for {problem} with {heuristic}")
 
     # Invert values since they are stored as negatives
     res_var['metrics.test_neg_mean_squared_error'] = -res_var['metrics.test_neg_mean_squared_error']

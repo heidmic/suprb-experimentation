@@ -2,7 +2,7 @@ import os
 import numpy as np
 from baycomp import SignedRankTest
 from itertools import combinations
-from logging_output_scripts.utils import get_dataframe, create_output_dir, config
+from mlflow_utils import get_dataframe
 
 
 """
@@ -13,9 +13,10 @@ NOTE: If you need to compare more than two models at once please refer to: https
 (Using a nix development environment is recommended for cmpbayes)
 """
 
-final_output_dir = f"{config['output_directory']}/calc_bay"
-create_output_dir(config['output_directory'])
-create_output_dir(final_output_dir)
+heuristics = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+
+datasets = ["concrete_strength", 'combined_cycle_power_plant',
+            'airfoil_self_noise', 'energy_cool']
 
 if config['filetype'] == 'csv':
     test_neg_mean_squared_error = "test_neg_mean_squared_error"
@@ -28,12 +29,12 @@ elif config['filetype'] == 'mlflow':
 def load_error_list():
     dict_list = {}
 
-    for heuristic in config['heuristics']:
+    for heuristic in heuristics:
         res_var = []
-        for problem in config['datasets']:
+        for problem in datasets:
             fold_df = get_dataframe(heuristic, problem)
             if not fold_df.empty:
-                mse_df = -fold_df[test_neg_mean_squared_error].mean()
+                mse_df = -fold_df['metrics.test_neg_mean_squared_error'].mean()
                 res_var.append(mse_df)
         dict_list.update({heuristic: np.array(res_var)})
     return dict_list
