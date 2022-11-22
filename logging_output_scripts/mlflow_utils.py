@@ -12,7 +12,6 @@ def get_dataframe(heuristic, dataset):
     df = None
 
     for run in all_runs_list:
-
         df = run[run['tags.mlflow.runName'].str.contains(f" {heuristic} Tuning ")]
 
         if not df.empty:
