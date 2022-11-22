@@ -9,10 +9,10 @@ to create LaTex tables based on the values calculated in Summary_csv.py
 (Except for Genomes-Tables which use a Json)
 """
 
-path_to_csvs = r"C:\Users\m\Documents\SupRB\rule_discovery_paper\run_csvs"
-tables = r"C:\Users\m\Documents\SupRB\rule_discovery_paper\tables"
+path_to_csvs = "csv_summary"
+tables = "latex_tabular"
 
-heur = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+heuristics = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
 
 datasets = ["concrete_strength", 'combined_cycle_power_plant',
             'airfoil_self_noise', 'energy_cool']
@@ -41,8 +41,8 @@ def create_folder(folder_name):
 
 # COMPLEXITY TABLES
 def write_complexity():
-    for directory in heur:
-        df = pd.read_csv(f"{path_to_csvs}/{directory}/summary.csv")
+    for heuristic in heuristics:
+        df = pd.read_csv(f"{path_to_csvs}/{heuristic}_summary.csv")
         comp_list = []
         for column_name, column_name_short in zip(comp_column.values(), comp_column_short.values()):
             data_res = load_problem_columns(df, column_name)
@@ -50,15 +50,17 @@ def write_complexity():
 
         res = tabulate(comp_list, tablefmt="latex_booktabs", headers=datasets_short.values())
 
-        with open(f"{tables}/Complexity-{directory}.txt", "w") as file:
+        with open(f"{tables}/Complexity-{heuristic}.txt", "w") as file:
 
             file.write(res)
 
 # GENOMES (Requires Genomes to be Stored as a .json in the respective Folder) [Leave out if not needed]
+
+
 def write_genomes():
-    for directory in heur:
+    for heuristic in heuristics:
         for problem in datasets:
-            with open(f'Genomes/{directory}_{problem}.json', 'r') as f:
+            with open(f'Genomes/{heuristic}_{problem}.json', 'r') as f:
                 genomes = json.load(f)
 
             genomes = list(genomes.values())
@@ -68,12 +70,12 @@ def write_genomes():
             for x in range(len(genomes)):
                 genome_list.append((str(x), genomes[x]))
 
-            headers = ['Iteration', 'Genome'
+            headers = ['Iteration', 'Genome']
             genome_table = tabulate(genome_list, tablefmt="latex_booktabs", headers=headers)
 
             create_folder("Genomes")
 
-            with open(f"Genomes/{directory}-{problem}.txt", "w") as file:
+            with open(f"Genomes/{heuristic}-{problem}.txt", "w") as file:
                 file.write(genome_table)
 
 
@@ -93,8 +95,8 @@ def write_mse():
     for problem in datasets:
         # Each row features one problem for one model
         row = []
-        for directory in heur:
-            df = pd.read_csv(f"{path_to_csvs}/{directory}/summary.csv")
+        for heuristic in heuristics:
+            df = pd.read_csv(f"{path_to_csvs}/{heuristic}_summary.csv")
             res = df[df['Problem'].str.contains(problem)]
             row.append(((round(float(res['MEAN_MSE']), 4)), round(float(res['STD_MSE']), 4)))
         column.append(row)
@@ -115,20 +117,20 @@ def single_table():
         # Each row features one problem for one model
         row = []
         row.append(problem)
-        for directory in heur:
-            df = pd.read_csv(f"{path_to_csvs}/{directory}/summary.csv")
+        for heuristic in heuristics:
+            df = pd.read_csv(f"{path_to_csvs}/{heuristic}_summary.csv")
             res = df[df['Problem'].str.contains(problem)]
-            row.append(str(round(float(res['MEAN_MSE']), 2))+u"\u00B1"+
+            row.append(str(round(float(res['MEAN_MSE']), 2))+u"\u00B1" +
                        str(round(float(res['STD_MSE']), 2)))
-            row.append(str(round(float(res['MEAN_COMP']), 2))+u"\u00B1"+
+            row.append(str(round(float(res['MEAN_COMP']), 2))+u"\u00B1" +
                        str(round(float(res['STD_COMP']), 2)))
         columns.append(row)
     frame = pd.DataFrame(columns)
     headers = [x for y in [['MSE', 'Complexity'] for i in range(
-        frame.shape[1]-1)] for x in y ]
+        frame.shape[1]-1)] for x in y]
     latex = tabulate(frame, tablefmt="latex_booktabs", headers=headers)
     splits = latex.split("\\toprule")
-    methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in heur])
+    methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in heuristics])
     latex = splits[0]+"\\toprule"+methods+splits[1]
     with open(f"{tables}/combined.txt", "w") as file:
         file.write(latex)
