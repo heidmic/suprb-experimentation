@@ -17,5 +17,5 @@ This repo also features scripts to automatically perform hyperparametersearch, r
 
 ## Run logging_output_scripts
 
-1) Change **heuristics** and **datasets** at the top of the file
+1) Change **heuristics** and **datasets** at the top of the file (and path to files if necessary)
 2) Run the script
