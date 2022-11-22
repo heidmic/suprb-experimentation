@@ -7,13 +7,12 @@ stores the results in a new csv-File for all Models specified
 Leave out/add metrics that you want to evaluate
 """
 
-# Datasets runs were performed on, responds to one csv file each
+heuristics = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+
 datasets = ["concrete_strength", 'combined_cycle_power_plant',
             'airfoil_self_noise', 'energy_cool']
-# The used representations (or models) on which runs were performed
-heur = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
 
-for directory in heur:
+for heuristic in heuristics:
     # Head of csv-File
     header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP," \
              f"MEAN_MSE,STD_MSE"
@@ -22,8 +21,8 @@ for directory in heur:
     for problem in datasets:
         values += problem
 
-        print(f"WORKING ON DATASET {problem} WITH {directory}")
-        fold_df = get_dataframe(directory, problem)
+        print(f"WORKING ON DATASET {problem} WITH {heuristic}")
+        fold_df = get_dataframe(heuristic, problem)
 
         # Calculates mean, min, max, median and std of elitist_complexity across all runs
         elitist_complexity = fold_df['metrics.elitist_complexity']
@@ -41,6 +40,6 @@ for directory in heur:
         values += '\n\n'
 
     # TODO Change directory
-    print(f"{directory} FINISHED")
-    with open(f"csv_summary/{directory}_summary.csv", "w") as file:
+    print(f"{heuristic} FINISHED")
+    with open(f"csv_summary/{heuristic}_summary.csv", "w") as file:
         file.write(header + values)

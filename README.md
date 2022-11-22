@@ -12,4 +12,10 @@ This repo also features scripts to automatically perform hyperparametersearch, r
 2) Create an output directory within your cloned repository (/data/oc-compute03/${USER}/<repo_name>/output)
 3) Check (and recheck) that your sbatch file is correct (see slurm/default.sbatch). Make sure that JOB_DIR and EXPERIMENT are correct and that you link to the correct path where your nix file is located
 4) Call sbatch script with: sbatch slurm/default.sbatch 
+5) You can check if your job is running with **squeue**. If it's not listed there, check the error in **output/output<job_id>**
 
+
+## Run logging_output_scripts
+
+1) Change **heuristics** and **datasets** at the top of the file
+2) Run the script

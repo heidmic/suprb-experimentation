@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from baycomp import SignedRankTest
 from itertools import combinations
+from mlflow_utils import get_dataframe
+
 
 """
 Uses baycomp-package to calculate probabilities of one model performing
@@ -12,27 +14,24 @@ NOTE: If you need to compare more than two models at once please refer to: https
 (Using a nix development environment is recommended for cmpbayes)
 """
 
-# Used Models (Adjust to reflect folders)
-dirs = ['OBR', 'UBR', 'CSR', 'MPR']
+heuristics = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
 
-# Used Datasets (Refers to .csv - File stored in folder)
-datasets = ['parkinson_total', 'protein_structure', 'airfoil_self_noise',
-            'concrete_strength', 'combined_cycle_power_plant']
+datasets = ["concrete_strength", 'combined_cycle_power_plant',
+            'airfoil_self_noise', 'energy_cool']
 
 
 # Returns dictionary where keys respond to the used model and items are array of MSE for all problems
 def load_error_list():
     dict_list = {}
 
-    for current_dir in dirs:
+    for heuristic in heuristics:
         res_var = []
         for problem in datasets:
-            # Folder in same directory as logging_output_scripts-Folder
-            df = pd.read_csv(f"../{current_dir}/{problem}.csv")
-            fold_df = df[df['Name'].str.contains('fold')]
-            mse_df = -fold_df['test_neg_mean_squared_error'].mean()
-            res_var.append(mse_df)
-        dict_list.update({current_dir: np.array(res_var)})
+            fold_df = get_dataframe(heuristic, problem)
+            if not fold_df.empty:
+                mse_df = -fold_df['metrics.test_neg_mean_squared_error'].mean()
+                res_var.append(mse_df)
+        dict_list.update({heuristic: np.array(res_var)})
     return dict_list
 
 
