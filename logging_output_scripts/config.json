@@ -1,0 +1,18 @@
+{
+    "filetype": "csv",
+    "data_directory": "run_csvs",
+    "output_directory": "logging_output_scripts/outputs",
+    "heuristics": [
+        "ES",
+        "RS",
+        "NS",
+        "MCNS",
+        "NSLC"
+    ],
+    "datasets": [
+        "concrete_strength",
+        "combined_cycle_power_plant",
+        "airfoil_self_noise",
+        "energy_cool"
+    ]
+}
