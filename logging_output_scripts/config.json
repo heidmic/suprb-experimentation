@@ -1,22 +1,18 @@
 {
-    "data_directory": "mlruns",
+    "filetype": "csv",
+    "data_directory": "run_csvs",
     "output_directory": "logging_output_scripts/outputs",
-    "normalize_datasets": false,
-    "heuristics": {
-        "s:ga": "GA",
-        "s:saga1": "SAGA1",
-        "s:saga2": "SAGA2",
-        "s:saga3": "SAGA3"
-    },
-    "datasets": {
-        "concrete_strength": "Concrete Strength",
-        "combined_cycle_power_plant": "Combined Cycle Power Plant",
-        "airfoil_self_noise": "Airfoil Self Noise",
-        "protein_structure": "Protein Structure",
-        "parkinson_total": "Parkinsons Telemonitoring"
-    },
-    "metrics": {
-        "elitist_complexity": "Komplexitaet",
-        "elitist_error": "MSE"
-    }
+    "heuristics": [
+        "ES",
+        "RS",
+        "NS",
+        "MCNS",
+        "NSLC"
+    ],
+    "datasets": [
+        "concrete_strength",
+        "combined_cycle_power_plant",
+        "airfoil_self_noise",
+        "energy_cool"
+    ]
 }

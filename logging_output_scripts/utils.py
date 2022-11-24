@@ -1,56 +1,35 @@
 import os
 import json
 import mlflow
+import pandas as pd
 
-def get_df(heuristic, dataset):
-    with open('logging_output_scripts/config.json') as f:
-        config = json.load(f)
-
-    all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
-
-    for run in all_runs:
-        df = mlflow.search_runs([run])
-        print(df['tags.mlflow.runName'])
-
-        heuristic_mask = df['tags.mlflow.runName'].str.contains(f"{heuristic}")
-        dataset_mask =  df['tags.mlflow.runName'].str.contains(f"{dataset}")
-        fold_mask = df['tags.fold'].str.contains("True", na=False)
-        df = df[heuristic_mask & dataset_mask & fold_mask]
-
-        if not df.empty:
-            print("found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n\n\n\n")
-            return df
-    
-    print(f"No run found with {heuristic} and {dataset}")
+with open('logging_output_scripts/config.json') as f:
+    config = json.load(f)
 
 
-def get_all_runs(problem):
+if config['filetype'] == 'mlflow':
     print("Get all mlflow runs...")
-
-    with open('logging_output_scripts/config.json') as f:
-        config = json.load(f)
-
     all_runs_list = []
-    heuristics = [key for key in config['heuristics']]
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
-
     for run in all_runs:
-        for run_name in mlflow.search_runs([run])['tags.mlflow.runName']:
-            if problem in run_name:
-                if any(substring in run_name for substring in heuristics):
-                    all_runs_list.append(mlflow.search_runs([run]))
-                    print(run_name)
-
-    return all_runs_list
+        all_runs_list.append(mlflow.search_runs([run]))
 
 
-def get_dataframe(all_runs_list, heuristic, dataset):
+def get_dataframe(heuristic, problem):
+    if config['filetype'] == 'csv':
+        return get_csv_dataframe(heuristic, problem)
+    elif config['filetype'] == 'mlflow':
+        return get_mlflow_dataframe(heuristic, problem)
+
+
+def get_mlflow_dataframe(heuristic, dataset):
     df = None
+
     for run in all_runs_list:
-        df = run[run['tags.mlflow.runName'].str.contains(f"{heuristic}")]
+        df = run[run['tags.mlflow.runName'].str.contains(f" {heuristic} ")]
 
         if not df.empty:
-            df = df[df['tags.mlflow.runName'].str.contains(f"{dataset}")]
+            df = df[df['tags.mlflow.runName'].str.contains(dataset)]
         else:
             continue
 
@@ -64,11 +43,11 @@ def get_dataframe(all_runs_list, heuristic, dataset):
     return None
 
 
-def check_and_create_dir(output_folder, output_dir):
-    if not os.path.isdir(output_folder):
-        os.mkdir(output_folder)
+def get_csv_dataframe(heuristic, problem):
+    df = pd.read_csv(f"{config['data_directory']}/{heuristic}/{problem}.csv")
+    return df[df['Name'].str.contains('fold')]
 
-    directory = f"{output_folder}/{output_dir}"
 
-    if not os.path.isdir(directory):
-        os.mkdir(directory)
+def create_output_dir(output_dir):
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
