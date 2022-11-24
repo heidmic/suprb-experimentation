@@ -1,4 +1,4 @@
-from mlflow_utils import get_dataframe
+from logging_output_scripts.utils import get_dataframe, create_output_dir, config
 
 
 """
@@ -7,39 +7,50 @@ stores the results in a new csv-File for all Models specified
 Leave out/add metrics that you want to evaluate
 """
 
-heuristics = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+final_output_dir = f"{config['output_directory']}/csv_summary"
+create_output_dir(config['output_directory'])
+create_output_dir(final_output_dir)
 
-datasets = ["concrete_strength", 'combined_cycle_power_plant',
-            'airfoil_self_noise', 'energy_cool']
+if config['filetype'] == 'csv':
+    elitist_complexity = "elitist_complexity"
+    test_neg_mean_squared_error = "test_neg_mean_squared_error"
+elif config['filetype'] == 'mlflow':
+    elitist_complexity = "metrics.elitist_complexity"
+    test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
 
-for heuristic in heuristics:
-    # Head of csv-File
-    header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP," \
-             f"MEAN_MSE,STD_MSE"
 
-    values = "\n"
-    for problem in datasets:
-        values += problem
+def create_summary_csv():
+    for heuristic in config['heuristics']:
+        # Head of csv-File
+        header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP," \
+            f"MEAN_MSE,STD_MSE"
 
-        print(f"WORKING ON DATASET {problem} WITH {heuristic}")
-        fold_df = get_dataframe(heuristic, problem)
+        values = "\n"
+        for problem in config['datasets']:
+            values += problem
 
-        # Calculates mean, min, max, median and std of elitist_complexity across all runs
-        elitist_complexity = fold_df['metrics.elitist_complexity']
-        values += "," + str(elitist_complexity.min())
-        values += "," + str(elitist_complexity.max())
-        values += "," + str(round(elitist_complexity.mean(), 2))
-        values += "," + str(round(elitist_complexity.std(), 2))
-        values += "," + str(elitist_complexity.median())
+            print(f"WORKING ON DATASET {problem} WITH {heuristic}")
+            fold_df = get_dataframe(heuristic, problem)
 
-        # Calculates both mse and std of mse between all runs (Changes MSE to positive value)
-        mse = -fold_df['metrics.test_neg_mean_squared_error']
-        values += "," + str(round(mse.mean(), 4))
-        values += "," + str(round(mse.std(), 4))
+            # Calculates mean, min, max, median and std of elitist_complexity across all runs
+            elitist_complexity_eval = fold_df[elitist_complexity]
+            values += "," + str(elitist_complexity_eval.min())
+            values += "," + str(elitist_complexity_eval.max())
+            values += "," + str(round(elitist_complexity_eval.mean(), 2))
+            values += "," + str(round(elitist_complexity_eval.std(), 2))
+            values += "," + str(elitist_complexity_eval.median())
 
-        values += '\n\n'
+            # Calculates both mse and std of mse between all runs (Changes MSE to positive value)
+            mse = -fold_df[test_neg_mean_squared_error]
+            values += "," + str(round(mse.mean(), 4))
+            values += "," + str(round(mse.std(), 4))
 
-    # TODO Change directory
-    print(f"{heuristic} FINISHED")
-    with open(f"csv_summary/{heuristic}_summary.csv", "w") as file:
-        file.write(header + values)
+            values += '\n\n'
+
+        print(f"{heuristic} FINISHED")
+        with open(f"{final_output_dir}/{heuristic}_summary.csv", "w") as file:
+            file.write(header + values)
+
+
+if __name__ == '__main__':
+    create_summary_csv()

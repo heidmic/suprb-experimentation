@@ -1,9 +1,8 @@
 import os
-import pandas as pd
 import numpy as np
 from baycomp import SignedRankTest
 from itertools import combinations
-from mlflow_utils import get_dataframe
+from logging_output_scripts.utils import get_dataframe, create_output_dir, config
 
 
 """
@@ -14,22 +13,27 @@ NOTE: If you need to compare more than two models at once please refer to: https
 (Using a nix development environment is recommended for cmpbayes)
 """
 
-heuristics = ['ES', 'RS', 'NS', 'MCNS', 'NSLC']
+final_output_dir = f"{config['output_directory']}/calc_bay"
+create_output_dir(config['output_directory'])
+create_output_dir(final_output_dir)
 
-datasets = ["concrete_strength", 'combined_cycle_power_plant',
-            'airfoil_self_noise', 'energy_cool']
-
+if config['filetype'] == 'csv':
+    test_neg_mean_squared_error = "test_neg_mean_squared_error"
+elif config['filetype'] == 'mlflow':
+    test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
 
 # Returns dictionary where keys respond to the used model and items are array of MSE for all problems
+
+
 def load_error_list():
     dict_list = {}
 
-    for heuristic in heuristics:
+    for heuristic in config['heuristics']:
         res_var = []
-        for problem in datasets:
+        for problem in config['datasets']:
             fold_df = get_dataframe(heuristic, problem)
             if not fold_df.empty:
-                mse_df = -fold_df['metrics.test_neg_mean_squared_error'].mean()
+                mse_df = -fold_df[test_neg_mean_squared_error].mean()
                 res_var.append(mse_df)
         dict_list.update({heuristic: np.array(res_var)})
     return dict_list
@@ -55,20 +59,15 @@ def calc_bayes(save_csv: bool = True, save_plots: bool = True, rope: float = 0.1
         # Plot simplex, histogram doesnt work properly
         simplex_plot = posterior.plot_simplex(names=(dir_1, "rope", dir_2))
         if save_plots:
-            simplex_plot.savefig(f'Bayesian/{comparison_title}.png')
+            simplex_plot.savefig(f'{final_output_dir}/{comparison_title}.png')
 
         # Store probabilities for each comparison as a row
         header += f"{comparison_title}, {probabilities[0]}, {probabilities[1]}, {probabilities[2]}\n"
 
     if save_csv:
-        with open("Bayesian/Resulting_probs.csv", "w") as file:
+        with open(f"{final_output_dir}/Resulting_probs.csv", "w") as file:
             file.write(header)
 
 
 if __name__ == '__main__':
-    # Create dedicated folder
-    directory = "Bayesian"
-    if not os.path.exists(directory):
-        os.mkdir(directory)
-
     calc_bayes()

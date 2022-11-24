@@ -17,5 +17,58 @@ This repo also features scripts to automatically perform hyperparametersearch, r
 
 ## Run logging_output_scripts
 
-1) Change **heuristics** and **datasets** at the top of the file (and path to files if necessary)
-2) Run the script
+You can run all scripts at once or run individual scripts with either (from mlflow) exported csv-files or by direclty using mlflow runs.
+
+### Run all scripts at once
+
+1) Adjust the **config.json** to fit your experiments:
+
+{
+    "filetype": "csv",                                      # You can choose between **csv** and **mlflow**
+    "data_directory": "run_csvs",                           # Specify the directory where the data is present
+    "output_directory": "logging_output_scripts/outputs",   # Specify the output_directory
+    "heuristics": [                                         
+        "ES",                                        # Heuristics and datasets are used to find the 
+        "RS",                                        # respective heuristics/datasets, so make sure that the
+        "NS",                                        # names here **only** correspond to one heuristic/dataset
+        "MCNS",
+        "NSLC"
+    ],
+    "datasets": [
+        "concrete_strength",
+        "combined_cycle_power_plant",
+        "airfoil_self_noise",
+        "energy_cool"
+    ]
+}
+
+If the scripts are executed in **csv** format, the **data_directory** has to be in this format:
+
+data_directory --- ES ------ concrete_strength
+            |       |
+            |       | ------ combined_cycle_power_plant
+            |       |
+            |       | ------ airfoil_self_noise
+            |       |
+            |       
+            |
+            |----- RS
+            |
+            |----- NS
+            |
+            |----- MCNS
+            |
+            |----- NSLC
+
+2) Run the python script: **/run_all_scripts.py**
+3) The specified **output_directory** will create a subdirectory for each scripts results
+            
+
+### Run a single script
+
+1) Specify the **config.json** as above (and have the data prepared in the correct format if you use csvs)
+2) Run the respective script in **logging_output_scripts**
+3) The specified **output_directory** will create a subdirectory for each scripts results
+
+Attention: **latex_tabulars** needs to specify a **summary_csv_dir** at the top of its file. (Not necessary if all scripts are executed at once) 
+
