@@ -132,10 +132,11 @@ def log_tuning(experiment: Experiment):
 
 
 def log_run(estimator: BaseEstimator):
-    # Log model parameters
-    try_log_dict(estimator.get_params(), 'params.json')
-
     logger = _get_default_logger(estimator)
+
+    try_log_dict(estimator.get_params(), 'params.json')
+    try_log_dict(logger.get_elitist(estimator), 'elitist.json')
+
     if logger is not None:
         # Log fitting metrics
         for key, values in logger.metrics_.items():
