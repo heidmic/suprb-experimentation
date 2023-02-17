@@ -161,7 +161,7 @@ class XCSF(BaseEstimator, RegressorMixin):
             "eta":
                 0,  # disable gradient descent of centers towards matched input mean
         }
-        xcs.condition("hyperrectangle", args)
+        xcs.condition("hyperrectangle_csr", args)
 
         args = {
             "x0": 1,  # bias attribute
