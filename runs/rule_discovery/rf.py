@@ -14,8 +14,13 @@ from experiments.parameter_search.optuna import OptunaTuner
 from experiments.parameter_search.skopt import SkoptTuner
 from problems import scale_X_y
 from problems.datasets import load_airfoil_self_noise
+import click
 
-if __name__ == '__main__':
+
+@click.command()
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-j', '--job_id', type=click.STRING, default='NA')
+def run(problem: str, job_id: str):
     random_state = 42
 
     X, y = load_airfoil_self_noise()
@@ -45,7 +50,8 @@ if __name__ == '__main__':
     )
 
     # Create the base experiment, using some default tuner
-    experiment = Experiment(name='Random Forest', tuner=default_tuner, verbose=10)
+    experiment_name = f'Random Forest {job_id} {problem}'
+    experiment = Experiment(name=experiment_name, tuner=default_tuner, verbose=10)
 
     # Add global tuning of the `n_estimators` parameter using optuna.
     # It is tuned by itself first, and afterwards, the fixed value is propagated to nested experiments,
@@ -58,7 +64,6 @@ if __name__ == '__main__':
 
         if params.n_estimators > 100:
             params.bootstrap = trial.suggest_categorical('bootstrap', [True, False])
-
 
     experiment.with_tuning(optuna_objective, tuner=optuna_tuner)
 
@@ -86,5 +91,9 @@ if __name__ == '__main__':
 
     experiment.perform(evaluation, cv=4)
 
-    mlflow.set_experiment("Airfoil Self-Noise")
+    mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
+
+
+if __name__ == '__main__':
+    run()

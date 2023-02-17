@@ -187,8 +187,9 @@ class XCSF(BaseEstimator, RegressorMixin):
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
-def run(problem: str):
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-j', '--job_id', type=click.STRING, default='NA')
+def run(problem: str, job_id: str):
     print(f"Problem is {problem}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
@@ -238,6 +239,9 @@ def run(problem: str):
         params.SET_SUBSUMPTION = trial.suggest_categorical('SET_SUBSUMPTION',
                                                            [True, False])
 
+    experiment_name = f'XCSF Tuning {job_id} {problem}'
+    experiment = Experiment(name=experiment_name,  verbose=10)
+
     experiment.with_tuning(optuna_objective, tuner=tuner)
 
     random_states = np.random.SeedSequence(random_state).generate_state(8)
@@ -249,7 +253,7 @@ def run(problem: str):
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
-    mlflow.set_experiment(f"{problem}_opt{n_calls}x")
+    mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
 
 
