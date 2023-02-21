@@ -66,7 +66,7 @@ def run(problem: str, job_id: str):
         cv=4,
         n_jobs_cv=4,
         n_jobs=4,
-        n_calls=10_000,
+        n_calls=1000,
         timeout=24 * 60 * 60,  # 24 hours
         scoring='neg_mean_squared_error',
         verbose=10

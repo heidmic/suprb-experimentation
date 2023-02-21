@@ -9,7 +9,7 @@ from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-import runs.rule_discovery.xcsf_tuning as xcsf_tuning
+import runs.comparisons.xcsf_tuning as xcsf_tuning
 from sklearn.utils import Bunch, shuffle
 import click
 import optuna
@@ -202,7 +202,7 @@ def run(problem: str, job_id: str):
 
     # exit()
 
-    n_calls = 128
+    n_calls = 4
     shared_tuning_params = dict(
         estimator=estimator,
         random_state=random_state,
@@ -244,17 +244,17 @@ def run(problem: str, job_id: str):
 
     experiment.with_tuning(optuna_objective, tuner=tuner)
 
-    random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=4)
+    # random_states = np.random.SeedSequence(random_state).generate_state(8)
+    # experiment.with_random_states(random_states, n_jobs=4)
 
-    # Evaluation using cross-validation and an external test set
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y,
-                               random_state=random_state, verbose=10)
+    # # Evaluation using cross-validation and an external test set
+    # evaluation = CrossValidate(estimator=estimator, X=X, y=y,
+    #                            random_state=random_state, verbose=10)
 
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+    # experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
-    mlflow.set_experiment(experiment_name)
-    log_experiment(experiment)
+    # mlflow.set_experiment(experiment_name)
+    # log_experiment(experiment)
 
 
 if __name__ == '__main__':

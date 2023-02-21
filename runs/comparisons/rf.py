@@ -34,7 +34,7 @@ def run(problem: str, job_id: str):
         X_train=X_train,
         y_train=y_train,
         random_state=random_state,
-        n_calls=10,
+        n_calls=1000,
         verbose=10,
         n_jobs_cv=4,
     )
@@ -44,7 +44,7 @@ def run(problem: str, job_id: str):
         X_train=X_train,
         y_train=y_train,
         random_state=random_state,
-        n_calls=20,
+        n_calls=1000,
         verbose=10,
         n_jobs_cv=4,
     )
