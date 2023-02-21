@@ -202,7 +202,7 @@ def run(problem: str, job_id: str):
 
     # exit()
 
-    n_calls = 4
+    n_calls = 1000
     shared_tuning_params = dict(
         estimator=estimator,
         random_state=random_state,
