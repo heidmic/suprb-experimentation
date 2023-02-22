@@ -248,11 +248,10 @@ def run(problem: str, job_id: str):
     experiment.with_random_states(random_states, n_jobs=4)
 
     # Evaluation using cross-validation and an external test set
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y,
-                               random_state=random_state, verbose=10)
+    # evaluation = CrossValidate(estimator=estimator, X=X, y=y,
+    #                            random_state=random_state, verbose=10)
 
-    # If it doesn't work set evaluation=None
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+    experiment.perform(None, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
