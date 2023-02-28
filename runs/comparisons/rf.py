@@ -3,11 +3,13 @@ import numpy as np
 import optuna
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.utils import Bunch
+from sklearn.utils import Bunch, shuffle
 from skopt.space import Integer, Real
+from sklearn.model_selection import ShuffleSplit
+
 
 from experiments import Experiment
-from experiments.evaluation import CrossValidateTest
+from experiments.evaluation import CrossValidate
 from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
@@ -25,33 +27,20 @@ def run(problem: str, job_id: str):
 
     X, y = load_airfoil_self_noise()
     X, y = scale_X_y(X, y)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
+    X, y = shuffle(X, y, random_state=random_state)
 
     estimator = RandomForestRegressor(random_state=random_state)
 
-    default_tuner = SkoptTuner(
+    tuning_params = dict(
         estimator=estimator,
-        X_train=X_train,
-        y_train=y_train,
         random_state=random_state,
-        n_calls=1000,
-        verbose=10,
+        cv=4,
         n_jobs_cv=4,
-    )
-
-    optuna_tuner = OptunaTuner(
-        estimator=estimator,
-        X_train=X_train,
-        y_train=y_train,
-        random_state=random_state,
+        n_jobs=4,
         n_calls=1000,
-        verbose=10,
-        n_jobs_cv=4,
+        timeout=72 * 60 * 60,  # 24 hours
+        verbose=10
     )
-
-    # Create the base experiment, using some default tuner
-    experiment_name = f'Random Forest {job_id} {problem}'
-    experiment = Experiment(name=experiment_name, tuner=default_tuner, verbose=10)
 
     # Add global tuning of the `n_estimators` parameter using optuna.
     # It is tuned by itself first, and afterwards, the fixed value is propagated to nested experiments,
@@ -65,31 +54,24 @@ def run(problem: str, job_id: str):
         if params.n_estimators > 100:
             params.bootstrap = trial.suggest_categorical('bootstrap', [True, False])
 
-    experiment.with_tuning(optuna_objective, tuner=optuna_tuner)
+        params.max_depth = trial.suggest_int('max_depth', 1, 5)
 
-    # Create a nested experiment using the MAE.
-    mae_experiment = experiment.with_params({'criterion': 'absolute_error'})
-    mae_experiment.name = 'MAE'
+    # Create the base experiment, using some default tuner
+    experiment_name = f'Random Forest {job_id} {problem}'
+    experiment = Experiment(name=experiment_name, verbose=10)
 
-    # Tune only this experiment on some parameter
-    mae_experiment.with_tuning({'min_samples_split': Real(0, 1)}, tuner=default_tuner)
-
-    # Create a nested experiment using the MSE.
-    mse_experiment = experiment.with_params({'criterion': 'squared_error'})
-    mse_experiment.name = 'MSE'
+    tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
 
     # Add global tuning of the `max_depth` parameter. Because `propagate` is set here,
     # the value is tuned new for every nested experiment.
-    experiment.with_tuning({'max_depth': Integer(1, 5)}, tuner=default_tuner, propagate=True)
+    experiment.with_tuning(optuna_objective, tuner=tuner, propagate=True)
 
-    random_states = np.random.SeedSequence(random_state).generate_state(4)
-    experiment.with_random_states(random_states, n_jobs=4)
+    random_states = np.random.SeedSequence(random_state).generate_state(8)
+    experiment.with_random_states(random_states, n_jobs=2)
 
-    # Evaluation using cross-validation and an external test set
-    evaluation = CrossValidateTest(estimator=estimator, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test,
-                                   random_state=random_state, verbose=10)
+    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
-    experiment.perform(evaluation, cv=4)
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
