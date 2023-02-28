@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --time=35:00:00
+#SBATCH --time=72:00:00
 #SBATCH --partition=cpu-prio
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=15
