@@ -225,7 +225,7 @@ def run(problem: str):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=n_calls,
-        timeout=24 * 60 * 60,  # 24 hours
+        timeout=72 * 60 * 60,  # 72 hours
         verbose=10
     )
 
@@ -239,8 +239,8 @@ def run(problem: str):
 
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
-        params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 50000,
-                                              500000)
+        params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000,
+                                              100000)
         params.POP_SIZE = trial.suggest_int('POP_SIZE', 250, 2500)
         params.P_CROSSOVER = trial.suggest_float('P_CROSSOVER', 0.5, 1)
         params.P_EXPLORE = trial.suggest_float('P_EXPLORE', 0.5, 0.9)

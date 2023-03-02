@@ -128,10 +128,4 @@ class CrossValidate(BaseCrossValidate):
 
     def __call__(self, **kwargs) -> tuple[list[BaseEstimator], dict]:
         scores = self.cross_validate(self.X, self.y, **kwargs)
-
         return [BaseEstimator()]*8, scores
-        # Save estimators externally
-        estimators = scores.pop('estimator')
-
-        self.estimators_, self.results_ = estimators, scores
-        return estimators, scores
