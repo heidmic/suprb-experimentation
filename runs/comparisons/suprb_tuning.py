@@ -79,11 +79,14 @@ def run(problem: str, job_id: str):
 
         params.rule_generation__mutation__sigma = trial.suggest_float(
             'rule_generation__mutation__sigma', *sigma_space)
-        params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 100)
         params.rule_generation__init__fitness__alpha = trial.suggest_float(
             'rule_generation__init__fitness__alpha', 0.01, 0.2)
         params.rule_generation__operator = trial.suggest_categorical(
             'rule_generation__operator', ['&', ',', '+'])
+
+        if params.rule_generation__operator == '&':
+            params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 100)
+
         params.rule_generation__mutation = trial.suggest_categorical(
             'mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])
         params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
