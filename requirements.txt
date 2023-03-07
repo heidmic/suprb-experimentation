@@ -31,4 +31,3 @@ click~=8.0.3
 setuptools~=57.0.0
 baycomp~=1.0.2
 tabulate~=0.8.9
-ipython~=8.11.0

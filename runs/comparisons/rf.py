@@ -19,20 +19,13 @@ from problems.datasets import load_airfoil_self_noise
 import click
 
 
-def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
-    method_name = f"load_{name}"
-    from problems import datasets
-    if hasattr(datasets, method_name):
-        return getattr(datasets, method_name)(**kwargs)
-
-
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 @click.option('-j', '--job_id', type=click.STRING, default='NA')
 def run(problem: str, job_id: str):
     random_state = 42
 
-    X, y = load_dataset(name=problem, return_X_y=True)
+    X, y = load_airfoil_self_noise()
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
@@ -61,11 +54,7 @@ def run(problem: str, job_id: str):
         if params.n_estimators > 100:
             params.bootstrap = trial.suggest_categorical('bootstrap', [True, False])
 
-        params.max_depth = trial.suggest_int('max_depth', 1, 100)
-        params.min_samples_split = trial.suggest_int('min_samples_split', 2, 20)
-        params.min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 4)
-
-        params.max_features = trial.suggest_categorical('max_features', ["auto", "sqrt", "log2"])
+        params.max_depth = trial.suggest_int('max_depth', 1, 5)
 
     # Create the base experiment, using some default tuner
     experiment_name = f'Random Forest {job_id} {problem}'
