@@ -135,7 +135,7 @@ def log_run(estimator: BaseEstimator):
     logger = _get_default_logger(estimator)
 
     try_log_dict(estimator.get_params(), 'params.json')
-    # try_log_dict(logger.get_elitist(estimator), 'elitist.json') #TODO: Enable once other PR is merged
+    try_log_dict(logger.get_elitist(estimator), 'elitist.json')
 
     if logger is not None:
         # Log fitting metrics
