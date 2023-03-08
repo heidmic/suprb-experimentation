@@ -203,9 +203,11 @@ class XCSF(BaseEstimator, RegressorMixin):
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
-def run(problem: str):
-    print(f"Problem is {problem}")
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-j', '--job_id', type=click.STRING, default='NA')
+def run(problem: str, job_id: str):
+    random_state = 42
+    print(f"Problem is {problem} with JobId {job_id}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
