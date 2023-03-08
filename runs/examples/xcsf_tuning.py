@@ -122,7 +122,7 @@ class XCSF(BaseEstimator, RegressorMixin):
 
     def __init__(self, random_state, MAX_TRIALS=1000, POP_SIZE=200, NU=5,
                  P_CROSSOVER=0.8, P_EXPLORE=0.9, THETA_EA=50,
-                 EA_SUBSUMPTION=False, EA_SELECT_TYPE="tournament"):
+                 EA_SUBSUMPTION=False, EA_SELECT_TYPE="tournament", SET_SUBSUMPTION=False):
         self.random_state = random_state
 
         self.MAX_TRIALS = MAX_TRIALS
@@ -132,6 +132,7 @@ class XCSF(BaseEstimator, RegressorMixin):
         self.P_EXPLORE = P_EXPLORE
         self.THETA_EA = THETA_EA
         self.EA_SUBSUMPTION = EA_SUBSUMPTION
+        self.SET_SUBSUMPTION = SET_SUBSUMPTION
         self.EA_SELECT_TYPE = EA_SELECT_TYPE
 
     def fit(self, X, y):
@@ -153,6 +154,7 @@ class XCSF(BaseEstimator, RegressorMixin):
                          "P_EXPLORE": self.P_EXPLORE,
                          "THETA_EA": self.THETA_EA,
                          "EA_SUBSUMPTION": self.EA_SUBSUMPTION,
+                         "SET_SUBSUMPTION": self.SET_SUBSUMPTION,
                          "EA_SELECT_TYPE": self.EA_SELECT_TYPE}
         params.update(configurables)
         set_xcs_params(xcs, params)
@@ -233,7 +235,7 @@ def run(problem: str, job_id: str):
 
     tuner = OptunaTuner(X_train=X, y_train=y,
                         scoring='neg_mean_squared_error',
-                        #scoring=mean_squared_error,
+                        # scoring=mean_squared_error,
                         **shared_tuning_params)
 
     # Create the base experiment, using some default tuner
@@ -250,6 +252,8 @@ def run(problem: str, job_id: str):
         params.THETA_EA = trial.suggest_int('THETA_EA', 25, 50)
         params.EA_SUBSUMPTION = trial.suggest_categorical('EA_SUBSUMPTION',
                                                           [True, False])
+        params.SET_SUBSUMPTION = trial.suggest_categorical('SET_SUBSUMPTION',
+                                                           [True, False])
         params.EA_SELECT_TYPE = trial.suggest_categorical('EA_SELECT_TYPE',
                                                           ["roulette",
                                                            "tournament"])
