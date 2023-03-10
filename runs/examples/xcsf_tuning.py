@@ -221,7 +221,7 @@ def run(problem: str, job_id: str):
 
     # exit()
 
-    n_calls = 1000 
+    n_calls = 1000
     shared_tuning_params = dict(
         estimator=estimator,
         random_state=random_state,
@@ -239,7 +239,7 @@ def run(problem: str, job_id: str):
                         **shared_tuning_params)
 
     # Create the base experiment, using some default tuner
-    experiment = Experiment(name='XCSF',  verbose=1)
+    experiment = Experiment(name='XCSF',  verbose=10)
 
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
