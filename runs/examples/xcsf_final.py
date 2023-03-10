@@ -202,6 +202,7 @@ class XCSF(BaseEstimator, RegressorMixin):
     #     pop = out.getvalue().decode("utf-8")
     #     return pop
 
+
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 @click.option('-j', '--job_id', type=click.STRING, default='NA')
@@ -255,7 +256,7 @@ def run(problem: str, job_id: str):
     estimator = XCSF(random_state, **params)
 
     # Create the base experiment, using some default tuner
-    experiment = Experiment(name='XCSF_eval',  verbose=10)
+    experiment = Experiment(name='XCSF_eval',  verbose=0)
 
     random_states = np.random.SeedSequence(random_state).generate_state(8)
     experiment.with_random_states(random_states, n_jobs=4)
@@ -272,4 +273,3 @@ def run(problem: str, job_id: str):
 
 if __name__ == '__main__':
     run()
-
