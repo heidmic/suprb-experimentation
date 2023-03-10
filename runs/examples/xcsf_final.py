@@ -202,11 +202,12 @@ class XCSF(BaseEstimator, RegressorMixin):
     #     pop = out.getvalue().decode("utf-8")
     #     return pop
 
-
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
-def run(problem: str):
-    print(f"Problem is {problem}")
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-j', '--job_id', type=click.STRING, default='NA')
+def run(problem: str, job_id: str):
+    random_state = 42
+    print(f"Problem is {problem} with JobId {job_id}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
@@ -261,7 +262,7 @@ def run(problem: str):
 
     # Evaluation using cross-validation and an external test set
     evaluation = CrossValidate(estimator=estimator, X=X, y=y,
-                               random_state=random_state, verbose=10)
+                               random_state=random_state, verbose=0)
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
@@ -271,3 +272,4 @@ def run(problem: str):
 
 if __name__ == '__main__':
     run()
+

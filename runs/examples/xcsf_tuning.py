@@ -190,7 +190,7 @@ class XCSF(BaseEstimator, RegressorMixin):
         check_is_fitted(self)
 
         X = check_array(X)
-
+        self.xcs_.print_pset(True, True, True)
         return self.xcs_.predict(X)
 
     # def population(self):
@@ -221,7 +221,7 @@ def run(problem: str, job_id: str):
 
     # exit()
 
-    n_calls = 128
+    n_calls = 1000 
     shared_tuning_params = dict(
         estimator=estimator,
         random_state=random_state,
@@ -230,7 +230,7 @@ def run(problem: str, job_id: str):
         n_jobs=4,
         n_calls=n_calls,
         timeout=72 * 60 * 60,  # 72 hours
-        verbose=10
+        verbose=1
     )
 
     tuner = OptunaTuner(X_train=X, y_train=y,
@@ -239,7 +239,7 @@ def run(problem: str, job_id: str):
                         **shared_tuning_params)
 
     # Create the base experiment, using some default tuner
-    experiment = Experiment(name='XCSF',  verbose=10)
+    experiment = Experiment(name='XCSF',  verbose=1)
 
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
@@ -269,7 +269,7 @@ def run(problem: str, job_id: str):
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
-    mlflow.set_experiment(f"{problem}_opt{n_calls}x")
+    mlflow.set_experiment(f"{problem}")
     log_experiment(experiment)
 
 
