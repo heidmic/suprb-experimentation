@@ -238,9 +238,6 @@ def run(problem: str, job_id: str):
                         # scoring=mean_squared_error,
                         **shared_tuning_params)
 
-    # Create the base experiment, using some default tuner
-    experiment = Experiment(name='XCSF',  verbose=10)
-
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
         params.MAX_TRIALS = trial.suggest_int('MAX_TRIALS', 10000,
@@ -257,6 +254,10 @@ def run(problem: str, job_id: str):
         params.EA_SELECT_TYPE = trial.suggest_categorical('EA_SELECT_TYPE',
                                                           ["roulette",
                                                            "tournament"])
+
+    experiment_name = f'XCSF {job_id} {problem}'
+    # Create the base experiment, using some default tuner
+    experiment = Experiment(name=experiment_name,  verbose=10)
 
     experiment.with_tuning(optuna_objective, tuner=tuner)
 
