@@ -18,6 +18,7 @@ from problems import scale_X_y
 from problems.datasets import load_airfoil_self_noise
 import click
 
+
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
     from problems import datasets
