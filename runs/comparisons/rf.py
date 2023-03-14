@@ -18,6 +18,11 @@ from problems import scale_X_y
 from problems.datasets import load_airfoil_self_noise
 import click
 
+def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
+    method_name = f"load_{name}"
+    from problems import datasets
+    if hasattr(datasets, method_name):
+        return getattr(datasets, method_name)(**kwargs)
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
