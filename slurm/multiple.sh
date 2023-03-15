@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 datasets=("concrete_strength" "energy_cool" "combined_cycle_power_plant" "airfoil_self_noise")
-scripts=("runs/comparisons/rf.py" "runs/comparisons/decision_tree.py")
+scripts=("runs/comparisons/rf.py")
 
 for script in ${scripts[@]}; do
     for dataset in ${datasets[@]}; do
