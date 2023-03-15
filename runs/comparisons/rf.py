@@ -62,7 +62,7 @@ def run(problem: str, job_id: str):
             params.bootstrap = trial.suggest_categorical('bootstrap', [True, False])
 
         params.max_depth = trial.suggest_int('max_depth', 1, 100)
-        params.min_samples_split = trial.suggest_int('min_samples_split', 1, 20)
+        params.min_samples_split = trial.suggest_int('min_samples_split', 2, 20)
         params.min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 4)
 
         params.max_features = trial.suggest_categorical('max_features', ["auto", "sqrt", "log2"])
