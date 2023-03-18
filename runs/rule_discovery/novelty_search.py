@@ -25,7 +25,8 @@ from suprb.optimizer.rule.mutation import HalfnormIncrease
 from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
 from suprb.optimizer.rule.ns.archive import ArchiveNovel
 from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
-
+from suprb.optimizer.rule.crossover import UniformCrossover
+from suprb.rule.matching import OrderedBound
 
 
 random_state = 42
@@ -58,6 +59,7 @@ def run(problem: str, ns_type: str, job_id: int):
             mutation=HalfnormIncrease()
         ),
         solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32),
+        matching_type=OrderedBound(np.array([])),
         n_iter=32,
         n_rules=8,
         verbose=10,
@@ -137,11 +139,10 @@ def run(problem: str, ns_type: str, job_id: int):
         params.rule_generation__novelty_calculation__archive = getattr(
             suprb.optimizer.rule.ns.archive, params.rule_generation__novelty_calculation__archive)()
 
-
         params.rule_generation__novelty_calculation = trial.suggest_categorical('novelty_calculation',
                                                                                 ["NoveltyCalculation",
                                                                                  "ProgressiveMinimalCriteria",
-                                                                                 "NovelityFitnessPareto",
+                                                                                 "NoveltyFitnessPareto",
                                                                                  "NoveltyFitnessBiased"])
 
         params.rule_generation__novelty_calculation = getattr(
