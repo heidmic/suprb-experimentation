@@ -68,7 +68,6 @@ tasks = {
     "concrete_strength": "CS",
     "energy_cool": "EEC",
 }
-algorithms = ["ES", "RS", "NS", "MCNS", "NSLC", "NS-P", "MCNS-P", "NSLC-P"]
 
 
 def list_from_ls(dname):
@@ -186,7 +185,7 @@ def calvo(latex, all_variants, check_mcmc, small_set):
 
             # We want the algorithms ordered as they are in the `algorithms`
             # list.
-            d = d[algorithms if not small_set else config["heuristics"]]
+            d = d[config["heuristics"] if not small_set else config["heuristics"]]
 
             title = f"Considering {mode} cv runs per task"
 
@@ -358,7 +357,7 @@ def ttest(latex):
 
                 # Remove RS runs.
                 d_ = df[metric].unstack("algorithm")[[
-                    alg for alg in algorithms if alg != "RS"
+                    alg for alg in config["heuristics"] if alg != "RS"
                 ]].stack()
 
                 # Rope is based on std of the other algorithms.
