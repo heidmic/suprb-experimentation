@@ -67,7 +67,6 @@ tasks = {
     "concrete_strength": "CS",
     "energy_cool": "EEC",
 }
-algorithms = ["ES", "RS", "NS", "MCNS", "NSLC", "NS-P", "MCNS-P", "NSLC-P"]
 
 
 def list_from_ls(dname):
@@ -189,7 +188,7 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
 
             # We want the algorithms ordered as they are in the `algorithms`
             # list.
-            d = d[algorithms if not small_set else config["heuristics"]]
+            d = d[config["heuristics"] if not small_set else config["heuristics"]]
 
             title = f"Considering {mode} cv runs per task"
 
@@ -322,8 +321,10 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                     ax[i].vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
                     ax[i].fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
 
-                    # Compute probabilities.
-                    sample = model.model_.rvs(100000)
+                # Remove RS runs.
+                d_ = df[metric].unstack("algorithm")[[
+                    alg for alg in config["heuristics"] if alg != "RS"
+                ]].stack()
 
                     probs[config['datasets'][task]] = {
                         "p(ES practically higher complexity)": (sample < rope[0]).sum() / len(sample),
