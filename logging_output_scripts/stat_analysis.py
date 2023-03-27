@@ -28,8 +28,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from IPython import embed
-from logging_output_scripts.utils import get_dataframe, check_and_create_dir, get_all_runs, get_df
-import json
+from logging_output_scripts.utils import get_dataframe, create_output_dir, config
 
 
 pd.options.display.max_rows = 2000
@@ -61,6 +60,26 @@ metrics = {
     mse: "MSE",
     elitist_complexity: "model complexity"
 }
+# TODO: Move this to config.json
+tasks = {
+    "combined_cycle_power_plant": "CCPP",
+    "airfoil_self_noise": "ASN",
+    "concrete_strength": "CS",
+    "energy_cool": "EEC",
+}
+algorithms = ["ES", "RS", "NS", "MCNS", "NSLC", "NS-P", "MCNS-P", "NSLC-P"]
+
+
+def list_from_ls(dname):
+    proc = subprocess.run(["ls", dname], capture_output=True)
+
+    if proc.stderr != b"":
+        print(proc.stderr)
+        sys.exit(1)
+
+    # Remove last element since that is an empty string always due to `ls`'s
+    # final newline.
+    return proc.stdout.decode().split("\n")[:-1]
 
 
 def smart_print(df, latex):
@@ -73,18 +92,29 @@ def smart_print(df, latex):
 def load_data(config):
     dfs = []
     keys = []
-    # all_runs_list = get_all_runs()
-
     for heuristic in config['heuristics']:
         for problem in config['datasets']:
-            # df = get_dataframe(all_runs_list, heuristic, problem)
-            df = get_df(heuristic, problem)
-            if df is not None:
-                df[mse] *= -1
-                dfs.append(df)
-                keys.append((heuristic, problem))
+            df = get_dataframe(heuristic, problem)
+            if "metrics.test_neg_mean_squared_error" in df.keys():
+                test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
+            else:
+                test_neg_mean_squared_error = "test_neg_mean_squared_error"
 
-    df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
+            if "metrics.elitist_complexity" in df.keys():
+                df["elitist_complexity"] = df["metrics.elitist_complexity"]
+                del df["metrics.elitist_complexity"]
+
+            df["test_mean_squared_error"] = -df[test_neg_mean_squared_error]
+            del df[test_neg_mean_squared_error]
+
+            dfs.append(df)
+            keys.append((heuristic, problem))
+
+    df = pd.concat(dfs,
+                   keys=keys,
+                   names=["algorithm", "task"],
+                   verify_integrity=True)
+
     df = df[metrics.keys()]
 
     assert not df.isna().any().any(), "Some values are missing"
@@ -154,7 +184,12 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
         i = -1
         for mode, f in variants.items():
             i += 1
-            d = f(df)[config["heuristics"]]
+
+            d = f(df)
+
+            # We want the algorithms ordered as they are in the `algorithms`
+            # list.
+            d = d[algorithms if not small_set else config["heuristics"]]
 
             title = f"Considering {mode} cv runs per task"
 

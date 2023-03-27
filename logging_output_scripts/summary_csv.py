@@ -11,13 +11,6 @@ final_output_dir = f"{config['output_directory']}/csv_summary"
 create_output_dir(config['output_directory'])
 create_output_dir(final_output_dir)
 
-if config['filetype'] == 'csv':
-    elitist_complexity = "elitist_complexity"
-    test_neg_mean_squared_error = "test_neg_mean_squared_error"
-elif config['filetype'] == 'mlflow':
-    elitist_complexity = "metrics.elitist_complexity"
-    test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
-
 
 def create_summary_csv():
     for heuristic in config['heuristics']:
@@ -31,6 +24,16 @@ def create_summary_csv():
 
             print(f"WORKING ON DATASET {problem} WITH {heuristic}")
             fold_df = get_dataframe(heuristic, problem)
+
+            if "metrics.elitist_complexity" in fold_df.keys():
+                elitist_complexity = "metrics.elitist_complexity"
+            else:
+                elitist_complexity = "elitist_complexity"
+
+            if "metrics.test_neg_mean_squared_error" in fold_df.keys():
+                test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
+            else:
+                test_neg_mean_squared_error = "test_neg_mean_squared_error"
 
             # Calculates mean, min, max, median and std of elitist_complexity across all runs
             elitist_complexity_eval = fold_df[elitist_complexity]

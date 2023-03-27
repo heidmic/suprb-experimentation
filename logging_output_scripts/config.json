@@ -1,13 +1,17 @@
 {
-    "filetype": "csv",
-    "data_directory": "run_csvs",
+    "filetype": "mlflow",
+    "data_directory_mlruns": "mlruns",
+    "data_directory_csv": "mlruns_csv",
     "output_directory": "logging_output_scripts/outputs",
     "heuristics": [
         "ES",
         "RS",
         "NS",
         "MCNS",
-        "NSLC"
+        "NSLC",
+        "NS-P",
+        "MCNS-P",
+        "NSLC-P"
     ],
     "datasets": [
         "concrete_strength",

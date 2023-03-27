@@ -24,11 +24,6 @@ final_output_dir = f"{config['output_directory']}/violin_plots"
 create_output_dir(config['output_directory'])
 create_output_dir(final_output_dir)
 
-if config['filetype'] == 'csv':
-    test_neg_mean_squared_error = "test_neg_mean_squared_error"
-elif config['filetype'] == 'mlflow':
-    test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
-
 
 def create_violin_plots():
     for problem in config['datasets']:
@@ -39,24 +34,36 @@ def create_violin_plots():
             if fold_df is not None:
                 name = []
                 for x in range(fold_df.shape[0]):
+                    if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
+                        heuristic += "-G"
                     name.append(heuristic)
                 # Adds additional column for plotting
                 if first:
                     res_var = fold_df.assign(Used_Representation=name)
+                    if "metrics.test_neg_mean_squared_error" in res_var.keys():
+                        res_var["test_neg_mean_squared_error"] = res_var.pop("metrics.test_neg_mean_squared_error")
                     first = False
                 else:
-                    res_var = pd.concat([res_var, fold_df.assign(Used_Representation=name)])
+                    current_res = fold_df.assign(Used_Representation=name)
+                    if "metrics.test_neg_mean_squared_error" in current_res.keys():
+                        current_res["test_neg_mean_squared_error"] = current_res.pop(
+                            "metrics.test_neg_mean_squared_error")
+                    res_var = pd.concat([res_var, current_res])
 
                 print(f"Done for {problem} with {heuristic}")
 
         # Invert values since they are stored as negatives
-        res_var[test_neg_mean_squared_error] = -res_var[test_neg_mean_squared_error]
+        res_var["test_neg_mean_squared_error"] *= -1
+
         # Store violin-plots of all models in one plot
         fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y=test_neg_mean_squared_error, data=res_var)
-        ax.set(xlabel='RD method')
+        ax = sns.violinplot(x='Used_Representation', y="test_neg_mean_squared_error",
+                            data=res_var, scale="width", scale_hue=False)
+        ax.set(xlabel='Estimator')
         ax.set(ylabel='MSE')
+        ax.set(title=problem)
 
+        plt.tight_layout()
         fig.savefig(f"{final_output_dir}/{problem}.png")
 
 
