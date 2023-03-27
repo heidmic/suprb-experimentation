@@ -45,7 +45,7 @@ def run(problem: str, job_id: str):
     estimator = SupRB(
         rule_generation=es.ES1xLambda(
             operator='&',
-            n_iter=10_000,
+            n_iter=150,
             init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                               model=Ridge(alpha=0.01,
                                                           random_state=random_state)),
@@ -53,7 +53,7 @@ def run(problem: str, job_id: str):
             origin_generation=origin.SquaredError(),
         ),
         solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32),
-        n_iter=32,
+        n_iter=2,
         n_rules=4,
         verbose=10,
         logger=CombinedLogger(
@@ -64,10 +64,10 @@ def run(problem: str, job_id: str):
         estimator=estimator,
         random_state=random_state,
         cv=4,
-        n_jobs_cv=4,
-        n_jobs=4,
-        n_calls=1000,
-        timeout=72 * 60 * 60,  # 72 hours
+        n_jobs_cv=1,
+        n_jobs=1,
+        n_calls=2,
+        timeout=60,  # 72 hours
         scoring='neg_mean_squared_error',
         verbose=10
     )
@@ -115,15 +115,15 @@ def run(problem: str, job_id: str):
     experiment_name = f'ES Tuning & Experimentation {job_id} {problem}'
     experiment = Experiment(name=experiment_name,  verbose=10)
 
-    tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
-    experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
+    # tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
+    # experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
 
-    random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=2)
+    # random_states = np.random.SeedSequence(random_state).generate_state(8)
+    # experiment.with_random_states(random_states, n_jobs=2)
 
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=1, test_size=0.25, random_state=random_state), n_jobs=1)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)

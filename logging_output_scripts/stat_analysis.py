@@ -28,6 +28,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from IPython import embed
+from logging_output_scripts.utils import get_dataframe, create_output_dir, config
+
 
 pd.options.display.max_rows = 2000
 
@@ -59,13 +61,14 @@ metrics = {
     "test_mean_squared_error": "MSE",
     "elitist_complexity": "model complexity"
 }
+# TODO: Move this to config.json
 tasks = {
     "combined_cycle_power_plant": "CCPP",
     "airfoil_self_noise": "ASN",
     "concrete_strength": "CS",
     "energy_cool": "EEC",
 }
-algorithms = ["ES", "RS", "NS", "MCNS", "NSLC"]
+algorithms = ["ES", "RS", "NS", "MCNS", "NSLC", "NS-P", "MCNS-P", "NSLC-P"]
 
 
 def list_from_ls(dname):
@@ -90,19 +93,28 @@ def smart_print(df, latex):
 def load_data():
     dfs = []
     keys = []
-    for algorithm in algorithms:
-        for task in tasks:
-            df = pd.read_csv(f"{dname}/{algorithm}/{task}{suffix}")
+    for heuristic in config['heuristics']:
+        for problem in config['datasets']:
+            df = get_dataframe(heuristic, problem)
+            if "metrics.test_neg_mean_squared_error" in df.keys():
+                test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
+            else:
+                test_neg_mean_squared_error = "test_neg_mean_squared_error"
+
+            if "metrics.elitist_complexity" in df.keys():
+                df["elitist_complexity"] = df["metrics.elitist_complexity"]
+                del df["metrics.elitist_complexity"]
+
+            df["test_mean_squared_error"] = -df[test_neg_mean_squared_error]
+            del df[test_neg_mean_squared_error]
+
             dfs.append(df)
-            keys.append((algorithm, task))
+            keys.append((heuristic, problem))
 
     df = pd.concat(dfs,
                    keys=keys,
                    names=["algorithm", "task"],
                    verify_integrity=True)
-
-    df["test_mean_squared_error"] = -df["test_neg_mean_squared_error"]
-    del df["test_neg_mean_squared_error"]
 
     df = df[metrics.keys()]
 
@@ -174,7 +186,7 @@ def calvo(latex, all_variants, check_mcmc, small_set):
 
             # We want the algorithms ordered as they are in the `algorithms`
             # list.
-            d = d[algorithms if not small_set else ["ES", "NS", "NSLC"]]
+            d = d[algorithms if not small_set else config["heuristics"]]
 
             title = f"Considering {mode} cv runs per task"
 
