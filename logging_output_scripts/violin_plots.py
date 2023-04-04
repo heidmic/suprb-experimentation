@@ -10,10 +10,9 @@ Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
 sns.set_style("whitegrid")
-sns.set(rc={"figure.dpi":300, 'savefig.dpi':300})
 sns.set_theme(style="whitegrid",
               font="Times New Roman",
-              font_scale=1,
+              font_scale=0.8,
               rc={
                   "lines.linewidth": 1,
                   "pdf.fonttype": 42,
@@ -59,12 +58,18 @@ def create_violin_plots():
         fig, ax = plt.subplots()
         ax = sns.violinplot(x='Used_Representation', y="test_neg_mean_squared_error",
                             data=res_var, scale="width", scale_hue=False)
-        ax.set(xlabel='Estimator')
-        ax.set(ylabel='MSE')
-        ax.set(title=problem)
+        # ax = sns.swarmplot(x='Used_Representation', y="test_neg_mean_squared_error", data=res_var, size=3)
+
+        ax.set_ylabel('RD method', weight="bold")
+        ax.set_xlabel('MSE', weight="bold")
+        title_dict = {"concrete_strength": "Concrete Strength",
+                      "combined_cycle_power_plant": "Combined Cycle Power Plant",
+                      "airfoil_self_noise": "Airfoil Self Noise",
+                      "energy_cool": "Energy Cool"}
+        ax.set_title(title_dict[problem], style="italic")
 
         plt.tight_layout()
-        fig.savefig(f"{final_output_dir}/{problem}.png")
+        fig.savefig(f"{final_output_dir}/{problem}.png", dpi=500)
 
 
 if __name__ == '__main__':

@@ -144,14 +144,8 @@ def cli():
 @click.option("--small-set/--no-small-set",
               help="Whether to only analyse ES, NS, NSLC",
               default=False)
-def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = False):
-    with open('logging_output_scripts/config.json') as f:
-        config = json.load(f)
-
-    final_output_dir = f"{config['output_directory']}"
-    check_and_create_dir(final_output_dir, "calvo")
-
-    df = load_data(config)
+def calvo(latex, all_variants, check_mcmc, small_set):
+    df = load_data()
 
     # Explore whether throwing away distributional information gives us any
     # insights.
@@ -173,22 +167,58 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
 
     pd.options.mode.chained_assignment = None
 
-    for metric in metrics:
-        fig, ax = plt.subplots(len(variants), figsize=(
-            textwidth, 2.7 if metrics[metric] == "MSE" else 5 / 7 * 2.7), dpi=72)
+    MCNS_concrete_strength = df.loc["MCNS"].loc["concrete_strength"].set_index(np.arange(64))
+    MCNS_combined_cycle_power_plant = df.loc["MCNS"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
+    MCNS_airfoil_self_noise = df.loc["MCNS"].loc["airfoil_self_noise"].set_index(np.arange(64))
+    MCNS_energy_cool = df.loc["MCNS"].loc["energy_cool"].set_index(np.arange(64))
 
+    mcns = pd.concat(
+        [MCNS_concrete_strength, MCNS_combined_cycle_power_plant, MCNS_airfoil_self_noise, MCNS_energy_cool],
+        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
+
+    NS_concrete_strength = df.loc["NS"].loc["concrete_strength"].set_index(np.arange(64))
+    NS_combined_cycle_power_plant = df.loc["NS"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
+    NS_airfoil_self_noise = df.loc["NS"].loc["airfoil_self_noise"].set_index(np.arange(64))
+    NS_energy_cool = df.loc["NS"].loc["energy_cool"].set_index(np.arange(64))
+
+    ns = pd.concat(
+        [NS_concrete_strength, NS_combined_cycle_power_plant, NS_airfoil_self_noise, NS_energy_cool],
+        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
+
+    NSLC_concrete_strength = df.loc["NSLC"].loc["concrete_strength"].set_index(np.arange(64))
+    NSLC_combined_cycle_power_plant = df.loc["NSLC"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
+    NSLC_airfoil_self_noise = df.loc["NSLC"].loc["airfoil_self_noise"].set_index(np.arange(64))
+    NSLC_energy_cool = df.loc["NSLC"].loc["energy_cool"].set_index(np.arange(64))
+
+    nslc = pd.concat(
+        [NSLC_concrete_strength, NSLC_combined_cycle_power_plant, NSLC_airfoil_self_noise, NSLC_energy_cool],
+        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
+
+    df = pd.concat(
+        [mcns, ns, nslc, df.loc["ES"], df.loc["RS"], df.loc["NS-P"], df.loc["MCNS-P"], df.loc["NSLC-P"]],
+        axis=0, keys=["MCNS", "NS", "NSLC", "ES", "RS", "NS-P", "MCNS-P", "NSLC-P"])
+
+    for metric in metrics:
+        # fig, ax = plt.subplots(len(variants), figsize=(linewidth, 2.7), dpi=72)
+        fig, ax = plt.subplots(
+            len(variants),
+            figsize=(textwidth, 2.7),  # if metrics[metric] == "MSE" else 5 / 7 * 2.7),
+            dpi=72)
         if not all_variants:
             ax = [ax]
 
         i = -1
         for mode, f in variants.items():
             i += 1
-
             d = f(df)
 
             # We want the algorithms ordered as they are in the `algorithms`
             # list.
             d = d[config["heuristics"] if not small_set else config["heuristics"]]
+
+            for key, value in d.items():
+                if key == "NS" or key == "MCNS" or key == "NSLC":
+                    d[key + "-G"] = d.pop(key)
 
             title = f"Considering {mode} cv runs per task"
 
@@ -211,14 +241,39 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
 
             # Join all chains, name columns.
             sample = np.concatenate(model.infdata_.posterior.weights)
-            sample = pd.DataFrame(sample, columns=model.infdata_.posterior.weights.algorithm_labels)
-
-            xlabel = f"Probability"  # f"Probability of having the lowest {metrics[metric]}"
+            sample = pd.DataFrame(
+                sample, columns=model.infdata_.posterior.weights.algorithm_labels)
             ylabel = "RD method"
             sample = sample.unstack().reset_index(0).rename(columns={"level_0": ylabel, 0: xlabel})
 
-            sns.boxplot(data=sample, y=ylabel, x=xlabel, ax=ax[i], fliersize=0.3)
-            ax[i].set_title(metrics[metric], style="italic")
+            # if metrics[metric] == "MSE":
+            #     add_prob = sample[sample[ylabel] == "ES"][xlabel] + sample[
+            #         sample[ylabel] == "NSLC"][xlabel]
+            #     add_prob = pd.DataFrame({
+            #         ylabel:
+            #         np.repeat(r"ES $\vee{} NSLC", len(add_prob)),
+            #         xlabel:
+            #         add_prob
+            #     })
+            #     sample = sample.append(add_prob)
+            #     add_prob = sample[sample[ylabel] == "ES"][xlabel] + sample[
+            #         sample[ylabel] == "NSLC"][xlabel] + sample[sample[ylabel]
+            #                                                    == "NS"][xlabel]
+            #     add_prob = pd.DataFrame({
+            #         ylabel:
+            #         np.repeat(r"ES $\vee{} NSLC $\vee{} NS", len(add_prob)),
+            #         xlabel:
+            #         add_prob
+            #     })
+            #     sample = sample.append(add_prob)
+
+            sns.boxplot(data=sample,
+                        y=ylabel,
+                        x=xlabel,
+                        ax=ax[i],
+                        fliersize=0.3)
+            if all_variants:
+                ax[i].set_title(title)
             ax[i].set_xlabel(xlabel, weight="bold")
             ax[i].set_ylabel(ylabel, weight="bold")
 
@@ -227,22 +282,47 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
                     dpi=fig.dpi, bbox_inches="tight")
 
 
-@ cli.command()
-@ click.option("--latex/--no-latex",
-               help="Generate LaTeX output (tables etc.)",
-               default=True)
-@ click.argument("cand1",
-                 default="")
-@ click.argument("cand2",
-                 default="")
-@ click.argument("cand1_name",
-                 default="")
-@ click.argument("cand2_name",
-                 default="")
-def ttest(latex, cand1, cand2, cand1_name, cand2_name):
-    check_and_create_dir(final_output_dir, "ttest")
+@cli.command()
+@click.option("--latex/--no-latex",
+              help="Generate LaTeX output (tables etc.)",
+              default=True)
+def ttest(latex):
     df = load_data()
     pd.options.mode.chained_assignment = None
+
+    MCNS_concrete_strength = df.loc["MCNS"].loc["concrete_strength"].set_index(np.arange(64))
+    MCNS_combined_cycle_power_plant = df.loc["MCNS"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
+    MCNS_airfoil_self_noise = df.loc["MCNS"].loc["airfoil_self_noise"].set_index(np.arange(64))
+    MCNS_energy_cool = df.loc["MCNS"].loc["energy_cool"].set_index(np.arange(64))
+
+    mcns = pd.concat(
+        [MCNS_concrete_strength, MCNS_combined_cycle_power_plant, MCNS_airfoil_self_noise, MCNS_energy_cool],
+        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
+
+    # NS_concrete_strength = df.loc["NS"].loc["concrete_strength"].set_index(np.arange(64))
+    # NS_combined_cycle_power_plant = df.loc["NS"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
+    # NS_airfoil_self_noise = df.loc["NS"].loc["airfoil_self_noise"].set_index(np.arange(64))
+    # NS_energy_cool = df.loc["NS"].loc["energy_cool"].set_index(np.arange(64))
+
+    # ns = pd.concat(
+    #     [NS_concrete_strength, NS_combined_cycle_power_plant, NS_airfoil_self_noise, NS_energy_cool],
+    #     axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
+
+    # NSLC_concrete_strength = df.loc["NSLC"].loc["concrete_strength"].set_index(np.arange(64))
+    # NSLC_combined_cycle_power_plant = df.loc["NSLC"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
+    # NSLC_airfoil_self_noise = df.loc["NSLC"].loc["airfoil_self_noise"].set_index(np.arange(64))
+    # NSLC_energy_cool = df.loc["NSLC"].loc["energy_cool"].set_index(np.arange(64))
+
+    # nslc = pd.concat(
+    #     [NSLC_concrete_strength, NSLC_combined_cycle_power_plant, NSLC_airfoil_self_noise, NSLC_energy_cool],
+    #     axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
+
+    # df = pd.concat(
+    #     [mcns, ns, nslc, df.loc["ES"], df.loc["RS"], df.loc["NS-P"], df.loc["MCNS-P"], df.loc["NSLC-P"]],
+    #     axis=0, keys=["MCNS", "NS", "NSLC", "ES", "RS", "NS-P", "MCNS-P", "NSLC-P"])
+
+    cand1 = "ES"
+    cand2 = "MCNS"
 
     hdis = {}
     for metric in metrics:
@@ -258,10 +338,12 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 y2 = df[metric].loc[cand2, task]
                 model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
 
-                # Compute 100(1 - alpha)% high density interval.
-                alpha = 0.005
-                hdi = (model.model_.ppf(alpha), model.model_.ppf(1 - alpha))
-                hdis[metrics[metric]][config["datasets"][task]] = {"lower": hdi[0], "upper": hdi[1]}
+            df = pd.concat([mcns, df.loc["ES"], df.loc["NS-P"], df.loc["MCNS-P"], df.loc["NSLC-P"]], axis=0,
+                           keys=["MCNS", "ES", "NS-P", "MCNS-P", "NSLC-P"], names=["algorithm", "task", "run_id"])
+
+            y1 = df[metric].loc[cand1, task]
+            y2 = df[metric].loc[cand2, task]
+            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
 
                 # Compute bounds of the plots based on ppf.
                 xlower_ = model.model_.ppf(1e-6)
@@ -283,8 +365,22 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                               f"{metrics[metric].capitalize()}({cand2_name})\n- "
                               f"{metrics[metric].capitalize()}({cand1_name})"))
 
-                ylabel = "Density"
-                data = pd.DataFrame({xlabel: x, ylabel: y})
+            # Create DataFrame for easier seaborn'ing.
+            cand1_name = cand1
+            cand2_name = cand2
+            if cand1 == "MCNS" or cand1 == "NS" or cand1 == "NSLC":
+                cand1_name = cand1 + "-G"
+            if cand2 == "MCNS" or cand2 == "NS" or cand2 == "NSLC":
+                cand2_name = cand2 + "-G"
+
+            xlabel = (
+                f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
+                if metrics[metric] == "MSE" else
+                (f"{metrics[metric].capitalize()}({cand2_name})\n- "
+                 f"{metrics[metric].capitalize()}({cand1_name})"))
+
+            ylabel = "Density"
+            data = pd.DataFrame({xlabel: x, ylabel: y})
 
                 # Plot posterior.
                 # sns.histplot(model.model_.rvs(50000),
@@ -317,19 +413,17 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                     rope = stds.mean()
                     rope = [-rope, rope]
 
-                    # Add rope lines and values.
-                    ax[i].vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
-                    ax[i].fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
-
+            if metrics[metric] == "model complexity":
+                # Compute rope for this task.
                 # Remove RS runs.
-                d_ = df[metric].unstack("algorithm")[[
-                    alg for alg in config["heuristics"] if alg != "RS"
-                ]].stack()
-
-                    probs[config['datasets'][task]] = {
-                        "p(ES practically higher complexity)": (sample < rope[0]).sum() / len(sample),
-                        "p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
-                        "p(NSLC practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
+                ()
+                d_ = df[metric].unstack("algorithm")[[alg for alg in config["heuristics"] if alg != "MCNS-P"]].stack()
+                # d_ = df[metric]  # .unstack(0).stack()
+                ()
+                # Rope is based on std of the other algorithms.
+                stds = d_[task].groupby("algorithm").std()
+                rope = stds.mean()
+                rope = [-rope, rope]
 
                 ax[i].set_ylabel(ylabel, weight="bold")
                 ax[i].set_xlabel(xlabel, weight="bold")
