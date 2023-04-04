@@ -5,18 +5,14 @@
     "output_directory": "logging_output_scripts/outputs",
     "heuristics": [
         "ES",
-        "RS",
-        "NS",
-        "MCNS",
-        "NSLC",
-        "NS-P",
-        "MCNS-P",
-        "NSLC-P"
+        "XCSF",
+        "Decision Tree",
+        "Random Forest"
     ],
     "datasets": [
-        "concrete_strength",
         "combined_cycle_power_plant",
         "airfoil_self_noise",
+        "concrete_strength",
         "energy_cool"
     ]
 }

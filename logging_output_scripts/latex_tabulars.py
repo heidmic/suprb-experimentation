@@ -245,6 +245,62 @@ def single_table_all_complexity():
         file.write(latex)
 
 
+def single_table_all_mse():
+    columns = []
+    for heuristic in config["heuristics"]:
+        # Each row features one problem for one model
+        row = []
+        if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
+            row.append(heuristic + "-G")
+        else:
+            row.append(heuristic)
+
+        for problem in config["datasets"]:
+            df = pd.read_csv(f"{summary_csv_dir}/{heuristic}_summary.csv")
+            res = df[df['Problem'].str.contains(problem)]
+            row.append(str(round(float(res['MEAN_MSE']), 2))+u"\u00B1" +
+                       str(round(float(res['STD_MSE']), 2)))
+        columns.append(row)
+    frame = pd.DataFrame(columns)
+    headers = [x for y in [['MSE'] for i in range(
+        frame.shape[1]-1)] for x in y]
+    headers = [i for i in range(frame.shape[1]-1)]
+    latex = tabulate(frame, tablefmt="latex_booktabs", headers=headers)
+    splits = latex.split("\\toprule")
+    methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in config["datasets"]])
+    latex = splits[0]+"\\toprule"+methods+splits[1]
+    with open(f"{final_output_dir}/mse_all.txt", "w") as file:
+        file.write(latex)
+
+
+def single_table_all_complexity():
+    columns = []
+    for heuristic in config["heuristics"]:
+        # Each row features one problem for one model
+        row = []
+        if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
+            row.append(heuristic + "-G")
+        else:
+            row.append(heuristic)
+
+        for problem in config["datasets"]:
+            df = pd.read_csv(f"{summary_csv_dir}/{heuristic}_summary.csv")
+            res = df[df['Problem'].str.contains(problem)]
+            row.append(str(round(float(res['MEAN_COMP']), 2))+u"\u00B1" +
+                       str(round(float(res['STD_COMP']), 2)))
+        columns.append(row)
+    frame = pd.DataFrame(columns)
+    headers = [x for y in [['Complexity'] for i in range(
+        frame.shape[1]-1)] for x in y]
+    headers = [i for i in range(frame.shape[1]-1)]
+    latex = tabulate(frame, tablefmt="latex_booktabs", headers=headers)
+    splits = latex.split("\\toprule")
+    methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in config["datasets"]])
+    latex = splits[0]+"\\toprule"+methods+splits[1]
+    with open(f"{final_output_dir}/complexity_all.txt", "w") as file:
+        file.write(latex)
+
+
 # Add / leave out certain tables
 if __name__ == '__main__':
     # write_complexity()
