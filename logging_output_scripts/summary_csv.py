@@ -36,12 +36,12 @@ def create_summary_csv():
                 test_neg_mean_squared_error = "test_neg_mean_squared_error"
 
             # Calculates mean, min, max, median and std of elitist_complexity across all runs
-            elitist_complexity_eval = fold_df[elitist_complexity]
-            values += "," + str(elitist_complexity_eval.min())
-            values += "," + str(elitist_complexity_eval.max())
-            values += "," + str(round(elitist_complexity_eval.mean(), 2))
-            values += "," + str(round(elitist_complexity_eval.std(), 2))
-            values += "," + str(elitist_complexity_eval.median())
+            # elitist_complexity_eval = fold_df[elitist_complexity]
+            # values += "," + str(elitist_complexity_eval.min())
+            # values += "," + str(elitist_complexity_eval.max())
+            # values += "," + str(round(elitist_complexity_eval.mean(), 2))
+            # values += "," + str(round(elitist_complexity_eval.std(), 2))
+            # values += "," + str(elitist_complexity_eval.median())
 
             # Calculates both mse and std of mse between all runs (Changes MSE to positive value)
             mse = -fold_df[test_neg_mean_squared_error]
