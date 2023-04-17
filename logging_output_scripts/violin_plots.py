@@ -35,6 +35,8 @@ def create_violin_plots():
                 for x in range(fold_df.shape[0]):
                     if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
                         heuristic += "-G"
+                    if heuristic == "ES":
+                        heuristic = "Suprb"
                     name.append(heuristic)
                 # Adds additional column for plotting
                 if first:
@@ -58,10 +60,10 @@ def create_violin_plots():
         fig, ax = plt.subplots()
         ax = sns.violinplot(x='Used_Representation', y="test_neg_mean_squared_error",
                             data=res_var, scale="width", scale_hue=False)
-        # ax = sns.swarmplot(x='Used_Representation', y="test_neg_mean_squared_error", data=res_var, size=3)
+        # ax = sns.swarmplot(x='Used_Representation', y="test_neg_mean_squared_error", data=res_var, size=2)
 
-        ax.set_ylabel('RD method', weight="bold")
-        ax.set_xlabel('MSE', weight="bold")
+        ax.set_xlabel('Estimator', weight="bold")
+        ax.set_ylabel('MSE', weight="bold")
         title_dict = {"concrete_strength": "Concrete Strength",
                       "combined_cycle_power_plant": "Combined Cycle Power Plant",
                       "airfoil_self_noise": "Airfoil Self Noise",
@@ -69,7 +71,8 @@ def create_violin_plots():
         ax.set_title(title_dict[problem], style="italic")
 
         plt.tight_layout()
-        fig.savefig(f"{final_output_dir}/{problem}.png", dpi=500)
+        # fig.savefig(f"{final_output_dir}/{problem}_swarm.png", dpi=500)
+        fig.savefig(f"{final_output_dir}/{problem}_violin.png", dpi=500)
 
 
 if __name__ == '__main__':
