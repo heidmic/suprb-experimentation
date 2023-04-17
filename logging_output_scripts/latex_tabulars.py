@@ -252,6 +252,8 @@ def single_table_all_mse():
         row = []
         if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
             row.append(heuristic + "-G")
+        elif heuristic == "ES":
+            row.append("Suprb")
         else:
             row.append(heuristic)
 
@@ -280,6 +282,8 @@ def single_table_all_complexity():
         row = []
         if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
             row.append(heuristic + "-G")
+        elif heuristic == "ES":
+            row.append("Suprb")
         else:
             row.append(heuristic)
 

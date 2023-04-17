@@ -156,9 +156,9 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
             i += 1
             d = f(df)[config["heuristics"]]
 
-            for key, value in d.items():
-                if key == "NS" or key == "MCNS" or key == "NSLC":
-                    d[key + "-G"] = d.pop(key)
+            # for key, value in d.items():
+            # if key == "XCSF" or key == "MCNS" or key == "Decision Tree":
+            #     d[key + "-G"] = d.pop(key)
 
             title = f"Considering {mode} cv runs per task"
 
