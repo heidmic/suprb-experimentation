@@ -48,6 +48,8 @@ def write_complexity_all():
         df = pd.read_csv(f"{summary_csv_dir}/{heuristic}_summary.csv")
         for column_name, column_name_short in zip(comp_column.values(), comp_column_short.values()):
             data_res = load_problem_columns(df, column_name)
+            if heuristic == "ES":
+                heuristic = "Suprb"
             comp_list.append((heuristic, column_name_short, data_res[0], data_res[1], data_res[2], data_res[3]))
 
     res = tabulate(comp_list, tablefmt="latex_booktabs", headers=datasets_short.values())
@@ -64,6 +66,8 @@ def write_complexity():
         comp_list = []
         for column_name, column_name_short in zip(comp_column.values(), comp_column_short.values()):
             data_res = load_problem_columns(df, column_name)
+            if heuristic == "ES":
+                heuristic = "Suprb"
             comp_list.append((column_name_short, data_res[0], data_res[1], data_res[2], data_res[3]))
 
         res = tabulate(comp_list, tablefmt="latex_booktabs", headers=datasets_short.values())
@@ -179,6 +183,8 @@ def single_table():
     with open(f"{final_output_dir}/combined.txt", "w") as file:
         file.write(latex)
 
+# TODO: Vor +- muss ein &
+
 
 def single_table_all_mse():
     columns = []
@@ -187,6 +193,8 @@ def single_table_all_mse():
         row = []
         if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
             row.append(heuristic + "-G")
+        elif heuristic == "ES":
+            row.append("Suprb")
         else:
             row.append(heuristic)
 
@@ -215,6 +223,8 @@ def single_table_all_complexity():
         row = []
         if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
             row.append(heuristic + "-G")
+        elif heuristic == "ES":
+            row.append("Suprb")
         else:
             row.append(heuristic)
 
