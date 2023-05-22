@@ -248,12 +248,12 @@ def single_table_all_complexity():
 
 # Add / leave out certain tables
 if __name__ == '__main__':
-    write_complexity()
-    write_complexity_all()
+    # write_complexity()
+    # write_complexity_all()
     # Only use if genomes are actually tracked.
     # write_genomes()
     write_mse()
     write_mse_all()
-    single_table()
+    # single_table()
     single_table_all_mse()
-    single_table_all_complexity()
+    # single_table_all_complexity()

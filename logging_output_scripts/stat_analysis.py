@@ -350,7 +350,7 @@ def ttest(latex):
     #     axis=0, keys=["ES", "XCSF", "Decision Tree", "Random Forest"])
 
     cand2 = "ES"
-    cand1 = "Random Forest"
+    cand1 = "Decision Tree"
 
     hdis = {}
     for metric in metrics:
@@ -399,9 +399,9 @@ def ttest(latex):
             cand1_name = cand1
             cand2_name = cand2
             if cand1 == "ES":
-                cand1_name = "Suprb"
+                cand1_name = "SupRB"
             if cand2 == "ES":
-                cand2_name = "Suprb"
+                cand2_name = "SupRB"
 
             xlabel = (
                 f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
