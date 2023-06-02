@@ -20,6 +20,8 @@ from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import es, origin, mutation
+from suprb.solution.initialization import RandomInit
+import suprb.solution.mixing_model as mixing_model
 
 
 random_state = 42
@@ -52,7 +54,8 @@ def run(problem: str, job_id: str):
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
-        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32),
+        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, init=RandomInit(mixing=mixing_model.ErrorExperienceHeuristic(
+            filter_subpopulation=mixing_model.RouletteWheel(2, 2), experience_calculation=mixing_model.CapExperienceWithDimensionality(10, 15), experience_weight=2))),
         n_iter=2,
         n_rules=4,
         verbose=10,
@@ -81,15 +84,15 @@ def run(problem: str, job_id: str):
             'rule_generation__mutation__sigma', *sigma_space)
         params.rule_generation__init__fitness__alpha = trial.suggest_float(
             'rule_generation__init__fitness__alpha', 0.01, 0.2)
-        #params.rule_generation__operator = trial.suggest_categorical(
+        # params.rule_generation__operator = trial.suggest_categorical(
         #    'rule_generation__operator', ['&', ',', '+'])
 
-        #if params.rule_generation__operator == '&':
+        # if params.rule_generation__operator == '&':
         #    params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 100)
 
-        #params.rule_generation__mutation = trial.suggest_categorical(
+        # params.rule_generation__mutation = trial.suggest_categorical(
         #    'mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])
-        #params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
+        # params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
@@ -97,17 +100,21 @@ def run(problem: str, job_id: str):
             ['RouletteWheel',
              'Tournament',
              'LinearRank', 'Random'])
-        params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
+        params.solution_composition__selection = getattr(
+            ga.selection, params.solution_composition__selection)()
 
         if isinstance(params.solution_composition__selection, ga.selection.Tournament):
-            params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)
+            params.solution_composition__selection__k = trial.suggest_int(
+                'solution_composition__selection__k', 3, 10)
 
         params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover',
                                                                            ['NPoint', 'Uniform'])
-        params.solution_composition__crossover = getattr(ga.crossover, params.solution_composition__crossover)()
+        params.solution_composition__crossover = getattr(
+            ga.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
-            params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)
+            params.solution_composition__crossover__n = trial.suggest_int(
+                'solution_composition__crossover__n', 1, 10)
 
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
@@ -121,9 +128,11 @@ def run(problem: str, job_id: str):
     # random_states = np.random.SeedSequence(random_state).generate_state(8)
     # experiment.with_random_states(random_states, n_jobs=2)
 
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
+    evaluation = CrossValidate(
+        estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=1, test_size=0.25, random_state=random_state), n_jobs=1)
+    experiment.perform(evaluation, cv=ShuffleSplit(
+        n_splits=1, test_size=0.25, random_state=random_state), n_jobs=1)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
