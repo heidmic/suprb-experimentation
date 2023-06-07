@@ -46,22 +46,21 @@ def run(problem: str, job_id: str):
 
     estimator = SupRB(
         rule_generation=es.ES1xLambda(
-            operator='&',
-            n_iter=150,
-            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
-                                              model=Ridge(alpha=0.01,
-                                                          random_state=random_state)),
+            operator='&', n_iter=150, init=rule.initialization.MeanInit(
+                fitness=rule.fitness.VolumeWu(),
+                model=Ridge(alpha=0.01, random_state=random_state)),
             mutation=mutation.HalfnormIncrease(),
-            origin_generation=origin.SquaredError(),
-        ),
-        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, init=RandomInit(mixing=mixing_model.ErrorExperienceHeuristic(
-            filter_subpopulation=mixing_model.RouletteWheel(2, 2), experience_calculation=mixing_model.CapExperienceWithDimensionality(10, 15), experience_weight=2))),
-        n_iter=2,
-        n_rules=4,
-        verbose=10,
-        logger=CombinedLogger(
-            [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
-    )
+            origin_generation=origin.SquaredError(),),
+        solution_composition=ga.GeneticAlgorithm(
+            n_iter=32, population_size=32,
+            init=RandomInit(
+                mixing=mixing_model.ErrorExperienceHeuristic(
+                    filter_subpopulation=mixing_model.RouletteWheel(2, 2),
+                    experience_calculation=mixing_model.CapExperienceWithDimensionality(10, 15),
+                    experience_weight=2))),
+        n_iter=2, n_rules=4, verbose=10,
+        logger=CombinedLogger([('stdout', StdoutLogger()),
+                               ('default', DefaultLogger())]),)
 
     tuning_params = dict(
         estimator=estimator,
@@ -119,14 +118,36 @@ def run(problem: str, job_id: str):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
+        params.solution_composition__init__mixing__filter_subpopulation__rule_amount = trial.suggest_float(
+            'solution_composition__init__mixing__filter_subpopulation__rule_amount', 10, 20)
+
+        params.solution_composition__init__mixing__experience_weight = trial.suggest_float(
+            'solution_composition__init__mixing__experience_weight', 0, 2)
+        params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
+            'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
+        params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+            'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
+
+        params.solution_composition__init__mixing__filter_subpopulation = trial.suggest_categorical(
+            'solution_composition__init__mixing__filter_subpopulation',
+            ['FilterSubpopulation', 'NBestFitness', 'NRandom', 'RouletteWheel'])
+        params.solution_composition__init__mixing__filter_subpopulation = getattr(
+            mixing_model, params.solution_composition__init__mixing__filter_subpopulation)()
+
+        params.solution_composition__init__mixing__experience_calculation = trial.suggest_categorical(
+            'solution_composition__init__mixing__experience_calculation',
+            ['ExperienceCalculation', 'CapExperience', 'CapExperienceWithDimensionality'])
+        params.solution_composition__init__mixing__experience_calculation = getattr(
+            mixing_model, params.solution_composition__init__mixing__experience_calculation)()
+
     experiment_name = f'ES Tuning & Experimentation {job_id} {problem}'
     experiment = Experiment(name=experiment_name,  verbose=10)
 
-    # tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
-    # experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
+    tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
+    experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
 
-    # random_states = np.random.SeedSequence(random_state).generate_state(8)
-    # experiment.with_random_states(random_states, n_jobs=2)
+    random_states = np.random.SeedSequence(random_state).generate_state(8)
+    experiment.with_random_states(random_states, n_jobs=2)
 
     evaluation = CrossValidate(
         estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
