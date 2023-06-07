@@ -1,0 +1,18 @@
+{
+    "filetype": "mlflow",
+    "data_directory_mlruns": "mlruns",
+    "data_directory_csv": "mlruns_csv",
+    "output_directory": "logging_output_scripts/outputs",
+    "heuristics": [
+        "ES",
+        "XCSF",
+        "Decision Tree",
+        "Random Forest"
+    ],
+    "datasets": [
+        "combined_cycle_power_plant",
+        "airfoil_self_noise",
+        "concrete_strength",
+        "energy_cool"
+    ]
+}
