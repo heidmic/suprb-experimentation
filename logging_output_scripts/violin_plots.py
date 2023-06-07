@@ -9,6 +9,14 @@ Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
 sns.set_style("whitegrid")
+sns.set_theme(style="whitegrid",
+              font="Times New Roman",
+              font_scale=1,
+              rc={
+                  "lines.linewidth": 1,
+                  "pdf.fonttype": 42,
+                  "ps.fonttype": 42
+              })
 
 final_output_dir = f"{config['output_directory']}/violin_plots"
 create_output_dir(config['output_directory'])
@@ -26,6 +34,8 @@ def create_violin_plots():
                 for x in range(fold_df.shape[0]):
                     if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
                         heuristic += "-G"
+                    if heuristic == "ES":
+                        heuristic = "SupRB"
                     name.append(heuristic)
                 # Adds additional column for plotting
                 if first:
@@ -47,14 +57,23 @@ def create_violin_plots():
 
         # Store violin-plots of all models in one plot
         fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y="test_neg_mean_squared_error",
-                            data=res_var, scale="width", scale_hue=False)
-        ax.set(xlabel='Estimator')
-        ax.set(ylabel='MSE')
-        ax.set(title=problem)
 
-        plt.tight_layout()
-        fig.savefig(f"{final_output_dir}/{problem}.png")
+        # ax = sns.violinplot(x='Used_Representation', y="test_neg_mean_squared_error",
+        #                     data=res_var, scale="width", scale_hue=False)
+        ax = sns.swarmplot(x='Used_Representation', y="test_neg_mean_squared_error", data=res_var, size=2)
+
+        ax.set_xlabel('Estimator', weight="bold")
+        ax.set_ylabel('MSE', weight="bold")
+        title_dict = {"concrete_strength": "Concrete Strength",
+                      "combined_cycle_power_plant": "Combined Cycle Power Plant",
+                      "airfoil_self_noise": "Airfoil Self Noise",
+                      "energy_cool": "Energy Efficiency Cooling"}
+        ax.set_title(title_dict[problem], style="italic")
+
+        ax.set_box_aspect(1)
+
+        # fig.savefig(f"{final_output_dir}/{problem}_swarm.png", dpi=500)
+        fig.savefig(f"{final_output_dir}/{problem}_violin.png", dpi=500)
 
 
 if __name__ == '__main__':
