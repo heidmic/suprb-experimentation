@@ -118,13 +118,10 @@ def run(problem: str, job_id: str):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-        params.solution_composition__init__mixing__filter_subpopulation__rule_amount = trial.suggest_float(
-            'solution_composition__init__mixing__filter_subpopulation__rule_amount', 10, 20)
-
         params.solution_composition__init__mixing__experience_weight = trial.suggest_float(
             'solution_composition__init__mixing__experience_weight', 0, 2)
-        params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
-            'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
+        # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
+        #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
         params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
             'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
 
@@ -140,7 +137,24 @@ def run(problem: str, job_id: str):
         params.solution_composition__init__mixing__experience_calculation = getattr(
             mixing_model, params.solution_composition__init__mixing__experience_calculation)()
 
-    experiment_name = f'ES Tuning & Experimentation {job_id} {problem}'
+        params.solution_composition__init__mixing__experience_weight = trial.suggest_float(
+            'solution_composition__init__mixing__experience_weight', 0, 2)
+        # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
+        #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
+
+        if isinstance(params.solution_composition__init__mixing__experience_calculation, mixing_model.CapExperienceWithDimensionality):
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+                'solution_composition__init__mixing__experience_calculation__upper_bound', 1, 5)
+        else:
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+                'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
+
+        params.solution_composition__init__mixing__filter_subpopulation__rule_amount = rule_amount
+
+    # Change this value according to run
+    rule_amount = 1
+
+    experiment_name = f'SupRB Tuning {job_id} {problem}; Rule amount {rule_amount}'
     experiment = Experiment(name=experiment_name,  verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
