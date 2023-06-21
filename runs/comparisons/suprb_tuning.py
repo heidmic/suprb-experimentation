@@ -37,6 +37,10 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 @click.option('-j', '--job_id', type=click.STRING, default='NA')
+@click.option('-r', '--rules_amount', type=click.INT, default=1)
+@click.option('-j', '--job_id', type=click.STRING, default='NA')
+@click.option('-j', '--job_id', type=click.STRING, default='NA')
+@click.option('-j', '--job_id', type=click.STRING, default='NA')
 def run(problem: str, job_id: str):
     print(f"Problem is {problem}, with job id {job_id}")
 
@@ -46,30 +50,31 @@ def run(problem: str, job_id: str):
 
     estimator = SupRB(
         rule_generation=es.ES1xLambda(
-            operator='&', n_iter=150, init=rule.initialization.MeanInit(
-                fitness=rule.fitness.VolumeWu(),
-                model=Ridge(alpha=0.01, random_state=random_state)),
+            operator='&',
+            n_iter=1000,
+            delay=30,
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
+                                              model=Ridge(alpha=0.01,
+                                                          random_state=random_state)),
             mutation=mutation.HalfnormIncrease(),
-            origin_generation=origin.SquaredError(),),
-        solution_composition=ga.GeneticAlgorithm(
-            n_iter=32, population_size=32,
-            init=RandomInit(
-                mixing=mixing_model.ErrorExperienceHeuristic(
-                    filter_subpopulation=mixing_model.RouletteWheel(2, 2),
-                    experience_calculation=mixing_model.CapExperienceWithDimensionality(10, 15),
-                    experience_weight=2))),
-        n_iter=2, n_rules=4, verbose=10,
-        logger=CombinedLogger([('stdout', StdoutLogger()),
-                               ('default', DefaultLogger())]),)
+            origin_generation=origin.SquaredError(),
+        ),
+        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32),
+        n_iter=32,
+        n_rules=4,
+        verbose=10,
+        logger=CombinedLogger(
+            [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
+    )
 
     tuning_params = dict(
         estimator=estimator,
         random_state=random_state,
         cv=4,
-        n_jobs_cv=1,
-        n_jobs=1,
-        n_calls=2,
-        timeout=60,  # 72 hours
+        n_jobs_cv=4,
+        n_jobs=4,
+        n_calls=1000,
+        timeout=60*60*72,  # 72 hours
         scoring='neg_mean_squared_error',
         verbose=10
     )
@@ -118,27 +123,30 @@ def run(problem: str, job_id: str):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-        params.solution_composition__init__mixing__experience_weight = trial.suggest_float(
-            'solution_composition__init__mixing__experience_weight', 0, 2)
         # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
         #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
         params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
             'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
 
+        # click it
         params.solution_composition__init__mixing__filter_subpopulation = trial.suggest_categorical(
             'solution_composition__init__mixing__filter_subpopulation',
             ['FilterSubpopulation', 'NBestFitness', 'NRandom', 'RouletteWheel'])
         params.solution_composition__init__mixing__filter_subpopulation = getattr(
             mixing_model, params.solution_composition__init__mixing__filter_subpopulation)()
 
+        # click it
         params.solution_composition__init__mixing__experience_calculation = trial.suggest_categorical(
             'solution_composition__init__mixing__experience_calculation',
             ['ExperienceCalculation', 'CapExperience', 'CapExperienceWithDimensionality'])
         params.solution_composition__init__mixing__experience_calculation = getattr(
             mixing_model, params.solution_composition__init__mixing__experience_calculation)()
 
+        # click it
         params.solution_composition__init__mixing__experience_weight = trial.suggest_float(
             'solution_composition__init__mixing__experience_weight', 0, 2)
+
+        # Upper and lower bound clip the experience into a given range
         # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
         #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
 
@@ -151,7 +159,7 @@ def run(problem: str, job_id: str):
 
         params.solution_composition__init__mixing__filter_subpopulation__rule_amount = rule_amount
 
-    # Change this value according to run
+    # click it
     rule_amount = 1
 
     experiment_name = f'SupRB Tuning {job_id} {problem}; Rule amount {rule_amount}'
@@ -161,13 +169,13 @@ def run(problem: str, job_id: str):
     experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
 
     random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=2)
+    experiment.with_random_states(random_states, n_jobs=8)
 
     evaluation = CrossValidate(
         estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
     experiment.perform(evaluation, cv=ShuffleSplit(
-        n_splits=1, test_size=0.25, random_state=random_state), n_jobs=1)
+        n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
