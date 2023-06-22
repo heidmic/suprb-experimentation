@@ -118,7 +118,7 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
             params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 2, 5)
         else:
-            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
 
     experiment_name = f'SupRB Tuning j:{job_id} p:{problem}; r:{rule_amount}; f:{filter_subpopulation}; -e:{experience_calculation}'
