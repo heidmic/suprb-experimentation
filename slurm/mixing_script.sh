@@ -2,8 +2,7 @@
 
 script="runs/comparisons/suprb_tuning.py"
 
-datasets=("concrete_strength")
-# "energy_cool" "combined_cycle_power_plant" "airfoil_self_noise")
+datasets=("concrete_strength" "energy_cool" "combined_cycle_power_plant" "airfoil_self_noise")
 filter_subpop=("FilterSubpopulation" "NBestFitness" "NRandom" "RouletteWheel")
 experience_calc=("ExperienceCalculation" "CapExperience" "CapExperienceWithDimensionality")
 
