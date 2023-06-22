@@ -116,10 +116,10 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
         #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
 
         if isinstance(params.solution_composition__init__mixing__experience_calculation, mixing_model.CapExperienceWithDimensionality):
-            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 1, 5)
         else:
-            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
 
     experiment_name = f'SupRB Tuning j:{job_id} p:{problem}; r:{rule_amount}; f:{filter_subpopulation}; -e:{experience_calculation}'
