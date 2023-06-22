@@ -85,8 +85,7 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
         # ES
         sigma_space = [0, np.sqrt(X.shape[1])]
 
-        params.rule_generation__mutation__sigma = trial.suggest_float(
-            'rule_generation__mutation__sigma', *sigma_space)
+        params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', *sigma_space)
         params.rule_generation__init__fitness__alpha = trial.suggest_float(
             'rule_generation__init__fitness__alpha', 0.01, 0.2)
 
@@ -116,10 +115,10 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
         #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
 
         if isinstance(params.solution_composition__init__mixing__experience_calculation, mixing_model.CapExperienceWithDimensionality):
-            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
-                'solution_composition__init__mixing__experience_calculation__upper_bound', 1, 5)
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+                'solution_composition__init__mixing__experience_calculation__upper_bound', 2, 5)
         else:
-            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
 
     experiment_name = f'SupRB Tuning j:{job_id} p:{problem}; r:{rule_amount}; f:{filter_subpopulation}; -e:{experience_calculation}'
