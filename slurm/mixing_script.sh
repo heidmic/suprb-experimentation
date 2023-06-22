@@ -28,15 +28,10 @@ for dataset in ${datasets[@]}; do
 			for ((k=rules_amount_start;k<=rules_amount_end;k++)); do
 				export rules_amount=$k
 
+				sbatch slurm/default.sbatch
 				echo "$JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID -r $rules_amount -f $filter_subpopulation -e $experience_calculation"
+				sleep 5
 			done
 		done
 	done
 done
-
-	# sbatch slurm/default.sbatch
-
-
-# python $JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID -r $rules_amount -f $filter_subpopulation -e $experience_calculation -w $experience_weight -u $experience_upper_bound"
-
-
