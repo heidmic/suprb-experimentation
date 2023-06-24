@@ -68,36 +68,6 @@ def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dic
                 result = _log_experiment(subexperiment, parent_name=run_name, depth=depth + 1)
                 if result is not None:
                     results.append(result)
-                if "Decisioasdn Tree" in experiment.name:
-                    for i, (estimator, result) in enumerate(
-                            zip(subexperiment.estimators_, _expand_dict(subexperiment.results_)),
-                            1):
-                        n_nodes = estimator.tree_.node_count
-                        children_left = estimator.tree_.children_left
-                        children_right = estimator.tree_.children_right
-                        feature = estimator.tree_.feature
-                        threshold = estimator.tree_.threshold
-
-                        node_depth = np.zeros(shape=n_nodes, dtype=np.int64)
-                        is_leaves = np.zeros(shape=n_nodes, dtype=bool)
-                        stack = [(0, 0)]  # start with the root node id (0) and its depth (0)
-                        while len(stack) > 0:
-                            # `pop` ensures each node is only visited once
-                            node_id, depth = stack.pop()
-                            node_depth[node_id] = depth
-
-                            # If the left and right child of a node is not the same we have a split
-                            # node
-                            is_split_node = children_left[node_id] != children_right[node_id]
-                            # If a split node, append left and right children and depth to `stack`
-                            # so we can loop through them
-                            if is_split_node:
-                                stack.append((children_left[node_id], depth + 1))
-                                stack.append((children_right[node_id], depth + 1))
-                            else:
-                                is_leaves[node_id] = True
-
-                        mlflow.log_metric("elitist_complexity", sum(is_leaves))
 
             with mlflow.start_run(run_name=f"{run_name}.averaged_exp", nested=True) as average_run:
                 average_results = {key: np.mean(value) for key, value in _expand_list(results).items()}
@@ -115,34 +85,6 @@ def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dic
                         log_run_result(result)
 
                         mlflow.set_tag('fold', True)
-
-                        if "Decisioasdn Tree" in experiment.name:
-                            n_nodes = estimator.tree_.node_count
-                            children_left = estimator.tree_.children_left
-                            children_right = estimator.tree_.children_right
-                            feature = estimator.tree_.feature
-                            threshold = estimator.tree_.threshold
-
-                            node_depth = np.zeros(shape=n_nodes, dtype=np.int64)
-                            is_leaves = np.zeros(shape=n_nodes, dtype=bool)
-                            stack = [(0, 0)]  # start with the root node id (0) and its depth (0)
-                            while len(stack) > 0:
-                                # `pop` ensures each node is only visited once
-                                node_id, depth = stack.pop()
-                                node_depth[node_id] = depth
-
-                                # If the left and right child of a node is not the same we have a split
-                                # node
-                                is_split_node = children_left[node_id] != children_right[node_id]
-                                # If a split node, append left and right children and depth to `stack`
-                                # so we can loop through them
-                                if is_split_node:
-                                    stack.append((children_left[node_id], depth + 1))
-                                    stack.append((children_right[node_id], depth + 1))
-                                else:
-                                    is_leaves[node_id] = True
-
-                            mlflow.log_metric("elitist_complexity", sum(is_leaves))
 
                 # Log cv average
                 with mlflow.start_run(run_name=f"{run_name}.averaged_cv", nested=True) as average_run:
@@ -190,47 +132,15 @@ def log_tuning(experiment: Experiment):
 
 
 def log_run(estimator: BaseEstimator):
-    logger = _get_default_logger(estimator)
-
+    # Log model parameters
     try_log_dict(estimator.get_params(), 'params.json')
-    try:
-        try_log_dict(logger.get_elitist(estimator), 'elitist.json')
-    except AttributeError:
-        print("Elitist not logged!")
 
+    logger = _get_default_logger(estimator)
     if logger is not None:
         # Log fitting metrics
         for key, values in logger.metrics_.items():
             for step, value in values.items():
                 mlflow.log_metric(key=key, value=value, step=step)
-
-    n_nodes = estimator.tree_.node_count
-    children_left = estimator.tree_.children_left
-    children_right = estimator.tree_.children_right
-    feature = estimator.tree_.feature
-    threshold = estimator.tree_.threshold
-
-    node_depth = np.zeros(shape=n_nodes, dtype=np.int64)
-    is_leaves = np.zeros(shape=n_nodes, dtype=bool)
-    stack = [(0, 0)]  # start with the root node id (0) and its depth (0)
-    while len(stack) > 0:
-        # `pop` ensures each node is only visited once
-        node_id, depth = stack.pop()
-        node_depth[node_id] = depth
-
-        # If the left and right child of a node is not the same we have a split
-        # node
-        is_split_node = children_left[node_id] != children_right[node_id]
-        # If a split node, append left and right children and depth to `stack`
-        # so we can loop through them
-        if is_split_node:
-            stack.append((children_left[node_id], depth + 1))
-            stack.append((children_right[node_id], depth + 1))
-        else:
-            is_leaves[node_id] = True
-
-    print("blyat", sum(is_leaves), n_nodes)
-    mlflow.log_metric("elitist_complexity", sum(is_leaves))
 
 
 def log_run_result(result: dict):
