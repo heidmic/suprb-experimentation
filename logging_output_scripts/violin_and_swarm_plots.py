@@ -1,8 +1,8 @@
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from logging_output_scripts.utils import get_dataframe, create_output_dir, config
+
+from logging_output_scripts.utils import get_dataframe, check_and_create_dir, config, get_all_runs
 
 
 """
@@ -25,18 +25,18 @@ plt.tight_layout()
 
 
 final_output_dir = f"{config['output_directory']}"
-create_output_dir(config['output_directory'])
-create_output_dir(final_output_dir)
 metric = "metrics.test_neg_mean_squared_error"
 
 
 def create_plots():
+    all_runs_list = get_all_runs()
     for problem in config['datasets']:
         first = True
-        for heuristic in config['heuristics']:
-            fold_df = get_dataframe(heuristic['name'], problem)
+        res_var = 0
+        for heuristic, renamed_heuristic in config['heuristics'].items():
+            fold_df = get_dataframe(all_runs_list, heuristic, problem)
             if fold_df is not None:
-                name = [heuristic['rename']] * fold_df.shape[0]
+                name = [renamed_heuristic] * fold_df.shape[0]
                 current_res = fold_df.assign(Used_Representation=name)
                 if first:
                     first = False
@@ -53,11 +53,7 @@ def create_plots():
     def ax_config(axis):
         ax.set_xlabel('Estimator', weight="bold")
         ax.set_ylabel('MSE', weight="bold")
-        title_dict = {"concrete_strength": "Concrete Strength",
-                      "combined_cycle_power_plant": "Combined Cycle Power Plant",
-                      "airfoil_self_noise": "Airfoil Self Noise",
-                      "energy_cool": "Energy Efficiency Cooling"}
-        ax.set_title(title_dict[problem], style="italic")
+        ax.set_title(config['datasets'][problem], style="italic")
         ax.set_box_aspect(1)
 
     # Store violin-plots of all models in one plot
@@ -74,9 +70,7 @@ def create_plots():
 
 
 if __name__ == '__main__':
-    for dir in ["", "violin_plots", "swarm_plots"]:
-        directory = f"{final_output_dir}/{dir}"
-        if not os.path.isdir(directory):
-            os.mkdir(directory)
+    for output_dir in ["", "violin_plots", "swarm_plots"]:
+        check_and_create_dir(final_output_dir, output_dir)
 
     create_plots()
