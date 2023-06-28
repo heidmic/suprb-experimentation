@@ -9,7 +9,7 @@ with open('logging_output_scripts/config.json') as f:
 def get_all_runs():
     print("Get all mlflow runs...")
     all_runs_list = []
-    heuristics = [heu['name'] for heu in config['heuristics']]
+    heuristics = [key for key in config['heuristics']]
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
 
     for run in all_runs:
@@ -42,6 +42,9 @@ def get_dataframe(all_runs_list, heuristic, dataset):
 
 
 def check_and_create_dir(output_folder, output_dir):
+    if not os.path.isdir(output_folder):
+        os.mkdir(output_folder)
+
     directory = f"{output_folder}/{output_dir}"
 
     if not os.path.isdir(directory):
