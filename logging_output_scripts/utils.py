@@ -1,31 +1,27 @@
 import os
 import json
 import mlflow
-import pandas as pd
 
 with open('logging_output_scripts/config.json') as f:
     config = json.load(f)
 
 
-if config['filetype'] == 'mlflow':
+def get_all_runs():
     print("Get all mlflow runs...")
     all_runs_list = []
-    all_runs = [item for item in next(os.walk(config['data_directory_mlruns']))[1] if item != '.trash' and item != '0']
+    heuristics = [heu['name'] for heu in config['heuristics']]
+    all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
+
     for run in all_runs:
-        all_runs_list.append(mlflow.search_runs([run]))
+        run_name = mlflow.search_runs([run])['tags.mlflow.runName'][0]
+        if any(substring in run_name for substring in heuristics):
+            all_runs_list.append(mlflow.search_runs([run]))
+            print(run_name)
+
+    return all_runs_list
 
 
-def get_dataframe(heuristic, problem):
-    result = None
-
-    result = get_mlflow_dataframe(heuristic, problem)
-    if result is None:
-        result = get_csv_dataframe(heuristic, problem)
-
-    return result
-
-
-def get_mlflow_dataframe(heuristic, dataset):
+def get_dataframe(all_runs_list, heuristic, dataset):
     df = None
     for run in all_runs_list:
         df = run[run['tags.mlflow.runName'].str.contains(f"{heuristic}")]
@@ -45,15 +41,8 @@ def get_mlflow_dataframe(heuristic, dataset):
     return None
 
 
-def get_csv_dataframe(heuristic, problem):
-    filename = f"{config['data_directory_csv']}/{heuristic}/{problem}.csv"
-    if os.path.isfile(filename):
-        df = pd.read_csv(filename)
-        return df[df['Name'].str.contains('fold')]
+def check_and_create_dir(output_folder, output_dir):
+    directory = f"{output_folder}/{output_dir}"
 
-    return None
-
-
-def create_output_dir(output_dir):
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+    if not os.path.isdir(directory):
+        os.mkdir(directory)

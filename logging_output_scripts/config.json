@@ -1,18 +1,17 @@
 {
-    "filetype": "mlflow",
-    "data_directory_mlruns": "mlruns",
-    "data_directory_csv": "mlruns_csv",
+    "data_directory": "mlruns",
     "output_directory": "logging_output_scripts/outputs",
-    "heuristics": [
-        "ES",
-        "XCSF",
-        "Decision Tree",
-        "Random Forest"
-    ],
-    "datasets": [
-        "combined_cycle_power_plant",
-        "airfoil_self_noise",
-        "concrete_strength",
-        "energy_cool"
-    ]
+    "heuristics": {
+        "p:energy_cool; r:1; f:NBestFitness; -e:ExperienceCalculation": "1",
+        "p:energy_cool; r:2; f:NBestFitness; -e:ExperienceCalculation": "2",
+        "p:energy_cool; r:3; f:NBestFitness; -e:ExperienceCalculation": "3",
+        "p:energy_cool; r:4; f:NBestFitness; -e:ExperienceCalculation": "4",
+        "p:energy_cool; r:5; f:NBestFitness; -e:ExperienceCalculation": "5"
+    },
+    "datasets": {
+        "combined_cycle_power_plant": "Concrete Strength",
+        "airfoil_self_noise": "Combined Cycle Power Plant",
+        "concrete_strength": "Airfoil Self Noise",
+        "energy_cool": "Energy Efficiency Cooling"
+    }
 }
