@@ -25,7 +25,7 @@ plt.tight_layout()
 
 
 final_output_dir = f"{config['output_directory']}"
-metric = "metrics.test_neg_mean_squared_error"
+mse = "metrics.test_neg_mean_squared_error"
 
 
 def create_plots():
@@ -45,10 +45,10 @@ def create_plots():
                     # Adds additional column for plotting
                     res_var = pd.concat([res_var, current_res])
 
-                print(f"Done for {problem} with {heuristic}")
+                print(f"Done for {problem} with {renamed_heuristic}")
 
     # Invert values since they are stored as negatives
-    res_var[metric] *= -1
+    res_var[mse] *= -1
 
     def ax_config(axis):
         ax.set_xlabel('Estimator', weight="bold")
@@ -58,19 +58,19 @@ def create_plots():
 
     # Store violin-plots of all models in one plot
     fig, ax = plt.subplots()
-    ax = sns.violinplot(x='Used_Representation', y=metric, data=res_var, scale="width", scale_hue=False)
+    ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, scale="width", scale_hue=False)
     ax_config(ax)
     fig.savefig(f"{final_output_dir}/violin_plots/{problem}.png")
 
     # Store swarm-plots of all models in one plot
     fig, ax = plt.subplots()
-    ax = sns.swarmplot(x='Used_Representation', y=metric, data=res_var, size=2)
+    ax = sns.swarmplot(x='Used_Representation', y=mse, data=res_var, size=2)
     ax_config(ax)
     fig.savefig(f"{final_output_dir}/swarm_plots/{problem}.png", dpi=500)
 
 
 if __name__ == '__main__':
-    for output_dir in ["", "violin_plots", "swarm_plots"]:
+    for output_dir in ["violin_plots", "swarm_plots"]:
         check_and_create_dir(final_output_dir, output_dir)
 
     create_plots()
