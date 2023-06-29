@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from IPython import embed
-from logging_output_scripts.utils import get_dataframe, create_output_dir, config
+from logging_output_scripts.utils import get_dataframe, check_and_create_dir, config, get_all_runs
 
 
 pd.options.display.max_rows = 2000
@@ -53,32 +53,14 @@ linewidth /= 72.27
 textwidth = 449.59116
 textwidth /= 72.27
 
+final_output_dir = f"{config['output_directory']}"
 elitist_complexity = "metrics.elitist_complexity"
 mse = "metrics.test_neg_mean_squared_error"
 
 metrics = {
-    "test_mean_squared_error": "MSE",
-    # "elitist_complexity": "model complexity"
+    mse: "MSE",
+    elitist_complexity: "model complexity"
 }
-# TODO: Move this to config.json
-tasks = {
-    "combined_cycle_power_plant": "CCPP",
-    "airfoil_self_noise": "ASN",
-    "concrete_strength": "CS",
-    "energy_cool": "EEC",
-}
-
-
-def list_from_ls(dname):
-    proc = subprocess.run(["ls", dname], capture_output=True)
-
-    if proc.stderr != b"":
-        print(proc.stderr)
-        sys.exit(1)
-
-    # Remove last element since that is an empty string always due to `ls`'s
-    # final newline.
-    return proc.stdout.decode().split("\n")[:-1]
 
 
 def smart_print(df, latex):
@@ -91,29 +73,17 @@ def smart_print(df, latex):
 def load_data(config):
     dfs = []
     keys = []
+    all_runs_list = get_all_runs()
+
     for heuristic in config['heuristics']:
         for problem in config['datasets']:
-            df = get_dataframe(heuristic, problem)
-            if "metrics.test_neg_mean_squared_error" in df.keys():
-                test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
-            else:
-                test_neg_mean_squared_error = "test_neg_mean_squared_error"
+            df = get_dataframe(all_runs_list, heuristic, problem)
+            if df is not None:
+                df[mse] *= -1
+                dfs.append(df)
+                keys.append((heuristic, problem))
 
-            if "metrics.elitist_complexity" in df.keys():
-                df["elitist_complexity"] = df["metrics.elitist_complexity"]
-                del df["metrics.elitist_complexity"]
-
-            df["test_mean_squared_error"] = -df[test_neg_mean_squared_error]
-            del df[test_neg_mean_squared_error]
-
-            dfs.append(df)
-            keys.append((heuristic, problem))
-
-    df = pd.concat(dfs,
-                   keys=keys,
-                   names=["algorithm", "task"],
-                   verify_integrity=True)
-
+    df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
     df = df[metrics.keys()]
 
     assert not df.isna().any().any(), "Some values are missing"
@@ -145,6 +115,8 @@ def cli():
               help="Whether to only analyse ES, NS, NSLC",
               default=False)
 def calvo(latex, all_variants, check_mcmc, small_set):
+    check_and_create_dir(final_output_dir, "calvo")
+
     df = load_data()
 
     # Explore whether throwing away distributional information gives us any
@@ -167,52 +139,10 @@ def calvo(latex, all_variants, check_mcmc, small_set):
 
     pd.options.mode.chained_assignment = None
 
-    MCNS_concrete_strength = df.loc["ES"].loc["concrete_strength"].set_index(np.arange(64))
-    # MCNS_combined_cycle_power_plant = df.loc["ES"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    MCNS_airfoil_self_noise = df.loc["ES"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    MCNS_energy_cool = df.loc["ES"].loc["energy_cool"].set_index(np.arange(64))
-
-    mcns = pd.concat(
-        [MCNS_concrete_strength, MCNS_airfoil_self_noise, MCNS_energy_cool],
-        axis=0, keys=['concrete_strength', 'airfoil_self_noise', 'energy_cool'])
-
-    NS_concrete_strength = df.loc["XCSF"].loc["concrete_strength"].set_index(np.arange(64))
-    # NS_combined_cycle_power_plant = df.loc["XCSF"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    NS_airfoil_self_noise = df.loc["XCSF"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    NS_energy_cool = df.loc["XCSF"].loc["energy_cool"].set_index(np.arange(64))
-
-    ns = pd.concat(
-        [NS_concrete_strength, NS_airfoil_self_noise, NS_energy_cool],
-        axis=0, keys=['concrete_strength', 'airfoil_self_noise', 'energy_cool'])
-
-    NSLC_concrete_strength = df.loc["Decision Tree"].loc["concrete_strength"].set_index(np.arange(64))
-    # NSLC_combined_cycle_power_plant = df.loc["Decision Tree"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    NSLC_airfoil_self_noise = df.loc["Decision Tree"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    NSLC_energy_cool = df.loc["Decision Tree"].loc["energy_cool"].set_index(np.arange(64))
-
-    nslc = pd.concat(
-        [NSLC_concrete_strength, NSLC_airfoil_self_noise, NSLC_energy_cool],
-        axis=0, keys=['concrete_strength', 'airfoil_self_noise', 'energy_cool'])
-
-    rf_concrete_strength = df.loc["Random Forest"].loc["concrete_strength"].set_index(np.arange(64))
-    # rf_combined_cycle_power_plant = df.loc["Random Forest"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    rf_airfoil_self_noise = df.loc["Random Forest"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    rf_energy_cool = df.loc["Random Forest"].loc["energy_cool"].set_index(np.arange(64))
-
-    rf = pd.concat(
-        [rf_concrete_strength, rf_airfoil_self_noise, rf_energy_cool],
-        axis=0, keys=['concrete_strength', 'airfoil_self_noise', 'energy_cool'])
-
-    df = pd.concat(
-        [mcns, ns, nslc, rf],
-        axis=0, keys=["ES", "XCSF", "Decision Tree", "Random Forest"])
-
     for metric in metrics:
-        # fig, ax = plt.subplots(len(variants), figsize=(linewidth, 2.7), dpi=72)
-        fig, ax = plt.subplots(
-            len(variants),
-            figsize=(textwidth, 2.7),  # if metrics[metric] == "MSE" else 5 / 7 * 2.7),
-            dpi=72)
+        fig, ax = plt.subplots(len(variants), figsize=(
+            textwidth, 2.7 if metrics[metric] == "MSE" else 5 / 7 * 2.7), dpi=72)
+
         if not all_variants:
             ax = [ax]
 
@@ -224,10 +154,6 @@ def calvo(latex, all_variants, check_mcmc, small_set):
             # We want the algorithms ordered as they are in the `algorithms`
             # list.
             d = d[config["heuristics"] if not small_set else config["heuristics"]]
-
-            # for key, value in d.items():
-            # if key == "XCSF" or key == "MCNS" or key == "Decision Tree":
-            #     d[key + "-G"] = d.pop(key)
 
             title = f"Considering {mode} cv runs per task"
 
@@ -241,7 +167,8 @@ def calvo(latex, all_variants, check_mcmc, small_set):
             # NOTE We fix the random seed here to enable model caching.
             model = cmpbayes.Calvo(
                 d.to_numpy(),
-                higher_better=False, algorithm_labels=d.columns.to_list()).fit(num_samples=10000, random_seed=1)
+                higher_better=False, algorithm_labels=d.columns.to_list()).fit(
+                num_samples=10000, random_seed=1)
 
             if check_mcmc:
                 smart_print(az.summary(model.infdata_), latex=latex)
@@ -250,39 +177,16 @@ def calvo(latex, all_variants, check_mcmc, small_set):
 
             # Join all chains, name columns.
             sample = np.concatenate(model.infdata_.posterior.weights)
-            sample = pd.DataFrame(
-                sample, columns=model.infdata_.posterior.weights.algorithm_labels)
+            sample = pd.DataFrame(sample, columns=model.infdata_.posterior.weights.algorithm_labels)
+
+            xlabel = f"Probability"  # f"Probability of having the lowest {metrics[metric]}"
             ylabel = "RD method"
-            sample = sample.unstack().reset_index(0).rename(columns={"level_0": ylabel, 0: xlabel})
-
-            # if metrics[metric] == "MSE":
-            #     add_prob = sample[sample[ylabel] == "ES"][xlabel] + sample[
-            #         sample[ylabel] == "Decision Tree"][xlabel]
-            #     add_prob = pd.DataFrame({
-            #         ylabel:
-            #         np.repeat(r"ES $\vee{} NSLC", len(add_prob)),
-            #         xlabel:
-            #         add_prob
-            #     })
-            #     sample = sample.append(add_prob)
-            #     add_prob = sample[sample[ylabel] == "ES"][xlabel] + sample[
-            #         sample[ylabel] == "Decision Tree"][xlabel] + sample[sample[ylabel]
-            #                                                    == "XCSF"][xlabel]
-            #     add_prob = pd.DataFrame({
-            #         ylabel:
-            #         np.repeat(r"ES $\vee{} NSLC $\vee{} NS", len(add_prob)),
-            #         xlabel:
-            #         add_prob
-            #     })
-            #     sample = sample.append(add_prob)
-
-            sns.boxplot(data=sample,
-                        y=ylabel,
-                        x=xlabel,
-                        ax=ax[i],
-                        fliersize=0.3)
+            sample = sample.unstack().reset_index(0).rename(columns={"level_0": ylabel, 0: xlabel
+                                                                     })
+            sns.boxplot(data=sample, y=ylabel, x=xlabel, ax=ax[i], fliersize=0.3)
             if all_variants:
                 ax[i].set_title(title)
+
             ax[i].set_xlabel(xlabel, weight="bold")
             ax[i].set_ylabel(ylabel, weight="bold")
 
@@ -295,52 +199,18 @@ def calvo(latex, all_variants, check_mcmc, small_set):
 @click.option("--latex/--no-latex",
               help="Generate LaTeX output (tables etc.)",
               default=True)
-def ttest(latex):
+@click.argument("cand1",
+                default="")
+@click.argument("cand2",
+                default="")
+@click.argument("cand1_name",
+                default="")
+@click.argument("cand2_name",
+                default="")
+def ttest(latex, cand1, cand2, cand1_name, cand2_name):
+    check_and_create_dir(final_output_dir, "ttest")
     df = load_data()
     pd.options.mode.chained_assignment = None
-
-    MCNS_concrete_strength = df.loc["ES"].loc["concrete_strength"].set_index(np.arange(64))
-    MCNS_combined_cycle_power_plant = df.loc["ES"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    MCNS_airfoil_self_noise = df.loc["ES"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    MCNS_energy_cool = df.loc["ES"].loc["energy_cool"].set_index(np.arange(64))
-
-    mcns = pd.concat(
-        [MCNS_concrete_strength, MCNS_combined_cycle_power_plant, MCNS_airfoil_self_noise, MCNS_energy_cool],
-        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
-
-    NS_concrete_strength = df.loc["XCSF"].loc["concrete_strength"].set_index(np.arange(64))
-    NS_combined_cycle_power_plant = df.loc["XCSF"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    NS_airfoil_self_noise = df.loc["XCSF"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    NS_energy_cool = df.loc["XCSF"].loc["energy_cool"].set_index(np.arange(64))
-
-    ns = pd.concat(
-        [NS_concrete_strength, NS_combined_cycle_power_plant, NS_airfoil_self_noise, NS_energy_cool],
-        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
-
-    NSLC_concrete_strength = df.loc["Decision Tree"].loc["concrete_strength"].set_index(np.arange(64))
-    NSLC_combined_cycle_power_plant = df.loc["Decision Tree"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    NSLC_airfoil_self_noise = df.loc["Decision Tree"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    NSLC_energy_cool = df.loc["Decision Tree"].loc["energy_cool"].set_index(np.arange(64))
-
-    nslc = pd.concat(
-        [NSLC_concrete_strength, NSLC_combined_cycle_power_plant, NSLC_airfoil_self_noise, NSLC_energy_cool],
-        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
-
-    rf_concrete_strength = df.loc["Random Forest"].loc["concrete_strength"].set_index(np.arange(64))
-    rf_combined_cycle_power_plant = df.loc["Random Forest"].loc["combined_cycle_power_plant"].set_index(np.arange(64))
-    rf_airfoil_self_noise = df.loc["Random Forest"].loc["airfoil_self_noise"].set_index(np.arange(64))
-    rf_energy_cool = df.loc["Random Forest"].loc["energy_cool"].set_index(np.arange(64))
-
-    rf = pd.concat(
-        [rf_concrete_strength, rf_combined_cycle_power_plant, rf_airfoil_self_noise, rf_energy_cool],
-        axis=0, keys=['concrete_strength', 'combined_cycle_power_plant', 'airfoil_self_noise', 'energy_cool'])
-
-    # df = pd.concat(
-    #     [mcns, ns, nslc, rf],
-    #     axis=0, keys=["ES", "XCSF", "Decision Tree", "Random Forest"])
-
-    cand2 = "ES"
-    cand1 = "Decision Tree"
 
     hdis = {}
     for metric in metrics:
@@ -356,11 +226,10 @@ def ttest(latex):
                 y2 = df[metric].loc[cand2, task]
                 model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
 
-            df = pd.concat([mcns, ns, nslc, rf], axis=0, keys=["ES", "XCSF", "Decision Tree", "Random Forest"])
-
-            y1 = df[metric].loc[cand1, task]
-            y2 = df[metric].loc[cand2, task]
-            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
+                # Compute 100(1 - alpha)% high density interval.
+                alpha = 0.005
+                hdi = (model.model_.ppf(alpha), model.model_.ppf(1 - alpha))
+                hdis[metrics[metric]][config["datasets"][task]] = {"lower": hdi[0], "upper": hdi[1]}
 
                 # Compute bounds of the plots based on ppf.
                 xlower_ = model.model_.ppf(1e-6)
@@ -382,22 +251,8 @@ def ttest(latex):
                               f"{metrics[metric].capitalize()}({cand2_name})\n- "
                               f"{metrics[metric].capitalize()}({cand1_name})"))
 
-            # Create DataFrame for easier seaborn'ing.
-            cand1_name = cand1
-            cand2_name = cand2
-            if cand1 == "ES":
-                cand1_name = "SupRB"
-            if cand2 == "ES":
-                cand2_name = "SupRB"
-
-            xlabel = (
-                f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
-                if metrics[metric] == "MSE" else
-                (f"{metrics[metric].capitalize()}({cand2_name})\n- "
-                 f"{metrics[metric].capitalize()}({cand1_name})"))
-
-            ylabel = "Density"
-            data = pd.DataFrame({xlabel: x, ylabel: y})
+                ylabel = "Density"
+                data = pd.DataFrame({xlabel: x, ylabel: y})
 
                 # Plot posterior.
                 # sns.histplot(model.model_.rvs(50000),
@@ -430,17 +285,17 @@ def ttest(latex):
                     rope = stds.mean()
                     rope = [-rope, rope]
 
-            if metrics[metric] == "model complexity":
-                # Compute rope for this task.
-                # Remove RS runs.
-                ()
-                d_ = df[metric].unstack("algorithm")[[alg for alg in config["heuristics"] if alg != "MCNS-P"]].stack()
-                # d_ = df[metric]  # .unstack(0).stack()
-                ()
-                # Rope is based on std of the other algorithms.
-                stds = d_[task].groupby("algorithm").std()
-                rope = stds.mean()
-                rope = [-rope, rope]
+                    # Add rope lines and values.
+                    ax[i].vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
+                    ax[i].fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
+
+                    # Compute probabilities.
+                    sample = model.model_.rvs(100000)
+
+                    probs[config['datasets'][task]] = {
+                        "p(ES practically higher complexity)": (sample < rope[0]).sum() / len(sample),
+                        "p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
+                        "p(NSLC practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
 
                 ax[i].set_ylabel(ylabel, weight="bold")
                 ax[i].set_xlabel(xlabel, weight="bold")
