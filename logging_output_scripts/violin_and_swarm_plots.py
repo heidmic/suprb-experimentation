@@ -107,6 +107,17 @@ def create_plots():
         ax_config(ax)
         fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
 
+    # Store line-box-plots
+    fig, ax = plt.subplots()
+
+    order = np.sort(res_var['Used_Representation'].unique())
+    ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
+                     showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
+    ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
+                       data=res_var, ci=None, color='black')
+    ax_config(ax)
+    fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
+
 
 if __name__ == '__main__':
     create_plots()
