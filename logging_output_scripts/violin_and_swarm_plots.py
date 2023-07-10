@@ -1,8 +1,10 @@
+from logging_output_scripts.utils import get_dataframe, check_and_create_dir, config, get_all_runs
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
-from logging_output_scripts.utils import get_dataframe, check_and_create_dir, config, get_all_runs
+from sklearn.preprocessing import MinMaxScaler
 
 
 """
@@ -26,16 +28,20 @@ plt.tight_layout()
 
 final_output_dir = f"{config['output_directory']}"
 mse = "metrics.test_neg_mean_squared_error"
+# mse = "metrics.elitist_complexity"
 
 
 def create_plots():
+    scaler = MinMaxScaler()
     all_runs_list = get_all_runs()
     for problem in config['datasets']:
         first = True
         res_var = 0
+        counter = 0
         for heuristic, renamed_heuristic in config['heuristics'].items():
             fold_df = get_dataframe(all_runs_list, heuristic, problem)
             if fold_df is not None:
+                counter += 1
                 name = [renamed_heuristic] * fold_df.shape[0]
                 current_res = fold_df.assign(Used_Representation=name)
                 if first:
@@ -47,14 +53,25 @@ def create_plots():
 
                 print(f"Done for {problem} with {renamed_heuristic}")
 
+        if counter and config["normalize_datasets"]:
+            reshaped_var = np.array(res_var[mse])[-counter*64:].reshape(counter, -1) * -1
+            scaler.fit(reshaped_var)
+            scaled_var = scaler.transform(reshaped_var)
+            scaled_var = scaled_var.reshape(1, -1)[0]
+            res_var[mse][-len(scaled_var):] = scaled_var
+
     # Invert values since they are stored as negatives
-    res_var[mse] *= -1
+    if not config["normalize_datasets"]:
+        res_var[mse] *= -1
 
     def ax_config(axis):
         ax.set_xlabel('Estimator', weight="bold")
         ax.set_ylabel('MSE', weight="bold")
-        ax.set_title(config['datasets'][problem], style="italic")
-        ax.set_box_aspect(1)
+        ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
+                     else "Normalized Datasets", style="italic")
+        # ax.set_box_aspect(1)
+
+    problem = problem if not config["normalize_datasets"] else "normalized"
 
     # Store violin-plots of all models in one plot
     fig, ax = plt.subplots()
@@ -64,13 +81,27 @@ def create_plots():
 
     # Store swarm-plots of all models in one plot
     fig, ax = plt.subplots()
-    ax = sns.swarmplot(x='Used_Representation', y=mse, data=res_var, size=2)
+    order = np.sort(res_var['Used_Representation'].unique())
+    ax = sns.swarmplot(x='Used_Representation', y=mse, data=res_var, size=4)
+    ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
+                       data=res_var, ci=None, color='black')
     ax_config(ax)
     fig.savefig(f"{final_output_dir}/swarm_plots/{problem}.png", dpi=500)
 
+    # Store line-box-plots
+    fig, ax = plt.subplots()
+
+    order = np.sort(res_var['Used_Representation'].unique())
+    ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
+                     showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
+    ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
+                       data=res_var, ci=None, color='black')
+    ax_config(ax)
+    fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
+
 
 if __name__ == '__main__':
-    for output_dir in ["violin_plots", "swarm_plots"]:
+    for output_dir in ["violin_plots", "swarm_plots", "line_plots"]:
         check_and_create_dir(final_output_dir, output_dir)
 
     create_plots()

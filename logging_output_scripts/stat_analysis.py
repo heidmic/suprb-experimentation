@@ -149,11 +149,7 @@ def calvo(latex, all_variants, check_mcmc, small_set):
         i = -1
         for mode, f in variants.items():
             i += 1
-            d = f(df)
-
-            # We want the algorithms ordered as they are in the `algorithms`
-            # list.
-            d = d[config["heuristics"] if not small_set else config["heuristics"]]
+            d = f(df)[config["heuristics"]]
 
             title = f"Considering {mode} cv runs per task"
 
@@ -162,11 +158,12 @@ def calvo(latex, all_variants, check_mcmc, small_set):
             print(title)
             smart_print(ranks.mean(), latex=latex)
 
+            d.rename(columns=config["heuristics"], inplace=True)
+
             # NOTE We fix the random seed here to enable model caching.
             model = cmpbayes.Calvo(
                 d.to_numpy(),
-                higher_better=False, algorithm_labels=d.columns.to_list()).fit(
-                num_samples=10000, random_seed=1)
+                higher_better=False, algorithm_labels=d.columns.to_list()).fit(num_samples=10000, random_seed=1)
 
             if check_mcmc:
                 smart_print(az.summary(model.infdata_), latex=latex)
@@ -179,12 +176,10 @@ def calvo(latex, all_variants, check_mcmc, small_set):
 
             xlabel = f"Probability"  # f"Probability of having the lowest {metrics[metric]}"
             ylabel = "RD method"
-            sample = sample.unstack().reset_index(0).rename(columns={"level_0": ylabel, 0: xlabel
-                                                                     })
-            sns.boxplot(data=sample, y=ylabel, x=xlabel, ax=ax[i], fliersize=0.3)
-            if all_variants:
-                ax[i].set_title(title)
+            sample = sample.unstack().reset_index(0).rename(columns={"level_0": ylabel, 0: xlabel})
 
+            sns.boxplot(data=sample, y=ylabel, x=xlabel, ax=ax[i], fliersize=0.3)
+            ax[i].set_title(metrics[metric], style="italic")
             ax[i].set_xlabel(xlabel, weight="bold")
             ax[i].set_ylabel(ylabel, weight="bold")
 
@@ -193,18 +188,18 @@ def calvo(latex, all_variants, check_mcmc, small_set):
                     dpi=fig.dpi, bbox_inches="tight")
 
 
-@cli.command()
-@click.option("--latex/--no-latex",
-              help="Generate LaTeX output (tables etc.)",
-              default=True)
-@click.argument("cand1",
-                default="")
-@click.argument("cand2",
-                default="")
-@click.argument("cand1_name",
-                default="")
-@click.argument("cand2_name",
-                default="")
+@ cli.command()
+@ click.option("--latex/--no-latex",
+               help="Generate LaTeX output (tables etc.)",
+               default=True)
+@ click.argument("cand1",
+                 default="")
+@ click.argument("cand2",
+                 default="")
+@ click.argument("cand1_name",
+                 default="")
+@ click.argument("cand2_name",
+                 default="")
 def ttest(latex, cand1, cand2, cand1_name, cand2_name):
     check_and_create_dir(final_output_dir, "ttest")
     df = load_data()
