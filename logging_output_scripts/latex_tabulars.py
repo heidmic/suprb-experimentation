@@ -2,7 +2,7 @@ import json
 import os
 import pandas as pd
 from tabulate import tabulate
-from logging_output_scripts.utils import create_output_dir, config
+from logging_output_scripts.utils import check_and_create_dir, config
 
 
 """
@@ -12,9 +12,8 @@ to create LaTex tables based on the values calculated in Summary_csv.py
 """
 
 summary_csv_dir = "logging_output_scripts/outputs/csv_summary"
-final_output_dir = f"{config['output_directory']}/latex_tabular"
-create_output_dir(final_output_dir)
-create_output_dir(final_output_dir)
+final_output_dir = f"{config['output_directory']}"
+check_and_create_dir(final_output_dir, 'latex_tabular')
 
 # Empty string needed for formatting purposes
 datasets_short = {-1: ' ', 0: 'CS', 1: 'CCPP', 2: 'ASN', 3: 'EC'}
@@ -143,8 +142,8 @@ def write_mse():
     for problem in config["datasets"]:
         # Each row features one problem for one model
         row = []
-        for heuristic in config["heuristics"]:
-            df = pd.read_csv(f"{summary_csv_dir}/{heuristic}_summary.csv")
+        for heuristic, renamed_heuristic in config['heuristics'].items():
+            df = pd.read_csv(f"{summary_csv_dir}/{renamed_heuristic}_summary.csv")
             res = df[df['Problem'].str.contains(problem)]
             row.append(((round(float(res['MEAN_MSE']), 4)), round(float(res['STD_MSE']), 4)))
         column.append(row)
@@ -155,7 +154,7 @@ def write_mse():
     problem_3 = tabulate(column[2], tablefmt="latex_booktabs", headers=headers)
     problem_4 = tabulate(column[3], tablefmt="latex_booktabs", headers=headers)
 
-    with open(f"{final_output_dir}/MSE.txt", "w") as file:
+    with open(f"{final_output_dir}/latex_tabular/MSE.txt", "w") as file:
         file.write(problem_1 + "\n\n" + problem_2 + "\n\n" + problem_3 + "\n\n" + problem_4)
 
 
@@ -253,7 +252,7 @@ if __name__ == '__main__':
     # Only use if genomes are actually tracked.
     # write_genomes()
     write_mse()
-    write_mse_all()
+    # write_mse_all()
     # single_table()
-    single_table_all_mse()
+    # single_table_all_mse()
     # single_table_all_complexity()

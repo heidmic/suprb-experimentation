@@ -1,9 +1,9 @@
-from logging_output_scripts.utils import get_dataframe, check_and_create_dir, config, get_all_runs
+from logging_output_scripts.utils import check_and_create_dir, get_dataframe, get_all_runs
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-
+import json
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -26,12 +26,20 @@ plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.tight_layout()
 
 
-final_output_dir = f"{config['output_directory']}"
 mse = "metrics.test_neg_mean_squared_error"
 # mse = "metrics.elitist_complexity"
 
 
 def create_plots():
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
+
+    final_output_dir = f"{config['output_directory']}"
+
+    for output_dir in ["violin_plots", "swarm_plots", "line_plots"]:
+        check_and_create_dir(final_output_dir, output_dir)
+
+    final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
     all_runs_list = get_all_runs()
     for problem in config['datasets']:
@@ -101,7 +109,4 @@ def create_plots():
 
 
 if __name__ == '__main__':
-    for output_dir in ["violin_plots", "swarm_plots", "line_plots"]:
-        check_and_create_dir(final_output_dir, output_dir)
-
     create_plots()
