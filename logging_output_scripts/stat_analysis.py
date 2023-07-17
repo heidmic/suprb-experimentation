@@ -28,7 +28,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from IPython import embed
-from logging_output_scripts.utils import get_dataframe, check_and_create_dir, config, get_all_runs
+from logging_output_scripts.utils import get_dataframe, check_and_create_dir, get_all_runs
+import json
 
 
 pd.options.display.max_rows = 2000
@@ -53,7 +54,6 @@ linewidth /= 72.27
 textwidth = 449.59116
 textwidth /= 72.27
 
-final_output_dir = f"{config['output_directory']}"
 elitist_complexity = "metrics.elitist_complexity"
 mse = "metrics.test_neg_mean_squared_error"
 
@@ -70,7 +70,7 @@ def smart_print(df, latex):
         print(df.to_markdown())
 
 
-def load_data():
+def load_data(config):
     dfs = []
     keys = []
     all_runs_list = get_all_runs()
@@ -114,10 +114,14 @@ def cli():
 @click.option("--small-set/--no-small-set",
               help="Whether to only analyse ES, NS, NSLC",
               default=False)
-def calvo(latex, all_variants, check_mcmc, small_set):
+def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = False):
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
+
+    final_output_dir = f"{config['output_directory']}"
     check_and_create_dir(final_output_dir, "calvo")
 
-    df = load_data()
+    df = load_data(config)
 
     # Explore whether throwing away distributional information gives us any
     # insights.

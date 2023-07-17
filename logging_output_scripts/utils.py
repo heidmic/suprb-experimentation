@@ -2,12 +2,13 @@ import os
 import json
 import mlflow
 
-with open('logging_output_scripts/config.json') as f:
-    config = json.load(f)
-
 
 def get_all_runs():
     print("Get all mlflow runs...")
+
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
+
     all_runs_list = []
     heuristics = [key for key in config['heuristics']]
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
@@ -17,7 +18,10 @@ def get_all_runs():
         if any(substring in run_name for substring in heuristics):
             all_runs_list.append(mlflow.search_runs([run]))
             print(run_name)
+    #     if len(all_runs_list) == len(heuristics):
+    #         return all_runs_list
 
+    # print("Something is missing")
     return all_runs_list
 
 
