@@ -47,8 +47,7 @@ def run(problem: str, job_id: str):
 
     estimator = SupRB(
         rule_generation=rs.RandomSearch(),
-        solution_composition=ga.GeneticAlgorithm(
-            n_iter=32, population_size=32, selection=ga.selection.Tournament()),
+        solution_composition=ga.GeneticAlgorithm(),
         n_iter=32, n_rules=4, verbose=10,
         logger=CombinedLogger([('stdout', StdoutLogger()),
                                ('default', DefaultLogger())]),)
@@ -64,8 +63,7 @@ def run(problem: str, job_id: str):
         scoring='neg_mean_squared_error',
         verbose=10
     )
-    # print(estimator.get_params())
-    # exit()
+    
 
     @param_space()
     def suprb_space(trial: Trial, params: Bunch):
@@ -87,7 +85,6 @@ def run(problem: str, job_id: str):
             # NS base
             params.rule_generation = getattr(suprb.optimizer.rule.ns, params.rule_generation)()
 
-            # NS base
             params.rule_generation__lmbda = trial.suggest_int('rule_generation__lmbda', 100, 200)
             params.rule_generation__mu = trial.suggest_int('rule_generation__mu', 10, 20)
             params.rule_generation__n_elitists = trial.suggest_int('rule_generation__n_elitists', 5, 20)
@@ -153,7 +150,7 @@ def run(problem: str, job_id: str):
         if not isinstance(params.rule_generation__init__fitness, suprb.rule.fitness.PseudoAccuracy):
             params.rule_generation__init__fitness__alpha = trial.suggest_float('rule_generation__init__fitness__alpha', 0.5, 1)  # nopep8
 
-        # TODO: What the we want to tune besides Ridge? And do we want to tune sklearn params as well (alpha, copy_X, fit_intercept, max_iter, normalize, positive, random_state, solver, tol)
+        # TODO: What do we want to tune besides Ridge? And do we want to tune sklearn params as well (alpha, copy_X, fit_intercept, max_iter, normalize, positive, random_state, solver, tol)
         params.rule_generation__init__model = Ridge()
 
         # Selection
@@ -171,7 +168,7 @@ def run(problem: str, job_id: str):
                 params.rule_generation__mutation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation__mutation)()  # nopep8
 
                 params.rule_generation__mutation__low = trial.suggest_float('rule_generation__mutation__sigma_range__low', 0.001, 0.01)  # nopep8
-                params.rule_generation__mutation__high = trial.suggest_float('rule_generation__mutation__sigma_range__high', 0.01, 0.1)  # nopep8
+                params.rule_generation__mutation__high = trial.suggest_float('rule_generation__mutation__sigma_range__high', 0.01, 0.1)  # nopep8 
 
                 params.rule_generation__mutation__mutation__sigma = trial.suggest_float('rule_generation__mutation__mutation__sigma', 0.05, 0.2)  # nopep8
             else:
@@ -185,43 +182,74 @@ def run(problem: str, job_id: str):
                isinstance(params.rule_generation__mutation, suprb.optimizer.rule.origin.SquaredError):
                 params.rule_generation__origin_generation__use_elitist = trial.suggest_categorical('rule_generation__origin_generation__use_elitist', [True, False])  # nopep8
 
-        print(params)
+        
 
-        # "matching_type": "None",
-        # "n_initial_rules": 0,
-        # "n_iter": 32,
-        # "n_jobs": 1,
-        # "n_rules": 4,
-        # "random_state": "None",
+            # GA base (TODO: There is only one archive: Elitist implemented -> no need to tune?)
+            params.solution_composition = trial.suggest_categorical('solution_composition', ['GeneticAlgorithm'])  # nopep8
+            params.solution_composition = getattr(suprb.optimizer.solution.ga, params.solution_composition)()
+        
+            params.solution_composition__n_jobs = trial.suggest_int('solution_composition__n_jobs', 1, 5)
+            params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 64)
+            params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 16, 64)
+            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.1, 0.25)
 
-        # n_iter=1000,
-        # "mutation=HalfnormIncrease()",
-        # "origin_generation=SquaredError())",
-        # "solution_composition__archive": "Elitist()",
-        # "solution_composition__crossover__crossover_rate": 0.9,
-        # "solution_composition__crossover__n": 3,
-        # "solution_composition__crossover": NPoint(n = 3),
-        # "solution_composition__elitist_ratio": 0.17,
-        # "solution_composition__init__fitness__alpha": 0.3,
-        # "solution_composition__init__fitness": "ComplexityWu()",
-        # "solution_composition__init__mixing__experience_calculation": < suprb.solution.mixing_model.ExperienceCalculation object at 0x7fd7db3f6850 > ,
-        # "solution_composition__init__mixing__experience_weight": 1,
-        # "solution_composition__init__mixing__filter_subpopulation": < suprb.solution.mixing_model.FilterSubpopulation object at 0x7fd7db3f6610 > ,
-        # "solution_composition__init__mixing": "ErrorExperienceHeuristic()",
-        # "solution_composition__init__p": 0.5,
-        # "solution_composition__init": "RandomInit(fitness=ComplexityWu()",
-        # "mixing=ErrorExperienceHeuristic())",
-        # "solution_composition__mutation__mutation_rate": 0.001,
-        # "solution_composition__mutation": BitFlips(mutation_rate = 0.001),
-        # "solution_composition__n_iter": 32,
-        # "solution_composition__n_jobs": 1,
-        # "solution_composition__population_size": 32,
-        # "solution_composition__random_state": "None",
-        # "solution_composition__selection__k": 5,
-        # "solution_composition__selection": "Tournament()",
-        # "solution_composition__warm_start": true,
-        # "solution_composition": "GeneticAlgorithm()",
-        # "verbose": 10
+            # GA init
+            params.solution_composition__init = trial.suggest_categorical('solution_composition__init', ['ZeroInit', 'RandomInit'])  # nopep8
+            params.solution_composition__init = getattr(suprb.solution.initialization, params.solution_composition__init)()
+
+            if isinstance(params.solution_composition__init, suprb.solution.initialization.RandomInit):
+                params.solution_composition__init__p = trial.suggest_float('solution_composition__init__p', 0.3, 0.8)
+
+            params.solution_composition__init__fitness = trial.suggest_categorical('solution_composition__init__fitness', ['PseudoBIC', 'ComplexityEmary', 'ComplexityWu'])  # nopep8
+            params.solution_composition__init__fitness = getattr(suprb.solution.fitness, params.solution_composition__init__fitness)()
+
+            if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
+                params.solution_composition__init__fitness__alpha = trial.suggest_float('solution_composition__init__fitness__alpha', 0.0, 1.0) # nopep8
+
+            # TODO: There is only one mixing heuristic: ErrorExperienceHeuristic
+            params.solution_composition__init__mixing__experience_weight = trial.suggest_float('solution_composition__init__mixing__experience_weight', 0.0, 1.0)
+
+            params.solution_composition__init__mixing__experience_calculation = trial.suggest_categorical('solution_composition__init__mixing__experience_calculation', ['ExperienceCalculation', 'CapExperience', 'CapExperienceWithDimensionality'])  # nopep8
+            params.solution_composition__init__mixing__experience_calculation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__experience_calculation)() # nopep8
+
+            if isinstance(params.solution_composition__init__mixing__experience_calculation, suprb.solution.mixing_model.CapExperienceWithDimensionality):
+                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 2, 5) # nopep8
+            else:
+                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50) # nopep8
+
+            params.solution_composition__init__mixing__filter_subpopulation = trial.suggest_categorical('solution_composition__init__mixing__filter_subpopulation', ['FilterSubpopulation', 'NBestFitness', 'NRandom', 'RouletteWheel'])  # nopep8
+            params.solution_composition__init__mixing__filter_subpopulation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__filter_subpopulation)() # nopep8
+            
+            params.solution_composition__init__mixing__filter_subpopulation__rule_amount = trial.suggest_int('solution_composition__init__mixing__filter_subpopulation__rule_amount', 4, 10)  # nopep8
+
+            # GA selection 
+            params.solution_composition__selection = trial.suggest_categorical('solution_composition__selection', ['Random', 'RouletteWheel', 'LinearRank', 'Tournament'])  # nopep8
+            params.solution_composition__selection = getattr(suprb.optimizer.solution.ga.selection, params.solution_composition__selection)()  # nopep8
+
+            if isinstance(params.solution_composition__selection, suprb.optimizer.solution.ga.selection.Tournament):
+                params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)  # nopep8
+
+            # GA mutation (TODO: There is only one mutation: BitFlips)
+            params.solution_composition__mutation__mutation_rate = trial.suggest_float('solution_composition__mutation__mutation_rate', 0.001, 0.01)  # nopep8
+
+            # GA crossover
+            params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover', ['NPoint', 'Uniform'])  # nopep8
+            params.solution_composition__crossover = getattr(suprb.optimizer.solution.ga.crossover, params.solution_composition__crossover)()  # nopep8
+
+            params.solution_composition__crossover__crossover_rate = trial.suggest_float('solution_composition__crossover__crossover_rate', 0.7, 1.0)  # nopep8
+            if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.ga.crossover.NPoint):
+                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 5)  # nopep8
+
+
+
+
+
+
+        # print(estimator.get_params())
+        # exit()
+        
+        
+        
 
     experiment_name = f'SupRB Tuning j:{job_id} p:{problem}'
     print(experiment_name)
