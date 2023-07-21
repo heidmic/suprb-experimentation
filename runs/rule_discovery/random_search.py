@@ -20,6 +20,8 @@ from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import rs, origin, mutation
+from sklearn.datasets import fetch_openml
+from sklearn.preprocessing import LabelEncoder
 
 
 random_state = 42
@@ -30,6 +32,20 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     from problems import datasets
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
+    else:
+        enc = LabelEncoder()
+        dataset = fetch_openml(name=name, version=1)
+
+        if name == "meta":
+            dataset.data.DS_Name = enc.fit_transform(dataset.data.DS_Name)
+            dataset.data.Alg_Name = enc.fit_transform(dataset.data.Alg_Name)
+            dataset.data = dataset.data.drop(
+                dataset.data.columns[dataset.data.isna().any()].tolist(), axis=1)
+
+        if name == "chscase_foot":
+            dataset.data.col_1 = enc.fit_transform(dataset.data.col_1)
+
+        return dataset.data.to_numpy(dtype=np.float), dataset.target.to_numpy(dtype=np.float)
 
 
 @click.command()

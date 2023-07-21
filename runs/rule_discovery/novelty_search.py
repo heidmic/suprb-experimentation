@@ -25,7 +25,8 @@ from suprb.optimizer.rule.mutation import HalfnormIncrease
 from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
 from suprb.optimizer.rule.ns.archive import ArchiveNovel
 from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
-
+from sklearn.datasets import fetch_openml
+from sklearn.preprocessing import LabelEncoder
 
 
 random_state = 42
@@ -36,6 +37,20 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     from problems import datasets
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
+    else:
+        enc = LabelEncoder()
+        dataset = fetch_openml(name=name, version=1)
+
+        if name == "meta":
+            dataset.data.DS_Name = enc.fit_transform(dataset.data.DS_Name)
+            dataset.data.Alg_Name = enc.fit_transform(dataset.data.Alg_Name)
+            dataset.data = dataset.data.drop(
+                dataset.data.columns[dataset.data.isna().any()].tolist(), axis=1)
+
+        if name == "chscase_foot":
+            dataset.data.col_1 = enc.fit_transform(dataset.data.col_1)
+
+        return dataset.data.to_numpy(dtype=np.float), dataset.target.to_numpy(dtype=np.float)
 
 
 @click.command()
@@ -137,11 +152,10 @@ def run(problem: str, ns_type: str, job_id: int):
         params.rule_generation__novelty_calculation__archive = getattr(
             suprb.optimizer.rule.ns.archive, params.rule_generation__novelty_calculation__archive)()
 
-
         params.rule_generation__novelty_calculation = trial.suggest_categorical('novelty_calculation',
                                                                                 ["NoveltyCalculation",
                                                                                  "ProgressiveMinimalCriteria",
-                                                                                 "NovelityFitnessPareto",
+                                                                                 "NoveltyFitnessPareto",
                                                                                  "NoveltyFitnessBiased"])
 
         params.rule_generation__novelty_calculation = getattr(
