@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-datasets=("concrete_strength") #"energy_cool" "combined_cycle_power_plant" "airfoil_self_noise" "LEV" "german.numer" "laser" "fourclass_scale" "machine_cpu" "boston" "meta" "chscase_foot")
+datasets=("concrete_strength" "energy_cool" "combined_cycle_power_plant" "airfoil_self_noise" "german.numer" "fourclass_scale" "meta" "chscase_foot")
 
 scripts=("runs/rule_discovery/evolution_strategy.py runs/rule_discovery/random_search.py")
 # scripts=("runs/rule_discovery/novelty_search.py")
@@ -28,6 +28,3 @@ for script in ${scripts[@]}; do
 	sbatch slurm/rule_discovery.sbatch
     done
 done
-
-
-
