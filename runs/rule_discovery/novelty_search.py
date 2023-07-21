@@ -56,9 +56,10 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 @click.option('-t', '--ns_type', type=click.STRING, default=None)
+@click.option('-a', '--use_current_population', type=click.BOOL, default=False)
 @click.option('-i', '--job_id', type=click.INT, default=None)
-def run(problem: str, ns_type: str, job_id: int):
-    print(f"{ns_type} is tuned and tested with problem {problem}")
+def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
+    print(f"{ns_type} with use_current_population={use_current_population} is tuned and tested with problem {problem}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
@@ -169,6 +170,8 @@ def run(problem: str, ns_type: str, job_id: int):
                       suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
             params.rule_generation__novelty_calculation__novelty_bias = \
                 trial.suggest_float('novelty_bias', 0.3, 0.7)
+            
+        params.rule_generation__use_population_for_archive = use_current_population
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
