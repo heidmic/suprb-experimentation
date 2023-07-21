@@ -20,12 +20,11 @@ for script in ${scripts[@]}; do
 		# 	sleep 5
 		# 	export archive_pop=false
 		# 	sbatch slurm/rule_discovery.sbatch
+		#	echo $script $dataset $ns_type $archive_pop
+		# done
 
+		echo $script $dataset $ns_type
 
-    	echo $script $dataset
-
-	
-	
 	sbatch slurm/rule_discovery.sbatch
     done
 done
