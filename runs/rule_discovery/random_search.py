@@ -45,7 +45,22 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         if name == "chscase_foot":
             dataset.data.col_1 = enc.fit_transform(dataset.data.col_1)
 
-        return dataset.data.to_numpy(dtype=np.float), dataset.target.to_numpy(dtype=np.float)
+        if isinstance(dataset.data, np.ndarray):
+            X = dataset.data
+        elif isinstance(dataset.data, pd.DataFrame) or isinstance(dataset.data, pd.Series):
+            X = dataset.data.to_numpy(dtype=np.float)
+        else:
+            X = dataset.data.toarray()
+
+        if isinstance(dataset.target, np.ndarray):
+            y = dataset.target
+        elif isinstance(dataset.target, pd.DataFrame) or isinstance(dataset.target, pd.Series):
+            y = dataset.target.to_numpy(dtype=np.float)
+        else:
+            y = dataset.target.toarray()
+
+
+        return X, y
 
 
 @click.command()
