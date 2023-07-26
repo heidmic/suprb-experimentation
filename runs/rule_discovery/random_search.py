@@ -22,6 +22,7 @@ from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import rs, origin, mutation
 from sklearn.datasets import fetch_openml
 from sklearn.preprocessing import LabelEncoder
+import pandas as pd
 
 
 random_state = 42
