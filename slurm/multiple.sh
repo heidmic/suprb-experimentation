@@ -2,29 +2,20 @@
 
 datasets=("concrete_strength" "energy_cool" "combined_cycle_power_plant" "airfoil_self_noise" "german.numer" "fourclass_scale" "meta" "chscase_foot")
 
-scripts=("runs/rule_discovery/evolution_strategy.py runs/rule_discovery/random_search.py")
-# scripts=("runs/rule_discovery/novelty_search.py")
+scripts=("runs/solution_composition/solution_composition_tuning_updated.py")
 
-ns_types=("NS" "MCNS" "NSLC")
+optimizers=('GeneticAlgorithm' 'ArtificialBeeColonyAlgorithm' 'AntColonyOptimization' 'GreyWolfOptimizer' 'ParticleSwarmOptimization' "RandomSearch")
 
 for script in ${scripts[@]}; do
     for dataset in ${datasets[@]}; do
 		export dataset=$dataset
 		export experiment=$script
+		for opt in ${optimizers[@]}; do 
+			export optimizer=$opt
+	
+			echo $script $dataset $opt
 
-		# for ns in ${ns_types[@]}; do
-		# 	export ns_type=$ns
-		# 	export archive_pop=true
-		# 	sbatch slurm/rule_discovery.sbatch
-
-		# 	sleep 5
-		# 	export archive_pop=false
-		# 	sbatch slurm/rule_discovery.sbatch
-		#	echo $script $dataset $ns_type $archive_pop
-		# done
-
-		echo $script $dataset $ns_type
-
-	sbatch slurm/rule_discovery.sbatch
+			# sbatch slurm/solution_composition.sbatch
+		done
     done
 done

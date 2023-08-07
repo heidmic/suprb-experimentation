@@ -99,7 +99,7 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
-@click.option('-o', '--optimizer', type=click.STRING, default='GeneticAlgorithm')
+@click.option('-o', '--optimizer', type=click.STRING, default='ga')
 def run(problem: str, optimizer: str):
     print(f"Problem is {problem}, optimizer is {optimizer}")
 
@@ -108,22 +108,11 @@ def run(problem: str, optimizer: str):
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
-        rule_generation=es.ES1xLambda(
-            operator='&',
-            n_iter=10_000,
-            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
-                                              model=Ridge(alpha=0.01,
-                                                          random_state=random_state)),
-            mutation=mutation.HalfnormIncrease(),
-            origin_generation=origin.SquaredError(),
-        ),
-        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
-        n_iter=32,
-        n_rules=4,
-        verbose=10,
-        logger=CombinedLogger(
-            [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
-    )
+        rule_generation=rs.RandomSearch(),
+        solution_composition=abc.ArtificialBeeColonyAlgorithm(),
+        n_iter=32, n_rules=4, verbose=10,
+        logger=CombinedLogger([('stdout', StdoutLogger()),
+                               ('default', DefaultLogger())]),)
 
     tuning_params = dict(
         estimator=estimator,
@@ -147,7 +136,7 @@ def run(problem: str, optimizer: str):
 
             params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 64)
             params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 16, 64)
-            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.0, 0.3)
+            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.0, 0.2)
 
             # GA init
             params.solution_composition__init = trial.suggest_categorical('solution_composition__init', ['ZeroInit', 'RandomInit'])  # nopep8
@@ -245,6 +234,13 @@ def run(problem: str, optimizer: str):
             params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 64, 128)
             params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 64, 128)
 
+        
+
+
+
+
+
+        
 
     experiment_name = f'SupRB Tuning o:{optimizer} p:{problem}'
     print(experiment_name)
