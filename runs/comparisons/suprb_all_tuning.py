@@ -18,7 +18,7 @@ from suprb import rule, SupRB
 from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
-from suprb.optimizer.solution import ga
+from suprb.optimizer.solution import ga, aco, rs, pso, gwo, abc
 from suprb.optimizer.rule import es, origin, mutation, ns, rs
 from suprb.solution.initialization import RandomInit
 import suprb.solution.mixing_model as mixing_model
@@ -47,7 +47,7 @@ def run(problem: str, job_id: str):
 
     estimator = SupRB(
         rule_generation=rs.RandomSearch(),
-        solution_composition=ga.GeneticAlgorithm(),
+        solution_composition=abc.ArtificialBeeColonyAlgorithm(),
         n_iter=32, n_rules=4, verbose=10,
         logger=CombinedLogger([('stdout', StdoutLogger()),
                                ('default', DefaultLogger())]),)
@@ -76,7 +76,6 @@ def run(problem: str, job_id: str):
             params.rule_generation__operator = trial.suggest_categorical('rule_generation__operator', ['&', ',', '+'])
 
             params.rule_generation__lmbda = trial.suggest_int('rule_generation__lmbda', 10, 30)
-            params.rule_generation__n_jobs = trial.suggest_int('rule_generation__n_jobs', 1, 5)
             params.rule_generation__n_iter = trial.suggest_int('rule_generation__n_iter', 500, 1500)
 
             if params.rule_generation__operator == '&':
@@ -89,7 +88,6 @@ def run(problem: str, job_id: str):
             params.rule_generation__mu = trial.suggest_int('rule_generation__mu', 10, 20)
             params.rule_generation__n_elitists = trial.suggest_int('rule_generation__n_elitists', 5, 20)
             params.rule_generation__n_iter = trial.suggest_int('rule_generation__n_iter', 5, 15)
-            params.rule_generation__n_jobs = trial.suggest_int('rule_generation__n_jobs', 1, 5)
             params.rule_generation__roh = trial.suggest_int('rule_generation__roh', 10, 20)
 
             # NS novelty_calculation
@@ -111,14 +109,11 @@ def run(problem: str, job_id: str):
                 params.rule_generation__novelty_calculation__novelty_search_type__min_examples_matched = trial.suggest_int('rule_generation__novelty_calculation__novelty_search_type__min_examples_matched', 10, 20)  # nopep8
             elif isinstance(params.rule_generation__novelty_calculation__novelty_search_type, suprb.optimizer.rule.ns.novelty_search_type.LocalCompetition):  # nopep8
                 params.rule_generation__novelty_calculation__novelty_search_type__max_neighborhood_range = trial.suggest_int('rule_generation__novelty_calculation__novelty_search_type__max_neighborhood_range', 10, 20)  # nopep8
-
-            # NS crossover (TODO: We only have UniformCrossover. Is this correct? matching_type is None here as well. Is that intended?)
             params.rule_generation__crossover__crossover_rate = trial.suggest_float('rule_generation__crossover__crossover_rate', 0.1, 0.5)  # nopep8
         elif params.rule_generation == 'RandomSearch':
             # RS base
             params.rule_generation = getattr(suprb.optimizer.rule.rs, params.rule_generation)()
 
-            params.rule_generation__n_jobs = trial.suggest_int('rule_generation__n_jobs', 1, 5)
             params.rule_generation__n_iter = trial.suggest_int('rule_generation__n_iter', 1, 5)
             params.rule_generation__rules_generated = trial.suggest_int('rule_generation__rules_generated', 5, 10)
 
@@ -129,7 +124,6 @@ def run(problem: str, job_id: str):
         if isinstance(params.rule_generation__acceptance, suprb.optimizer.rule.acceptance.Variance):
             params.rule_generation__acceptance__beta = trial.suggest_float('rule_generation__acceptance__beta', 1, 3)
 
-        # Constraint (TODO: Do we need to specify min_range and clip or can we use default values here?)
         params.rule_generation__constraint = trial.suggest_categorical('rule_generation__constraint', ['MinRange', 'Clip', 'CombinedConstraint'])  # nopep8
         params.rule_generation__constraint = getattr(suprb.optimizer.rule.constraint, params.rule_generation__constraint)()  # nopep8
 
@@ -137,12 +131,11 @@ def run(problem: str, job_id: str):
             params.rule_generation__constraint__clip = suprb.optimizer.rule.constraint.Clip()
             params.rule_generation__constraint__min_range = suprb.optimizer.rule.constraint.MinRange()
 
-        # Init (TODO: bounds and matching_typeare None and are apparenly never said. Is this intended?)
         params.rule_generation__init = trial.suggest_categorical('rule_generation__init', ['MeanInit', 'NormalInit', 'HalfnormInit'])  # nopep8
         params.rule_generation__init = getattr(suprb.rule.initialization, params.rule_generation__init)()  # nopep8
 
         if not isinstance(params.rule_generation__init, suprb.rule.initialization.MeanInit):
-            params.rule_generation__init__sigma = trial.suggest_float('rule_generation__init__sigma', 0.05, 0.2)  # nopep8
+            params.rule_generation__init__sigma = trial.suggest_float('rule_generation__init__sigma', 0.01, 0.1)  # nopep8
 
         params.rule_generation__init__fitness = trial.suggest_categorical('rule_generation__init__fitness', ['PseudoAccuracy', 'VolumeEmary', 'VolumeWu'])  # nopep8
         params.rule_generation__init__fitness = getattr(suprb.rule.fitness, params.rule_generation__init__fitness)()  # nopep8
@@ -150,7 +143,6 @@ def run(problem: str, job_id: str):
         if not isinstance(params.rule_generation__init__fitness, suprb.rule.fitness.PseudoAccuracy):
             params.rule_generation__init__fitness__alpha = trial.suggest_float('rule_generation__init__fitness__alpha', 0.5, 1)  # nopep8
 
-        # TODO: What do we want to tune besides Ridge? And do we want to tune sklearn params as well (alpha, copy_X, fit_intercept, max_iter, normalize, positive, random_state, solver, tol)
         params.rule_generation__init__model = Ridge()
 
         # Selection
@@ -159,7 +151,7 @@ def run(problem: str, job_id: str):
 
         if isinstance(params.rule_generation, suprb.optimizer.rule.es.ES1xLambda) or \
            isinstance(params.rule_generation, suprb.optimizer.rule.ns.NoveltySearch):
-            # Mutation (# TODO: Do we also need matching_type here? It is always None, is that expected?)
+            # Mutation 
             params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['SigmaRange', 'Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
             params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()  # nopep8
 
@@ -183,15 +175,15 @@ def run(problem: str, job_id: str):
                 params.rule_generation__origin_generation__use_elitist = trial.suggest_categorical('rule_generation__origin_generation__use_elitist', [True, False])  # nopep8
 
         
-
-            # GA base (TODO: There is only one archive: Elitist implemented -> no need to tune?)
-            params.solution_composition = trial.suggest_categorical('solution_composition', ['GeneticAlgorithm'])  # nopep8
+        params.solution_composition = trial.suggest_categorical('solution_composition', ['GeneticAlgorithm', 'ArtificialBeeColonyAlgorithm', 'AntColonyOptimization', 'GreyWolfOptimizer', 'ParticleSwarmOptimization', "RandomSearch"])  # nopep8
+       
+        if params.solution_composition == 'GeneticAlgorithm':
+            # GA base
             params.solution_composition = getattr(suprb.optimizer.solution.ga, params.solution_composition)()
-        
-            params.solution_composition__n_jobs = trial.suggest_int('solution_composition__n_jobs', 1, 5)
+
             params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 64)
             params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 16, 64)
-            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.1, 0.25)
+            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.0, 0.2)
 
             # GA init
             params.solution_composition__init = trial.suggest_categorical('solution_composition__init', ['ZeroInit', 'RandomInit'])  # nopep8
@@ -206,7 +198,6 @@ def run(problem: str, job_id: str):
             if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
                 params.solution_composition__init__fitness__alpha = trial.suggest_float('solution_composition__init__fitness__alpha', 0.0, 1.0) # nopep8
 
-            # TODO: There is only one mixing heuristic: ErrorExperienceHeuristic
             params.solution_composition__init__mixing__experience_weight = trial.suggest_float('solution_composition__init__mixing__experience_weight', 0.0, 1.0)
 
             params.solution_composition__init__mixing__experience_calculation = trial.suggest_categorical('solution_composition__init__mixing__experience_calculation', ['ExperienceCalculation', 'CapExperience', 'CapExperienceWithDimensionality'])  # nopep8
@@ -229,8 +220,7 @@ def run(problem: str, job_id: str):
             if isinstance(params.solution_composition__selection, suprb.optimizer.solution.ga.selection.Tournament):
                 params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)  # nopep8
 
-            # GA mutation (TODO: There is only one mutation: BitFlips)
-            params.solution_composition__mutation__mutation_rate = trial.suggest_float('solution_composition__mutation__mutation_rate', 0.001, 0.01)  # nopep8
+            params.solution_composition__mutation__mutation_rate = trial.suggest_float('solution_composition__mutation__mutation_rate', 0.0, 0.1)  # nopep8
 
             # GA crossover
             params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover', ['NPoint', 'Uniform'])  # nopep8
@@ -238,7 +228,60 @@ def run(problem: str, job_id: str):
 
             params.solution_composition__crossover__crossover_rate = trial.suggest_float('solution_composition__crossover__crossover_rate', 0.7, 1.0)  # nopep8
             if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.ga.crossover.NPoint):
-                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 5)  # nopep8
+                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
+        
+        elif params.solution_composition == 'ArtificialBeeColonyAlgorithm':
+            params.solution_composition = getattr(suprb.optimizer.solution.abc, params.solution_composition)()
+
+            params.solution_composition__food = trial.suggest_categorical('solution_composition__food', ['Sigmoid', 'Bitwise', 'DimensionFlips'])
+            params.solution_composition__food = getattr(suprb.optimizer.solution.abc.food, params.solution_composition__food)()
+
+            params.solution_composition__trials_limit = trial.suggest_int('solution_composition__trials_limit', 1, 32)
+
+            if isinstance(params.solution_composition__food, abc.food.DimensionFlips):
+                params.solution_composition__food__flip_rate = trial.suggest_float('solution_composition__food__flip_rate', 0.01, 1)
+
+        elif params.solution_composition == 'AntColonyOptimization':
+            params.solution_composition = getattr(suprb.optimizer.solution.aco, params.solution_composition)()
+
+            params.solution_composition__builder = trial.suggest_categorical('solution_composition__builder', ['Binary', 'Complete'])
+            params.solution_composition__builder = getattr(suprb.optimizer.solution.aco.builder, params.solution_composition__builder)()
+            params.solution_composition__builder__alpha = trial.suggest_float('solution_composition__builder__alpha', 0.5, 5)
+            params.solution_composition__builder__beta = trial.suggest_float('solution_composition__builder__beta', 0.5, 5)
+
+            params.solution_composition__evaporation_rate = trial.suggest_float('solution_composition__evaporation_rate', 0, 0.9)
+            params.solution_composition__selection__n = trial.suggest_int('solution_composition__selection__n', 1, 32 // 2)
+
+        elif params.solution_composition == 'GreyWolfOptimizer':
+            params.solution_composition = getattr(suprb.optimizer.solution.gwo, params.solution_composition)()
+
+            params.solution_composition__position = trial.suggest_categorical('solution_composition__position', ['Sigmoid', 'Crossover'])
+            params.solution_composition__position = getattr(suprb.optimizer.solution.gwo.position, params.solution_composition__position)()
+            params.solution_composition__n_leaders = trial.suggest_int('solution_composition__n_leaders', 1, 32 // 2)
+
+        elif params.solution_composition == 'ParticleSwarmOptimization':
+            params.solution_composition = getattr(suprb.optimizer.solution.pso, params.solution_composition)()
+
+            params.solution_composition__movement = trial.suggest_categorical('solution_composition__movement', ['Sigmoid', 'SigmoidQuantum', 'BinaryQuantum'])
+            params.solution_composition__movement = getattr(suprb.optimizer.solution.pso.movement, params.solution_composition__movement)()
+
+            params.solution_composition__a_min = trial.suggest_float('solution_composition__a_min', 0, 3)
+            params.solution_composition__a_max = trial.suggest_float('solution_composition__a_max', params.solution_composition__a_min, 3)
+
+            if isinstance(params.solution_composition__movement, suprb.optimizer.solution.pso.movement.Sigmoid):
+                params.solution_composition__movement__b = trial.suggest_float('solution_composition__movement__b', 0, 3)
+                params.solution_composition__movement__c = trial.suggest_float('solution_composition__movement__c', 0, 3)
+            elif isinstance(params.solution_composition__movement, suprb.optimizer.solution.pso.movement.BinaryQuantum):
+                params.solution_composition__movement__p_learning = trial.suggest_float('solution_composition__movement__p_learning', 0.01, 1)
+                params.solution_composition__movement__n_attractors = trial.suggest_int('solution_composition__movement__n_attractors', 1, 32 // 2)
+
+        elif params.solution_composition == 'RandomSearch':
+            params.solution_composition = getattr(suprb.optimizer.solution.rs, params.solution_composition)()
+
+            params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 64, 128)
+            params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 64, 128)
+    
+        
 
 
 
