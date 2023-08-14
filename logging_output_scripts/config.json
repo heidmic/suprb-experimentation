@@ -1,17 +1,25 @@
 {
     "data_directory": "mlruns",
     "output_directory": "logging_output_scripts/outputs",
+    "normalize_datasets": false,
     "heuristics": {
-        "p:energy_cool; r:1; f:NBestFitness; -e:ExperienceCalculation": "1",
-        "p:energy_cool; r:2; f:NBestFitness; -e:ExperienceCalculation": "2",
-        "p:energy_cool; r:3; f:NBestFitness; -e:ExperienceCalculation": "3",
-        "p:energy_cool; r:4; f:NBestFitness; -e:ExperienceCalculation": "4",
-        "p:energy_cool; r:5; f:NBestFitness; -e:ExperienceCalculation": "5"
+        "ES Tuning": "ES",
+        "RS Tuning": "RS",
+        " NS False": "NS-G",
+        "MCNS False": "MCNS-G",
+        "NSLC False": "NSLC-G",
+        " NS True": "NS-P",
+        "MCNS True": "MCNS-P",
+        "NSLC True": "NSLC-P"
     },
     "datasets": {
-        "combined_cycle_power_plant": "Concrete Strength",
-        "airfoil_self_noise": "Combined Cycle Power Plant",
-        "concrete_strength": "Airfoil Self Noise",
-        "energy_cool": "Energy Efficiency Cooling"
+        "concrete_strength": "Concrete Strength",
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "energy_cool": "Energy Efficiency Cooling",
+        "german.numer": "German Number",
+        "fourclass_scale": "Fourclass Scale",
+        "meta": "Meta",
+        "chscase_foot": "Chscase Foot"
     }
 }
