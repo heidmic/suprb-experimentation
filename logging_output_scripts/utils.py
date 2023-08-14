@@ -2,8 +2,25 @@ import os
 import json
 import mlflow
 
+def get_df(heuristic, dataset):
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
 
-def get_all_runs():
+    all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
+
+    for run in all_runs:
+        df = mlflow.search_runs([run])
+
+        heuristic_mask = df['tags.mlflow.runName'].str.contains(f"{heuristic}")
+        dataset_mask =  df['tags.mlflow.runName'].str.contains(f"{dataset}")
+        fold_mask = df['tags.fold'].str.contains("True", na=False)
+        df = df[heuristic_mask & dataset_mask & fold_mask]
+
+        if not df.empty:
+            return df
+
+
+def get_all_runs(problem):
     print("Get all mlflow runs...")
 
     with open('logging_output_scripts/config.json') as f:
@@ -14,14 +31,12 @@ def get_all_runs():
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
 
     for run in all_runs:
-        run_name = mlflow.search_runs([run])['tags.mlflow.runName'][0]
-        if any(substring in run_name for substring in heuristics):
-            all_runs_list.append(mlflow.search_runs([run]))
-            print(run_name)
-    #     if len(all_runs_list) == len(heuristics):
-    #         return all_runs_list
+        for run_name in mlflow.search_runs([run])['tags.mlflow.runName']:
+            if problem in run_name:
+                if any(substring in run_name for substring in heuristics):
+                    all_runs_list.append(mlflow.search_runs([run]))
+                    print(run_name)
 
-    # print("Something is missing")
     return all_runs_list
 
 

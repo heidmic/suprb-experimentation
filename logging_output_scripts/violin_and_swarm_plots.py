@@ -1,4 +1,4 @@
-from logging_output_scripts.utils import check_and_create_dir, get_dataframe, get_all_runs
+from logging_output_scripts.utils import check_and_create_dir, get_dataframe, get_all_runs, get_df
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -41,13 +41,13 @@ def create_plots():
 
     final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
-    all_runs_list = get_all_runs()
+    
     for problem in config['datasets']:
         first = True
         res_var = 0
         counter = 0
         for heuristic, renamed_heuristic in config['heuristics'].items():
-            fold_df = get_dataframe(all_runs_list, heuristic, problem)
+            fold_df = get_df(heuristic, problem)
             if fold_df is not None:
                 counter += 1
                 name = [renamed_heuristic] * fold_df.shape[0]
@@ -68,44 +68,44 @@ def create_plots():
             scaled_var = scaled_var.reshape(1, -1)[0]
             res_var[mse][-len(scaled_var):] = scaled_var
 
-    # Invert values since they are stored as negatives
-    if not config["normalize_datasets"]:
-        res_var[mse] *= -1
+        # Invert values since they are stored as negatives
+        if not config["normalize_datasets"]:
+            res_var[mse] *= -1
 
-    def ax_config(axis):
-        ax.set_xlabel('Estimator', weight="bold")
-        ax.set_ylabel('MSE', weight="bold")
-        ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
-                     else "Normalized Datasets", style="italic")
-        # ax.set_box_aspect(1)
+        def ax_config(axis):
+            ax.set_xlabel('Estimator', weight="bold")
+            ax.set_ylabel('MSE', weight="bold")
+            ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
+                        else "Normalized Datasets", style="italic")
+            ax.set_box_aspect(1)
 
-    problem = problem if not config["normalize_datasets"] else "normalized"
+        problem = problem if not config["normalize_datasets"] else "normalized"
 
-    # Store violin-plots of all models in one plot
-    fig, ax = plt.subplots()
-    ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, scale="width", scale_hue=False)
-    ax_config(ax)
-    fig.savefig(f"{final_output_dir}/violin_plots/{problem}.png")
+        # Store violin-plots of all models in one plot
+        fig, ax = plt.subplots()
+        ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, scale="width", scale_hue=False)
+        ax_config(ax)
+        fig.savefig(f"{final_output_dir}/violin_plots/{problem}.png")
 
-    # Store swarm-plots of all models in one plot
-    fig, ax = plt.subplots()
-    order = np.sort(res_var['Used_Representation'].unique())
-    ax = sns.swarmplot(x='Used_Representation', y=mse, data=res_var, size=4)
-    ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
-                       data=res_var, ci=None, color='black')
-    ax_config(ax)
-    fig.savefig(f"{final_output_dir}/swarm_plots/{problem}.png", dpi=500)
+        # Store swarm-plots of all models in one plot
+        fig, ax = plt.subplots()
+        order = np.sort(res_var['Used_Representation'].unique())
+        ax = sns.swarmplot(x='Used_Representation', y=mse, data=res_var, size=4)
+        # ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
+        #                    data=res_var, ci=None, color='black')
+        ax_config(ax)
+        fig.savefig(f"{final_output_dir}/swarm_plots/{problem}.png", dpi=500)
 
-    # Store line-box-plots
-    fig, ax = plt.subplots()
+        # Store line-box-plots
+        fig, ax = plt.subplots()
 
-    order = np.sort(res_var['Used_Representation'].unique())
-    ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
-                     showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
-    ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
-                       data=res_var, ci=None, color='black')
-    ax_config(ax)
-    fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
+        order = np.sort(res_var['Used_Representation'].unique())
+        ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
+                        showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
+        ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
+                        data=res_var, ci=None, color='black')
+        ax_config(ax)
+        fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
 
 
 if __name__ == '__main__':
