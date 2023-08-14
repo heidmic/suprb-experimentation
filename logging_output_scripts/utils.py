@@ -41,7 +41,6 @@ def get_all_runs(problem):
                     all_runs_list.append(mlflow.search_runs([run]))
                     print(run_name)
 
-    # print("Something is missing")
     return all_runs_list
 
 
