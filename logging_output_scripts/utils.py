@@ -18,6 +18,8 @@ def get_df(heuristic, dataset):
 
         if not df.empty:
             return df
+    
+    print(f"No run found with {heuristic} and {dataset}")
 
 
 def get_all_runs(problem):
