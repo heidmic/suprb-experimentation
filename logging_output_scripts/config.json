@@ -1,25 +1,15 @@
 {
     "data_directory": "mlruns",
     "output_directory": "logging_output_scripts/outputs",
-    "normalize_datasets": false,
+    "normalize_datasets": true,
     "heuristics": {
-        "ES Tuning": "ES",
-        "RS Tuning": "RS",
-        " NS False": "NS-G",
-        "MCNS False": "MCNS-G",
-        "NSLC False": "NSLC-G",
-        " NS True": "NS-P",
-        "MCNS True": "MCNS-P",
-        "NSLC True": "NSLC-P"
+        "r:1; f:FilterSubpopulation; -e:ExperienceCalculation": 1,
+        "r:2; f:FilterSubpopulation; -e:ExperienceCalculation": 2,
+        "r:3; f:FilterSubpopulation; -e:ExperienceCalculation": 3,
+        "r:4; f:FilterSubpopulation; -e:ExperienceCalculation": 4,
+        "r:5; f:FilterSubpopulation; -e:ExperienceCalculation": 5
     },
     "datasets": {
-        "concrete_strength": "Concrete Strength",
-        "combined_cycle_power_plant": "Combined Cycle Power Plant",
-        "airfoil_self_noise": "Airfoil Self Noise",
-        "energy_cool": "Energy Efficiency Cooling",
-        "german.numer": "German Number",
-        "fourclass_scale": "Fourclass Scale",
-        "meta": "Meta",
-        "chscase_foot": "Chscase Foot"
+        "": ""
     }
 }
