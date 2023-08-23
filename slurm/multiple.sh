@@ -35,9 +35,9 @@ for ns in ${ns_types[@]}; do
 	export ns_type=$ns
 	export archive_pop=true
 	echo $experiment $dataset $ns_type $archive_pop
-	sbatch slurm/rule_discovery.sbatch
+	sbatch slurm/rule_discovery_ns.sbatch
 
 	export archive_pop=false
 	echo $experiment $dataset $ns_type $archive_pop
-	sbatch slurm/rule_discovery.sbatch
+	sbatch slurm/rule_discovery_ns.sbatch
 done
