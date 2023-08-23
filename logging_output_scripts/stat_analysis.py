@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from IPython import embed
-from logging_output_scripts.utils import get_dataframe, check_and_create_dir, get_all_runs
+from logging_output_scripts.utils import get_dataframe, check_and_create_dir, get_all_runs, get_df
 import json
 
 
@@ -73,11 +73,12 @@ def smart_print(df, latex):
 def load_data(config):
     dfs = []
     keys = []
-    all_runs_list = get_all_runs()
+    # all_runs_list = get_all_runs()
 
     for heuristic in config['heuristics']:
         for problem in config['datasets']:
-            df = get_dataframe(all_runs_list, heuristic, problem)
+            # df = get_dataframe(all_runs_list, heuristic, problem)
+            df = get_df(heuristic, problem)
             if df is not None:
                 df[mse] *= -1
                 dfs.append(df)

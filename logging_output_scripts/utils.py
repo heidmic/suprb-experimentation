@@ -10,6 +10,7 @@ def get_df(heuristic, dataset):
 
     for run in all_runs:
         df = mlflow.search_runs([run])
+        print(df['tags.mlflow.runName'])
 
         heuristic_mask = df['tags.mlflow.runName'].str.contains(f"{heuristic}")
         dataset_mask =  df['tags.mlflow.runName'].str.contains(f"{dataset}")
@@ -17,6 +18,7 @@ def get_df(heuristic, dataset):
         df = df[heuristic_mask & dataset_mask & fold_mask]
 
         if not df.empty:
+            print("found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n\n\n\n")
             return df
     
     print(f"No run found with {heuristic} and {dataset}")

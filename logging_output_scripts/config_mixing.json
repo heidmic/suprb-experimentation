@@ -1,0 +1,18 @@
+{
+    "data_directory": "mlruns",
+    "output_directory": "logging_output_scripts/outputs",
+    "normalize_datasets": true,
+    "heuristics": {
+        "r:1; f:RouletteWheel; -e:CapExperienceWithDimensionality.": "1",
+        "r:2; f:RouletteWheel; -e:CapExperienceWithDimensionality.": "2",
+        "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality.": "3",
+        "r:4; f:RouletteWheel; -e:CapExperienceWithDimensionality.": "4",
+        "r:5; f:RouletteWheel; -e:CapExperienceWithDimensionality.": "5"
+    },
+    "datasets": {
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "concrete_strength": "Concrete Strength",
+        "energy_cool": "Energy Efficiency Cooling"
+    }
+}
