@@ -66,9 +66,6 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
-@click.option('-t', '--ns_type', type=click.STRING, default=None)
-@click.option('-a', '--use_current_population', type=click.BOOL, default=False)
-@click.option('-i', '--job_id', type=click.INT, default=None)
 def run(problem: str):
     print(f"Problem is {problem}")
 
