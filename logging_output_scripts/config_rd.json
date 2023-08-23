@@ -14,6 +14,9 @@
         "NSLC Tuning": "NSLC-P"
     },
     "datasets": {
-        "concrete_strength": "Concrete Strength"
+        "concrete_strength": "Concrete Strength",
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "energy_cool": "Energy Efficiency Cooling"
     }
 }
