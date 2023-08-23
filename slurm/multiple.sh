@@ -11,20 +11,20 @@ for opt in ${optimizers[@]}; do
 	export optimizer=$opt
 
 	echo $experiment $dataset $opt
-	# sbatch slurm/solution_composition.sbatch
+	sbatch slurm/solution_composition.sbatch
 done
 
 ############################ RULE DISCOVERY - ES ################################
 
 export experiment="runs/rule_discovery/evolution_strategy.py"
-# sbatch slurm/rule_discovery.sbatch
 echo $experiment $dataset
+sbatch slurm/rule_discovery.sbatch
 
 ############################ RULE DISCOVERY - RS ################################
 
 export experiment="runs/rule_discovery/random_search.py"
-# sbatch slurm/rule_discovery.sbatch
 echo $experiment $dataset
+sbatch slurm/rule_discovery.sbatch
 
 ############################ RULE DISCOVERY - NS ################################
 
@@ -34,41 +34,10 @@ ns_types=("NS" "MCNS" "NSLC")
 for ns in ${ns_types[@]}; do
 	export ns_type=$ns
 	export archive_pop=true
-	# sbatch slurm/rule_discovery.sbatch
 	echo $experiment $dataset $ns_type $archive_pop
+	sbatch slurm/rule_discovery.sbatch
 
 	export archive_pop=false
-	# sbatch slurm/rule_discovery.sbatch
 	echo $experiment $dataset $ns_type $archive_pop
-done
-
-
-
-
-
-
-
-for script in ${scripts[@]}; do
-    for dataset in ${datasets[@]}; do
-		export dataset=$dataset
-		export experiment
-
-		# for ns in ${ns_types[@]}; do
-		# 	export ns_type=$ns
-		# 	export archive_pop=true
-		# 	sbatch slurm/rule_discovery.sbatch
-
-		# 	sleep 5
-		# 	export archive_pop=false
-		# 	sbatch slurm/rule_discovery.sbatch
-		#	echo $experiment $dataset $ns_type $archive_pop
-		# done
-
-		echo $experiment $dataset $ns_type
-
 	sbatch slurm/rule_discovery.sbatch
-    done
 done
-
-
-
