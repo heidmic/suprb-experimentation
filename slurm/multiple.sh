@@ -41,6 +41,3 @@ for ns in ${ns_types[@]}; do
 	echo $experiment $dataset $ns_type $archive_pop
 	sbatch slurm/rule_discovery_ns.sbatch
 done
-
-
-
