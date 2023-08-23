@@ -3,7 +3,7 @@
 #SBATCH --partition=cpu
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=5
-#SBATCH --mem=30G
+#SBATCH --mem=20G
 #SBATCH --nodelist=oc-compute03 
 
 JOB_DIR=/data/oc-compute03/$USER/suprb-experimentation
