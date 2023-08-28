@@ -209,8 +209,8 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-    experiment = Experiment(name=f'{problem} {ns_type} Tuning & Experimentation' if job_id is None
-                            else f'{job_id}: {problem} {ns_type} Tuning & Experimentation', verbose=10)
+    experiment = Experiment(name=f'{problem} {ns_type} {use_current_population} Tuning & Experimentation' if job_id is None
+                            else f'{job_id}: {problem} {ns_type} {use_current_population} Tuning & Experimentation', verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_NS_GA_space, tuner=tuner)
