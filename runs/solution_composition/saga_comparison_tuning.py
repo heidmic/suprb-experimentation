@@ -55,7 +55,6 @@ def run(problem: str, solution_composition: str, job_id: str):
 
     estimator = SupRB(
         rule_generation=es.ES1xLambda(),
-        solution_composition=ga.GeneticAlgorithm(),
         n_iter=32, n_rules=4, verbose=10,
         logger=CombinedLogger([('stdout', StdoutLogger()),
                                ('default', DefaultLogger())]),)
@@ -67,7 +66,7 @@ def run(problem: str, solution_composition: str, job_id: str):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=1000,
-        timeout=60*60*24,  # 24 hours
+        timeout=60*60*72,  # 72 hours
         scoring='neg_mean_squared_error',
         verbose=10
     )
