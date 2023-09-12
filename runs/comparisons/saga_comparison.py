@@ -33,9 +33,12 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     from problems import datasets
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
-    
-def get_solution_composition(name: str):
-    pass
+
+
+def validate_solution_composition(name: str):
+    valid_names = ['ga', 'saga1', 'saga2', 'saga3', 'sas']
+    if not name in valid_names:
+        raise ValueError('Invalid solution composition')
 
 
 @click.command()
@@ -45,6 +48,7 @@ def get_solution_composition(name: str):
 def run(problem: str, solution_composition: str, job_id: str):
     print(f"Problem is {problem}, with solution composition {solution_composition} and job id {job_id}")
 
+    validate_solution_composition(solution_composition)
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
@@ -72,13 +76,13 @@ def run(problem: str, solution_composition: str, job_id: str):
     @param_space()
     def suprb_space(trial: Trial, params: Bunch):
         # ES base
-        params.rule_generation__operator = trial.suggest_categorical('rule_generation__operator', ['&', ',', '+'])
+        params.rule_generation__operator = trial.suggest_categorical('rule_generation__operator', ['&', ',', '+'])  # nopep8
 
-        params.rule_generation__lmbda = trial.suggest_int('rule_generation__lmbda', 10, 30)
-        params.rule_generation__n_iter = trial.suggest_int('rule_generation__n_iter', 500, 1500)
+        params.rule_generation__lmbda = trial.suggest_int('rule_generation__lmbda', 10, 30)  # nopep8
+        params.rule_generation__n_iter = trial.suggest_int('rule_generation__n_iter', 500, 1500)  # nopep8
 
         if params.rule_generation__operator == '&':
-            params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 20, 50)
+            params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 20, 50)  # nopep8
 
         # Acceptance
         params.rule_generation__init = trial.suggest_categorical('rule_generation__init', ['MeanInit', 'NormalInit', 'HalfnormInit'])  # nopep8
@@ -102,38 +106,6 @@ def run(problem: str, solution_composition: str, job_id: str):
             # GA base
             params.solution_composition = ga.GeneticAlgorithm()
 
-            params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 64)
-            params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 16, 64)
-            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.0, 0.2)
-
-            # GA init
-            params.solution_composition__init = trial.suggest_categorical('solution_composition__init', ['ZeroInit', 'RandomInit'])  # nopep8
-            params.solution_composition__init = getattr(suprb.solution.initialization, params.solution_composition__init)()
-
-            if isinstance(params.solution_composition__init, suprb.solution.initialization.RandomInit):
-                params.solution_composition__init__p = trial.suggest_float('solution_composition__init__p', 0.3, 0.8)
-
-            params.solution_composition__init__fitness = trial.suggest_categorical('solution_composition__init__fitness', ['PseudoBIC', 'ComplexityEmary', 'ComplexityWu'])  # nopep8
-            params.solution_composition__init__fitness = getattr(suprb.solution.fitness, params.solution_composition__init__fitness)()
-
-            if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
-                params.solution_composition__init__fitness__alpha = trial.suggest_float('solution_composition__init__fitness__alpha', 0.0, 1.0) # nopep8
-
-            params.solution_composition__init__mixing__experience_weight = trial.suggest_float('solution_composition__init__mixing__experience_weight', 0.0, 1.0)
-
-            params.solution_composition__init__mixing__experience_calculation = trial.suggest_categorical('solution_composition__init__mixing__experience_calculation', ['ExperienceCalculation', 'CapExperience', 'CapExperienceWithDimensionality'])  # nopep8
-            params.solution_composition__init__mixing__experience_calculation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__experience_calculation)() # nopep8
-
-            if isinstance(params.solution_composition__init__mixing__experience_calculation, suprb.solution.mixing_model.CapExperienceWithDimensionality):
-                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 2, 5) # nopep8
-            else:
-                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50) # nopep8
-
-            params.solution_composition__init__mixing__filter_subpopulation = trial.suggest_categorical('solution_composition__init__mixing__filter_subpopulation', ['FilterSubpopulation', 'NBestFitness', 'NRandom', 'RouletteWheel'])  # nopep8
-            params.solution_composition__init__mixing__filter_subpopulation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__filter_subpopulation)() # nopep8
-            
-            params.solution_composition__init__mixing__filter_subpopulation__rule_amount = trial.suggest_int('solution_composition__init__mixing__filter_subpopulation__rule_amount', 4, 10)  # nopep8
-
             # GA selection 
             params.solution_composition__selection = trial.suggest_categorical('solution_composition__selection', ['Random', 'RouletteWheel', 'LinearRank', 'Tournament'])  # nopep8
             params.solution_composition__selection = getattr(suprb.optimizer.solution.ga.selection, params.solution_composition__selection)()  # nopep8
@@ -155,21 +127,76 @@ def run(problem: str, solution_composition: str, job_id: str):
             # SAGA1 Base
             params.solution_composition = saga1.SelfAdaptingGeneticAlgorithm()
 
+            params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 128, step=2)
+
+            # SAGA1 selection
+            params.solution_composition__selection = trial.suggest_categorical('solution_composition__selection', ['Random', 'RouletteWheel', 'LinearRank', 'Tournament'])  # nopep8
+            params.solution_composition__selection = getattr(suprb.optimizer.solution.saga1.selection, params.solution_composition__selection)()  # nopep8
+
+            if isinstance(params.solution_composition__selection, suprb.optimizer.solution.saga1.selection.Tournament):
+                params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)  # nopep8
+
+            # SAGA1 crossover
+            params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover', ['NPoint', 'Uniform'])  # nopep8
+            params.solution_composition__crossover = getattr(suprb.optimizer.solution.saga1.crossover, params.solution_composition__crossover)()  # nopep8
+
+            if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.saga1.crossover.NPoint):
+                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
+
         elif solution_composition == 'saga2':
             # SAGA2 Base
             params.solution_composition = saga2.SelfAdaptingGeneticAlgorithm()
+
+            params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 128, step=2)
+
+            # SAGA2 selection
+            params.solution_composition__selection = trial.suggest_categorical('solution_composition__selection', ['Random', 'RouletteWheel', 'LinearRank', 'Tournament'])  # nopep8
+            params.solution_composition__selection = getattr(suprb.optimizer.solution.saga2.selection, params.solution_composition__selection)()  # nopep8
+
+            if isinstance(params.solution_composition__selection, suprb.optimizer.solution.saga2.selection.Tournament):
+                params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)  # nopep8
+
+            # SAGA2 crossover
+            params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover', ['NPoint', 'Uniform'])  # nopep8
+            params.solution_composition__crossover = getattr(suprb.optimizer.solution.saga2.crossover, params.solution_composition__crossover)()  # nopep8
+
+            if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.saga2.crossover.NPoint):
+                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
 
         elif solution_composition == 'saga3':
             # SAGA3 Base
             params.solution_composition = saga3.SelfAdaptingGeneticAlgorithm()
 
+            params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 128, step=2)
+
+            # SAGA3 selection
+            params.solution_composition__selection = trial.suggest_categorical('solution_composition__selection', ['Random', 'RouletteWheel', 'LinearRank', 'Tournament'])  # nopep8
+            params.solution_composition__selection = getattr(suprb.optimizer.solution.saga3.selection, params.solution_composition__selection)()  # nopep8
+
+            if isinstance(params.solution_composition__selection, suprb.optimizer.solution.saga3.selection.Tournament):
+                params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)  # nopep8
+
+            # SAGA3 crossover
+            # not needed as it is selfadapting
+
         elif solution_composition == 'sas':
             # SAS Base
             params.solution_composition = sas.SasGeneticAlgorithm()
-    
-        
 
+            params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 128, step=2)
 
+            # SAS selection
+            # Not needed as it uses a selfadapting ageing selection
+
+            # SAS crossover
+            params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover', ['NPoint', 'Uniform'])  # nopep8
+            params.solution_composition__crossover = getattr(suprb.optimizer.solution.sas.crossover, params.solution_composition__crossover)()  # nopep8
+
+            params.solution_composition__crossover__crossover_rate = trial.suggest_float('solution_composition__crossover__crossover_rate', 0.7, 1.0)  # nopep8
+            if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.sas.crossover.NPoint):
+                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
+
+            params.solution_composition__mutation__mutation_rate = trial.suggest_float('solution_composition__mutation__mutation_rate', 0.0, 0.1)  # nopep8
 
 
 
