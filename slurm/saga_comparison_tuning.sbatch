@@ -6,6 +6,7 @@
 #SBATCH --mem=20G
 #SBATCH --nodelist=oc-compute02
 
+USER="krischma"
 solution_comp="saga1"
 dataset="airfoil_self_noise"
 experiment="runs/solution_composition/saga_comparison_tuning.py"
