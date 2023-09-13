@@ -183,7 +183,7 @@ def run(problem: str, job_id: str):
 
             params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 64)
             params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 16, 64)
-            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.0, 0.2)
+            params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.0, 0.3)
 
             # GA init
             params.solution_composition__init = trial.suggest_categorical('solution_composition__init', ['ZeroInit', 'RandomInit'])  # nopep8
