@@ -28,6 +28,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from IPython import embed
+from logging_output_scripts.utils import get_dataframe, check_and_create_dir, get_all_runs, get_df
+import json
+
 
 pd.options.display.max_rows = 2000
 
@@ -51,33 +54,13 @@ linewidth /= 72.27
 textwidth = 449.59116
 textwidth /= 72.27
 
-dname = "RD"
-suffix = ".csv"
-plotdir = "plots"
+elitist_complexity = "metrics.elitist_complexity"
+mse = "metrics.test_neg_mean_squared_error"
 
 metrics = {
-    "test_mean_squared_error": "MSE",
-    "elitist_complexity": "model complexity"
+    mse: "MSE",
+    elitist_complexity: "model complexity"
 }
-tasks = {
-    "combined_cycle_power_plant": "CCPP",
-    "airfoil_self_noise": "ASN",
-    "concrete_strength": "CS",
-    "energy_cool": "EEC",
-}
-algorithms = ["ES", "RS", "NS", "MCNS", "NSLC"]
-
-
-def list_from_ls(dname):
-    proc = subprocess.run(["ls", dname], capture_output=True)
-
-    if proc.stderr != b"":
-        print(proc.stderr)
-        sys.exit(1)
-
-    # Remove last element since that is an empty string always due to `ls`'s
-    # final newline.
-    return proc.stdout.decode().split("\n")[:-1]
 
 
 def smart_print(df, latex):
@@ -87,23 +70,21 @@ def smart_print(df, latex):
         print(df.to_markdown())
 
 
-def load_data():
+def load_data(config):
     dfs = []
     keys = []
-    for algorithm in algorithms:
-        for task in tasks:
-            df = pd.read_csv(f"{dname}/{algorithm}/{task}{suffix}")
-            dfs.append(df)
-            keys.append((algorithm, task))
+    # all_runs_list = get_all_runs()
 
-    df = pd.concat(dfs,
-                   keys=keys,
-                   names=["algorithm", "task"],
-                   verify_integrity=True)
+    for heuristic in config['heuristics']:
+        for problem in config['datasets']:
+            # df = get_dataframe(all_runs_list, heuristic, problem)
+            df = get_df(heuristic, problem)
+            if df is not None:
+                df[mse] *= -1
+                dfs.append(df)
+                keys.append((heuristic, problem))
 
-    df["test_mean_squared_error"] = -df["test_neg_mean_squared_error"]
-    del df["test_neg_mean_squared_error"]
-
+    df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
     df = df[metrics.keys()]
 
     assert not df.isna().any().any(), "Some values are missing"
@@ -123,7 +104,7 @@ def cli():
 @cli.command()
 @click.option("--latex/--no-latex",
               help="Generate LaTeX output (tables etc.)",
-              default=False)
+              default=True)
 @click.option("--all-variants/--no-all-variants",
               help="Plot different variants for interpreting run/cv data",
               default=False)
@@ -134,17 +115,21 @@ def cli():
 @click.option("--small-set/--no-small-set",
               help="Whether to only analyse ES, NS, NSLC",
               default=False)
-def calvo(latex, all_variants, check_mcmc, small_set):
+def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = False):
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
 
-    df = load_data()
+    final_output_dir = f"{config['output_directory']}"
+    check_and_create_dir(final_output_dir, "calvo")
+
+    df = load_data(config)
 
     # Explore whether throwing away distributional information gives us any
     # insights.
     variants = ({
         # Mean/median over cv runs per task (n_tasks problem instances).
         "mean of":
-        lambda _df: _df[metric].groupby(["algorithm", "task"]).mean().unstack(
-        ).T,
+        lambda _df: _df[metric].groupby(["algorithm", "task"]).mean().unstack().T,
         "median of":
         lambda _df: _df[metric].groupby(["algorithm", "task"]).median().
         unstack().T,
@@ -157,236 +142,163 @@ def calvo(latex, all_variants, check_mcmc, small_set):
     if not all_variants:
         variants = {"all": variants["all"]}
 
+    pd.options.mode.chained_assignment = None
+
     for metric in metrics:
-        # fig, ax = plt.subplots(len(variants), figsize=(linewidth, 2.7), dpi=72)
-        fig, ax = plt.subplots(
-            len(variants),
-            figsize=(textwidth,
-                     2.7 if metrics[metric] == "MSE" else 5 / 7 * 2.7),
-            dpi=72)
+        fig, ax = plt.subplots(len(variants), figsize=(
+            textwidth, 2.7 if metrics[metric] == "MSE" else 5 / 7 * 2.7), dpi=72)
+
         if not all_variants:
             ax = [ax]
+
         i = -1
         for mode, f in variants.items():
             i += 1
-
-            d = f(df)
-
-            # We want the algorithms ordered as they are in the `algorithms`
-            # list.
-            d = d[algorithms if not small_set else ["ES", "NS", "NSLC"]]
+            d = f(df)[config["heuristics"]]
 
             title = f"Considering {mode} cv runs per task"
 
-            print(
-                f"Sample statistics of {metrics[metric]} for “{title}” are as follows:"
-            )
-            print()
+            print(f"Sample statistics of {metrics[metric]} for “{title}” are as follows:\n")
             ranks = d.apply(np.argsort, axis=1) + 1
             print(title)
             smart_print(ranks.mean(), latex=latex)
 
+            d.rename(columns=config["heuristics"], inplace=True)
+
             # NOTE We fix the random seed here to enable model caching.
-            model = cmpbayes.Calvo(d.to_numpy(),
-                                   higher_better=False,
-                                   algorithm_labels=d.columns.to_list()).fit(
-                                       num_samples=10000, random_seed=1)
+            model = cmpbayes.Calvo(
+                d.to_numpy(),
+                higher_better=False, algorithm_labels=d.columns.to_list()).fit(num_samples=10000, random_seed=1)
 
             if check_mcmc:
-                smart_print(az.summary(model.data_), latex=latex)
-                az.plot_trace(model.data_)
-                az.plot_rank(model.data_)
+                smart_print(az.summary(model.infdata_), latex=latex)
+                az.plot_trace(model.infdata_)
+                az.plot_rank(model.infdata_)
 
             # Join all chains, name columns.
-            sample = np.concatenate(model.data_.posterior.weights)
-            sample = pd.DataFrame(
-                sample, columns=model.data_.posterior.weights.algorithm_labels)
+            sample = np.concatenate(model.infdata_.posterior.weights)
+            sample = pd.DataFrame(sample, columns=model.infdata_.posterior.weights.algorithm_labels)
+
+            xlabel = f"Probability"  # f"Probability of having the lowest {metrics[metric]}"
             ylabel = "RD method"
-            # xlabel = f"Probability of having the lowest {metrics[metric]}"
-            xlabel = f"Probability"
-            sample = sample.unstack().reset_index(0).rename(columns={
-                "level_0": ylabel,
-                0: xlabel
-            })
+            sample = sample.unstack().reset_index(0).rename(columns={"level_0": ylabel, 0: xlabel})
 
-            if metrics[metric] == "MSE":
-                add_prob = sample[sample[ylabel] == "ES"][xlabel] + sample[
-                    sample[ylabel] == "NSLC"][xlabel]
-                add_prob = pd.DataFrame({
-                    ylabel:
-                    np.repeat(r"ES $\vee{} NSLC", len(add_prob)),
-                    xlabel:
-                    add_prob
-                })
-                sample = sample.append(add_prob)
-                add_prob = sample[sample[ylabel] == "ES"][xlabel] + sample[
-                    sample[ylabel] == "NSLC"][xlabel] + sample[sample[ylabel]
-                                                               == "NS"][xlabel]
-                add_prob = pd.DataFrame({
-                    ylabel:
-                    np.repeat(r"ES $\vee{} NSLC $\vee{} NS", len(add_prob)),
-                    xlabel:
-                    add_prob
-                })
-                sample = sample.append(add_prob)
-
-            sns.boxplot(data=sample,
-                        y=ylabel,
-                        x=xlabel,
-                        ax=ax[i],
-                        fliersize=0.3)
-            if all_variants:
-                ax[i].set_title(title)
+            sns.boxplot(data=sample, y=ylabel, x=xlabel, ax=ax[i], fliersize=0.3)
+            ax[i].set_title(metrics[metric], style="italic")
             ax[i].set_xlabel(xlabel, weight="bold")
             ax[i].set_ylabel(ylabel, weight="bold")
 
         fig.tight_layout()
-        fig.savefig(
-            f"{plotdir}/calvo-{metric}{'' if not small_set else '-small'}.pdf",
-            dpi=fig.dpi,
-            bbox_inches="tight")
-        # plt.show()
+        fig.savefig(f"{final_output_dir}/calvo/{metric}{'' if not small_set else '-small'}.pdf",
+                    dpi=fig.dpi, bbox_inches="tight")
 
 
-@cli.command()
-@click.option("--latex/--no-latex",
-              help="Generate LaTeX output (tables etc.)",
-              default=False)
-def ttest(latex):
+@ cli.command()
+@ click.option("--latex/--no-latex",
+               help="Generate LaTeX output (tables etc.)",
+               default=True)
+@ click.argument("cand1",
+                 default="")
+@ click.argument("cand2",
+                 default="")
+@ click.argument("cand1_name",
+                 default="")
+@ click.argument("cand2_name",
+                 default="")
+def ttest(latex, cand1, cand2, cand1_name, cand2_name):
+    check_and_create_dir(final_output_dir, "ttest")
     df = load_data()
-    cand1 = "ES"
-    cand2 = "NSLC"
+    pd.options.mode.chained_assignment = None
 
     hdis = {}
     for metric in metrics:
         hdis[metrics[metric]] = {}
         probs = {}
 
-        print(f"# {metrics[metric]}")
-        print()
+        print(f"# {metrics[metric]}\n")
 
-        fig, ax = plt.subplots(
-            4,
-            figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5),
-            # Default LaTeX dpi.
-            dpi=72)
-        for i, task in enumerate(tasks):
+        fig, ax = plt.subplots(4, figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5), dpi=72)
+        for i, task in enumerate(config["datasets"]):
+            if task in df[metric].loc[cand1]:
+                y1 = df[metric].loc[cand1, task]
+                y2 = df[metric].loc[cand2, task]
+                model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
 
-            y1 = df[metric].loc[cand1, task]
-            y2 = df[metric].loc[cand2, task]
-            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
+                # Compute 100(1 - alpha)% high density interval.
+                alpha = 0.005
+                hdi = (model.model_.ppf(alpha), model.model_.ppf(1 - alpha))
+                hdis[metrics[metric]][config["datasets"][task]] = {"lower": hdi[0], "upper": hdi[1]}
 
-            # Compute 100(1 - alpha)% high density interval.
-            alpha = 0.005
-            hdi = (model.model_.ppf(alpha), model.model_.ppf(1 - alpha))
-            hdis[metrics[metric]][tasks[task]] = {
-                "lower": hdi[0],
-                "upper": hdi[1]
-            }
+                # Compute bounds of the plots based on ppf.
+                xlower_ = model.model_.ppf(1e-6)
+                xlower_ -= xlower_ * 0.07
+                xupper_ = model.model_.ppf(1 - 1e-6)
+                xupper_ += xupper_ * 0.07
+                xlower = np.abs([xlower_, xupper_, *hdi]).max()
+                xupper = -xlower
 
-            # Compute bounds of the plots based on ppf.
-            xlower_ = model.model_.ppf(1e-6)
-            xlower_ -= xlower_ * 0.07
-            xupper_ = model.model_.ppf(1 - 1e-6)
-            xupper_ += xupper_ * 0.07
-            xlower = np.abs([xlower_, xupper_, *hdi]).max()
-            xupper = -xlower
+                # Compute pdf values of posterior.
+                x = np.linspace(xlower, xupper, 1000)
+                # y = model.model_.cdf(x)
+                # x = np.arange(1e-3, 1 - 1e-3, 1e-3)
+                y = model.model_.pdf(x)
 
-            # Compute pdf values of posterior.
-            x = np.linspace(xlower, xupper, 1000)
-            # y = model.model_.cdf(x)
-            # x = np.arange(1e-3, 1 - 1e-3, 1e-3)
-            y = model.model_.pdf(x)
+                xlabel = (f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
+                          if metrics[metric] == "MSE"
+                          else (
+                              f"{metrics[metric].capitalize()}({cand2_name})\n- "
+                              f"{metrics[metric].capitalize()}({cand1_name})"))
 
-            # Create DataFrame for easier seaborn'ing.
-            xlabel = (
-                f"{metrics[metric]}({cand2}) - {metrics[metric]}({cand1})"
-                if metrics[metric] == "MSE" else
-                (f"{metrics[metric].capitalize()}({cand2})\n- "
-                 f"{metrics[metric].capitalize()}({cand1})"))
-            ylabel = "Density"
-            data = pd.DataFrame({xlabel: x, ylabel: y})
+                ylabel = "Density"
+                data = pd.DataFrame({xlabel: x, ylabel: y})
 
-            # Plot posterior.
-            # sns.histplot(model.model_.rvs(50000),
-            #              bins=100,
-            #              ax=ax[i],
-            #              stat="density")
-            sns.lineplot(data=data, x=xlabel, y=ylabel, ax=ax[i])
-            ax[i].fill_between(x, 0, y, alpha=0.33)
-            ax[i].set_xlabel("")
-            ax[i].set_ylabel("")
-            ax[i].set_title(f"{tasks[task]}", style="italic")
+                # Plot posterior.
+                # sns.histplot(model.model_.rvs(50000),
+                #              bins=100,
+                #              ax=ax[i],
+                #              stat="density")
+                sns.lineplot(data=data, x=xlabel, y=ylabel, ax=ax[i])
+                ax[i].fill_between(x, 0, y, alpha=0.33)
+                ax[i].set_xlabel("")
+                ax[i].set_ylabel("")
+                ax[i].set_title(f"{config['datasets'][task]}", style="italic")
 
-            # Add HDI lines and values.
-            ax[i].vlines(x=hdi,
-                         ymin=-0.1 * max(y),
-                         ymax=1.2 * max(y),
-                         colors="C1",
-                         linestyles="dashed")
-            ax[i].text(x=hdi[0],
-                       y=1.3 * max(y),
-                       s=round_to_n_sig_figs(hdi[0], 2),
-                       ha="right",
-                       va="center",
-                       color="C1",
-                       fontweight="bold")
-            ax[i].text(x=hdi[1],
-                       y=1.3 * max(y),
-                       s=round_to_n_sig_figs(hdi[1], 2),
-                       ha="left",
-                       va="center",
-                       color="C1",
-                       fontweight="bold")
+                # Add HDI lines and values.
+                ax[i].vlines(x=hdi, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C1", linestyles="dashed")
+                ax[i].text(x=hdi[0], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[0], 2),
+                           ha="right", va="center", color="C1", fontweight="bold")
+                ax[i].text(x=hdi[1], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[1], 2),
+                           ha="left", va="center", color="C1", fontweight="bold")
 
-            ax[i].set_ylim(top=1.2 * max(y))
+                ax[i].set_ylim(top=1.2 * max(y))
+                if metrics[metric] == elitist_complexity:
+                    # Compute rope for this task.
+                    # Remove RS runs.
+                    ()
+                    d_ = df[metric].unstack("algorithm")[[alg for alg in config["heuristics"]]].stack()
+                    # d_ = df[metric]  # .unstack(0).stack()
+                    ()
+                    # Rope is based on std of the other algorithms.
+                    stds = d_[task].groupby("algorithm").std()
+                    rope = stds.mean()
+                    rope = [-rope, rope]
 
-            if metrics[metric] == "model complexity":
-                # Compute rope for this task.
+                    # Add rope lines and values.
+                    ax[i].vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
+                    ax[i].fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
 
-                # Remove RS runs.
-                d_ = df[metric].unstack("algorithm")[[
-                    alg for alg in algorithms if alg != "RS"
-                ]].stack()
+                    # Compute probabilities.
+                    sample = model.model_.rvs(100000)
 
-                # Rope is based on std of the other algorithms.
-                stds = d_[task].groupby("algorithm").std()
-                rope = stds.mean()
-                rope = [-rope, rope]
+                    probs[config['datasets'][task]] = {
+                        "p(ES practically higher complexity)": (sample < rope[0]).sum() / len(sample),
+                        "p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
+                        "p(NSLC practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
 
-                # Add rope lines and values.
-                ax[i].vlines(x=rope,
-                             ymin=-0.1 * max(y),
-                             ymax=1.2 * max(y),
-                             colors="C2",
-                             linestyles="dotted")
-                ax[i].fill_between(rope,
-                                   0,
-                                   1.2 * max(y),
-                                   alpha=0.33,
-                                   color="C2")
-
-                # Compute probabilities.
-                sample = model.model_.rvs(100000)
-
-                probs[tasks[task]] = {
-                    "p(ES practically higher complexity)":
-                    (sample < rope[0]).sum() / len(sample),
-                    "p(practically equivalent)":
-                    np.logical_and(rope[0] < sample, sample < rope[1]).sum()
-                    / len(sample),
-                    "p(NSLC practically higher complexity)":
-                    (rope[1] < sample).sum() / len(sample),
-                }
-
-        ax[i].set_ylabel(ylabel, weight="bold")
-        ax[i].set_xlabel(xlabel, weight="bold")
-        fig.tight_layout()
-        fig.savefig(f"{plotdir}/ttest-{metric}.pdf",
-                    dpi=fig.dpi,
-                    bbox_inches="tight")
-        # plt.show()
-        print()
+                ax[i].set_ylabel(ylabel, weight="bold")
+                ax[i].set_xlabel(xlabel, weight="bold")
+                fig.tight_layout()
+                fig.savefig(f"{final_output_dir}/ttest/{metric}.pdf", dpi=fig.dpi, bbox_inches="tight")
 
     # https://stackoverflow.com/a/67575847/6936216
     hdis_ = hdis
@@ -397,10 +309,8 @@ def ttest(latex):
     hdis["bound"] = hdis_melt["value"]
     hdis = hdis.set_index(list(hdis.columns[:-1]))
     hdis = hdis.unstack("kind")
-    hdis["bound", "lower"] = hdis["bound", "lower"].apply(
-        lambda x: f"[{round_to_n_sig_figs(x, n=2)},")
-    hdis["bound", "upper"] = hdis["bound", "upper"].apply(
-        lambda x: f"{round_to_n_sig_figs(x, n=2)}]")
+    hdis["bound", "lower"] = hdis["bound", "lower"].apply(lambda x: f"[{round_to_n_sig_figs(x, n=2)},")
+    hdis["bound", "upper"] = hdis["bound", "upper"].apply(lambda x: f"{round_to_n_sig_figs(x, n=2)}]")
     hdis = hdis.rename(columns={"bound": "99\% HDI"})
 
     smart_print(hdis, latex=latex)
@@ -411,38 +321,5 @@ def ttest(latex):
     smart_print(probs, latex=latex)
 
 
-@cli.command()
-def violins():
-    df = load_data()
-
-    metric = "test_mean_squared_error"
-    fig, ax = plt.subplots(2, 2, figsize=(textwidth, 2.7 * 1.3), dpi=72)
-
-    xlabel = "RD method"
-    ylabel = "MSE"
-
-    for i, task in enumerate(tasks):
-        d = df[metric].swaplevel(0, 1).loc[task]
-        # Make index a column (seaborn requires this seemingly).
-        d = d.reset_index()
-        ax_ = ax[i // 2][i % 2]
-        sns.violinplot(data=d,
-                       x="algorithm",
-                       y="test_mean_squared_error",
-                       ax=ax_)
-
-        ax_.set_title(tasks[task], style="italic")
-        ax_.set_xlabel("")
-        ax_.set_ylabel("")
-
-    ax[1][0].set_xlabel(xlabel, weight="bold")
-    ax[1][0].set_ylabel(ylabel, weight="bold")
-    fig.tight_layout()
-    fig.savefig(f"{plotdir}/violins-{metric}.pdf",
-                dpi=fig.dpi,
-                bbox_inches="tight")
-
-
-# TODO Consider to try tom, too, here
 if __name__ == "__main__":
     cli()

@@ -20,6 +20,9 @@ from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import rs, origin, mutation
+from sklearn.datasets import fetch_openml
+from sklearn.preprocessing import LabelEncoder
+import pandas as pd
 
 
 random_state = 42
@@ -30,6 +33,35 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     from problems import datasets
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
+    else:
+        enc = LabelEncoder()
+        dataset = fetch_openml(name=name, version=1)
+
+        if name == "meta":
+            dataset.data.DS_Name = enc.fit_transform(dataset.data.DS_Name)
+            dataset.data.Alg_Name = enc.fit_transform(dataset.data.Alg_Name)
+            dataset.data = dataset.data.drop(
+                dataset.data.columns[dataset.data.isna().any()].tolist(), axis=1)
+
+        if name == "chscase_foot":
+            dataset.data.col_1 = enc.fit_transform(dataset.data.col_1)
+
+        if isinstance(dataset.data, np.ndarray):
+            X = dataset.data
+        elif isinstance(dataset.data, pd.DataFrame) or isinstance(dataset.data, pd.Series):
+            X = dataset.data.to_numpy(dtype=np.float)
+        else:
+            X = dataset.data.toarray()
+
+        if isinstance(dataset.target, np.ndarray):
+            y = dataset.target
+        elif isinstance(dataset.target, pd.DataFrame) or isinstance(dataset.target, pd.Series):
+            y = dataset.target.to_numpy(dtype=np.float)
+        else:
+            y = dataset.target.toarray()
+
+
+        return X, y
 
 
 @click.command()
@@ -63,7 +95,7 @@ def run(problem: str):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=10_000,
-        timeout=24 * 60 * 60,  # 24 hours
+        timeout=72 * 60 * 60,  # 72 hours
         scoring='neg_mean_squared_error',
         verbose=10
     )
