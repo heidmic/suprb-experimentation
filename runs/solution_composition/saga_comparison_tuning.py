@@ -139,7 +139,7 @@ def run(problem: str, solution_composition: str, job_id: str):
             params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover', ['NPoint', 'Uniform'])  # nopep8
             params.solution_composition__crossover = getattr(suprb.optimizer.solution.saga1.crossover, params.solution_composition__crossover)()  # nopep8
 
-            if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.saga1.crossover.NPoint):
+            if isinstance(params.solution_composition__crossover, suprb.optimizer.solution.saga1.crossover.NPoint):
                 params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
 
         elif solution_composition == 'saga2':
@@ -159,7 +159,7 @@ def run(problem: str, solution_composition: str, job_id: str):
             params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover', ['NPoint', 'Uniform'])  # nopep8
             params.solution_composition__crossover = getattr(suprb.optimizer.solution.saga2.crossover, params.solution_composition__crossover)()  # nopep8
 
-            if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.saga2.crossover.NPoint):
+            if isinstance(params.solution_composition__crossover, suprb.optimizer.solution.saga2.crossover.NPoint):
                 params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
 
         elif solution_composition == 'saga3':
@@ -192,7 +192,7 @@ def run(problem: str, solution_composition: str, job_id: str):
             params.solution_composition__crossover = getattr(suprb.optimizer.solution.sas.crossover, params.solution_composition__crossover)()  # nopep8
 
             params.solution_composition__crossover__crossover_rate = trial.suggest_float('solution_composition__crossover__crossover_rate', 0.7, 1.0)  # nopep8
-            if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.sas.crossover.NPoint):
+            if isinstance(params.solution_composition__crossover, suprb.optimizer.solution.sas.crossover.NPoint):
                 params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
 
             params.solution_composition__mutation__mutation_rate = trial.suggest_float('solution_composition__mutation__mutation_rate', 0.0, 0.1)  # nopep8
