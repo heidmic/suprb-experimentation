@@ -99,7 +99,10 @@ def run(problem: str, solution_composition: str, job_id: str):
         params.rule_generation__init__model = Ridge()
 
         # Mutation 
-        params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])  # nopep8
+        if params.rule_generation__operator == ',':
+            params.rule_generation__mutation = 'Normal'
+        else:
+            params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])  # nopep8
         params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()  # nopep8
         params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', 0.0, 3.0)  # nopep8
 
