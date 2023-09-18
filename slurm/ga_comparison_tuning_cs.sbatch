@@ -7,7 +7,7 @@
 #SBATCH --nodelist=oc-compute02
 
 USER="krischma"
-solution_comp="saga1"
+solution_comp="ga"
 dataset="concrete_strength"
 experiment="runs/solution_composition/saga_comparison_tuning.py"
 JOB_DIR=/data/oc-compute02/$USER/suprb-experimentation
