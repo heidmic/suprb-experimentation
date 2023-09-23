@@ -77,32 +77,12 @@ def run(problem: str, solution_composition: str, job_id: str):
 
     @param_space()
     def suprb_space(trial: Trial, params: Bunch):
-        # ES base
-        params.rule_generation__n_iter = trial.suggest_int('rule_generation__n_iter', 10, 500)
-        params.rule_generation__operator = trial.suggest_categorical('rule_generation__operator', ['&', ',', '+'])  # nopep8
+        # ES
+        sigma_space = [0, np.sqrt(X.shape[1])]
 
-        if params.rule_generation__operator == '&':
-            params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 20, 50)  # nopep8
-
-        # Acceptance
-        params.rule_generation__init = trial.suggest_categorical('rule_generation__init', ['MeanInit', 'NormalInit'])  # nopep8
-        params.rule_generation__init = getattr(suprb.rule.initialization, params.rule_generation__init)()  # nopep8
-
-        if not isinstance(params.rule_generation__init, suprb.rule.initialization.MeanInit):
-            params.rule_generation__init__sigma = trial.suggest_float('rule_generation__init__sigma', 0.0, 3.0)  # nopep8
-
-        params.rule_generation__init__fitness = params.rule_generation__init__fitness = suprb.rule.fitness.VolumeWu()
-        params.rule_generation__init__fitness__alpha = trial.suggest_float('rule_generation__init__fitness__alpha', 0.0, 1)  # nopep8
-
-        params.rule_generation__init__model = Ridge()
-
-        # Mutation 
-        if params.rule_generation__operator == ',':
-            params.rule_generation__mutation = 'Normal'
-        else:
-            params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])  # nopep8
-        params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()  # nopep8
-        params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', 0.0, 3.0)  # nopep8
+        params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', *sigma_space)
+        params.rule_generation__init__fitness__alpha = trial.suggest_float(
+            'rule_generation__init__fitness__alpha', 0.01, 0.2)
 
        # Solution Composition
         if solution_composition == 'ga':
