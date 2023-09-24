@@ -2,21 +2,10 @@
 # We could directly refer to a commit here, but we probably shouldn't merge unstable features into master, anyway.
 # If you are not logged into GitHub while running this command, you may need to install the package manually
 # Reference Link: https://docs.readthedocs.io/en/stable/guides/private-python-packages.html
--e git+https://github.com/heidmic/suprb@master#egg=suprb
-# If the following throws an error along the lines:q
-#
-# ERROR: Could not find a version that satisfies the requirement httpstan<4.8,>=4.7 (from pystan==3.4.0->cmpbayes==1.0.0b0)
-# (from versions: 2.2.0, 2.3.0, 4.0.0, 4.3.1, 4.3.2, 4.4.0, 4.4.1, 4.4.2, 4.8.0, 4.8.1, 4.8.2, 4.9.0, 4.9.1)
-# ERROR: No matching distribution found for httpstan<4.8,>=4.7 (from pystan==3.4.0->cmpbayes==1.0.0b0)
-#
-# Update pip with "pip install -U pip" and run it again
--e git+https://github.com/dpaetzel/cmpbayes@main#egg=cmpbayes
+-e git+https://github.com/heidmic/suprb@109_introduce_hyperellipsoidal_conditions#egg=suprb
 
 # Other requirements
-# Do not change httpstan and pystan. You are going to regret it!
-httpstan==4.7.1
-pystan==3.4.0
-numpy~=1.21.5
+numpy~=1.22.4
 scipy~=1.7.1
 matplotlib~=3.4.3
 seaborn~=0.11.2
@@ -26,9 +15,12 @@ sklearn-genetic-opt~=0.8.0
 optuna~=2.10.0
 pandas~=1.3.4
 mlflow~=1.26.1
+hypothesis~=6.24.2
 joblib~=1.1.0
 click~=8.0.3
+tqdm~=4.62.3
+pytest~=6.2.5
+protobuf~=3.20.0
 setuptools~=57.0.0
 baycomp~=1.0.2
 tabulate~=0.8.9
-ipython~=8.11.0

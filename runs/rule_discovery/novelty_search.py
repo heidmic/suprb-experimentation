@@ -25,9 +25,8 @@ from suprb.optimizer.rule.mutation import HalfnormIncrease
 from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
 from suprb.optimizer.rule.ns.archive import ArchiveNovel
 from suprb.optimizer.rule.ns.novelty_calculation import NoveltyCalculation
-from sklearn.datasets import fetch_openml
-from sklearn.preprocessing import LabelEncoder
-import pandas as pd
+
+
 
 random_state = 42
 
@@ -37,44 +36,14 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     from problems import datasets
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
-    else:
-        enc = LabelEncoder()
-        dataset = fetch_openml(name=name, version=1)
-
-        if name == "meta":
-            dataset.data.DS_Name = enc.fit_transform(dataset.data.DS_Name)
-            dataset.data.Alg_Name = enc.fit_transform(dataset.data.Alg_Name)
-            dataset.data = dataset.data.drop(
-                dataset.data.columns[dataset.data.isna().any()].tolist(), axis=1)
-
-        if name == "chscase_foot":
-            dataset.data.col_1 = enc.fit_transform(dataset.data.col_1)
-
-        if isinstance(dataset.data, np.ndarray):
-            X = dataset.data
-        elif isinstance(dataset.data, pd.DataFrame) or isinstance(dataset.data, pd.Series):
-            X = dataset.data.to_numpy(dtype=np.float)
-        else:
-            X = dataset.data.toarray()
-
-        if isinstance(dataset.target, np.ndarray):
-            y = dataset.target
-        elif isinstance(dataset.target, pd.DataFrame) or isinstance(dataset.target, pd.Series):
-            y = dataset.target.to_numpy(dtype=np.float)
-        else:
-            y = dataset.target.toarray()
-
-
-        return X, y
 
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 @click.option('-t', '--ns_type', type=click.STRING, default=None)
-@click.option('-a', '--use_current_population', type=click.BOOL, default=False)
 @click.option('-i', '--job_id', type=click.INT, default=None)
-def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
-    print(f"{ns_type} with use_current_population={use_current_population} is tuned and tested with problem {problem}")
+def run(problem: str, ns_type: str, job_id: int):
+    print(f"{ns_type} is tuned and tested with problem {problem}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
@@ -103,7 +72,7 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=10_000,
-        timeout=72 * 60 * 60,  # 72 hours
+        timeout=24 * 60 * 60,  # 24 hours
         scoring='neg_mean_squared_error',
         verbose=10
     )
@@ -168,10 +137,11 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
         params.rule_generation__novelty_calculation__archive = getattr(
             suprb.optimizer.rule.ns.archive, params.rule_generation__novelty_calculation__archive)()
 
+
         params.rule_generation__novelty_calculation = trial.suggest_categorical('novelty_calculation',
                                                                                 ["NoveltyCalculation",
                                                                                  "ProgressiveMinimalCriteria",
-                                                                                 "NoveltyFitnessPareto",
+                                                                                 "NovelityFitnessPareto",
                                                                                  "NoveltyFitnessBiased"])
 
         params.rule_generation__novelty_calculation = getattr(
@@ -185,8 +155,6 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
                       suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
             params.rule_generation__novelty_calculation__novelty_bias = \
                 trial.suggest_float('novelty_bias', 0.3, 0.7)
-            
-        params.rule_generation__use_population_for_archive = use_current_population
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
@@ -209,8 +177,8 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-    experiment = Experiment(name=f'{problem} {ns_type} {use_current_population} Tuning & Experimentation' if job_id is None
-                            else f'{job_id}: {problem} {ns_type} {use_current_population} Tuning & Experimentation', verbose=10)
+    experiment = Experiment(name=f'{problem} {ns_type} Tuning & Experimentation' if job_id is None
+                            else f'{job_id}: {problem} {ns_type} Tuning & Experimentation', verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_NS_GA_space, tuner=tuner)
