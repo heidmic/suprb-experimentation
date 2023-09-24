@@ -7,6 +7,7 @@ from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import mutation, es, origin
+from suprb.rule.matching import GaussianKernelFunction
 
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
@@ -56,28 +57,35 @@ individual_dataset_params = {
     }
 }
 
-estimator = SupRB(
+estimator = (SupRB(
     rule_generation=es.ES1xLambda(
         operator='&',
         lmbda=20,
-        init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
-                                          model=Ridge(alpha=0.01, random_state=random_state)),
-        mutation=mutation.HalfnormIncrease(),
-        origin_generation=origin.SquaredError(),
+        init=rule.initialization.NormalInit(sigma=np.array([0.00000001, 1]), fitness=rule.fitness.VolumeWu(alpha=0.8)),
+        mutation=mutation.Uniform(sigma=np.array([1, 1]))
     ),
-    solution_composition=ga.GeneticAlgorithm(),
-    verbose=10,
+    solution_composition=ga.GeneticAlgorithm(
+        n_iter=64,
+        crossover=ga.crossover.Uniform(),
+        selection=ga.selection.Tournament(),
+        mutation=ga.mutation.BitFlips(),
+    ),
+    matching_type=GaussianKernelFunction(np.array([]), np.array([])),
+    n_iter=16,
+    n_rules=4,
     logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
+    random_state=random_state,
+)
 )
 
 # Default values to be used for all tunings
 shared_tuning_params = dict(
-    estimator=estimator,
-    random_state=random_state,
-    cv=4,
-    n_jobs_cv=4,
-    n_jobs=4,
-    n_calls=10000,
-    timeout=72 * 60 * 60,  # 72 hours
-    verbose=10
+estimator = estimator,
+random_state = random_state,
+cv = 4,
+n_jobs_cv = 4,
+n_jobs = 4,
+n_calls = 10000,
+timeout = 72 * 60 * 60,  # 72 hours
+verbose = 10
 )
