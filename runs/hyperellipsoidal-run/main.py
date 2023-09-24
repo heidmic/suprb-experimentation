@@ -81,8 +81,8 @@ def run(problem: str):
 
     experiment = Experiment(name=f'{problem} General Tuning', params=params, verbose=10)
 
-    #tuner = OptunaTuner(X_train=X, y_train=y, **shared_tuning_params,scoring='fitness')
-    #experiment.with_tuning(che_space, tuner=tuner)
+    tuner = OptunaTuner(X_train=X, y_train=y, **shared_tuning_params,scoring='fitness')
+    experiment.with_tuning(che_space, tuner=tuner)
 
     experiment.perform(evaluation=None)
     mlflow.set_experiment(problem)
