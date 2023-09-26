@@ -1,6 +1,8 @@
 # MlFlow
 **/mlruns/**
 mlruns/**
+# Output
+output/**
 # PyCharm
 .idea
 
