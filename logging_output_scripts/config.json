@@ -1,0 +1,22 @@
+{
+    "data_directory": "mlruns",
+    "output_directory": "logging_output_scripts/outputs",
+    "normalize_datasets": false,
+    "heuristics": {
+        "s:ga": "GA",
+        "s:saga1": "SAGA1",
+        "s:saga2": "SAGA2",
+        "s:saga3": "SAGA3",
+        "s:sas": "SAS"
+    },
+    "datasets": {
+        "concrete_strength": "Concrete Strength",
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "protein_structure": "Protein Structure"
+    },
+    "metrics": {
+        "elitist_complexity": "Komplexitaet",
+        "elitist_error": "MSE"
+    }
+}
