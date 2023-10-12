@@ -85,6 +85,6 @@ def create_plots(metric_name='elitist_complexity', steps=32):
 
 
 if __name__ == '__main__':
-    create_plots(metric_name="elitist_complexity")
+    create_plots(metric_name="elitist_error")
     #a = get_histogram("s:ga", "concrete_strength", "elitist_error", 10)
     #print(a)

@@ -2,7 +2,8 @@
 **/mlruns/**
 mlruns/**
 # Output
-output/**
+**/output/**
+**/outputs/**
 # PyCharm
 .idea
 
