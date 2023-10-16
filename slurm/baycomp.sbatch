@@ -7,7 +7,7 @@
 #SBATCH --nodelist=oc-compute02
 
 USER="krischma"
-experiment="runs/solution_composition/saga_comparison_tuning.py"
+script="logging_output_scripts/stat_analysis.py"
 JOB_DIR=/data/oc-compute02/$USER/suprb-experimentation
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
-python $JOB_DIR/$experiment -p $dataset -s $solution_comp -j $SLURM_JOB_ID"
+python $JOB_DIR/$script calvo --latex"
