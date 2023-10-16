@@ -13,6 +13,7 @@ Uses seaborn-package to create MSE-Time and Complexity-Time Plots comparing mode
 on multiple datasets
 """
 sns.set_style("whitegrid")
+sns.set(rc={"figure.dpi":300, 'savefig.dpi':300})
 sns.set_theme(style="whitegrid",
               font="Times New Roman",
               font_scale=1,
@@ -74,7 +75,7 @@ def create_plots(metric_name='elitist_complexity', steps=32):
         def ax_config(axis):
             axis.set_xlabel('Iteration')
             axis.set_ylabel(config['metrics'][metric_name])
-            axis.legend(title='Optimizer', labels=legend_labels)
+            axis.legend(title='Optimierer', labels=legend_labels)
 
         fig, ax = plt.subplots()
         ax = sns.lineplot(x='step', y=metric_name, data=res_data, style='optimizer_name', hue='optimizer_name')
@@ -86,5 +87,3 @@ def create_plots(metric_name='elitist_complexity', steps=32):
 
 if __name__ == '__main__':
     create_plots(metric_name="elitist_error")
-    #a = get_histogram("s:ga", "concrete_strength", "elitist_error", 10)
-    #print(a)

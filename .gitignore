@@ -1,6 +1,7 @@
 # MlFlow
 **/mlruns/**
 mlruns/**
+mlruns_pt/**
 # Output
 **/output/**
 **/outputs/**

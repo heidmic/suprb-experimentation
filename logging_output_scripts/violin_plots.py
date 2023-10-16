@@ -12,6 +12,7 @@ Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
 sns.set_style("whitegrid")
+sns.set(rc={"figure.dpi":300, 'savefig.dpi':300})
 sns.set_theme(style="whitegrid",
               font="Times New Roman",
               font_scale=1,
@@ -27,7 +28,7 @@ plt.tight_layout()
 
 
 mse = "metrics.test_neg_mean_squared_error"
-# mse = "metrics.elitist_complexity"
+#mse = "metrics.elitist_complexity"
 
 
 def create_plots():
@@ -73,10 +74,8 @@ def create_plots():
             res_var[mse] *= -1
 
         def ax_config(axis):
-            ax.set_xlabel('Optimizer')
-            ax.set_ylabel('MSE')
-            ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
-                        else "Normalized Datasets", style="italic")
+            ax.set_xlabel('Optimierer')
+            ax.set_ylabel('Komplexitaet')
             ax.set_box_aspect(1)
 
         problem = problem if not config["normalize_datasets"] else "normalized"
@@ -85,7 +84,7 @@ def create_plots():
         fig, ax = plt.subplots()
         ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, density_norm="width", hue='Used_Representation')
         ax_config(ax)
-        fig.savefig(f"{final_output_dir}/{output_dir}/{problem}.png")
+        fig.savefig(f"{final_output_dir}/{output_dir}/{problem}_elitist_error.png")
 
 
 if __name__ == '__main__':

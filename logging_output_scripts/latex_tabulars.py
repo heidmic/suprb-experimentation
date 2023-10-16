@@ -137,6 +137,8 @@ def write_mse():
     [MODEL n]
     To be fused into a larger table (needs to be done manually)
     """
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
     # Each column features all models for one problem
     column = []
     for problem in config["datasets"]:
