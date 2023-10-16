@@ -10,6 +10,10 @@
         "s:sas": "SAS"
     },
     "datasets": {
+        "concrete_strength": "Concrete Strength",
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "protein_structure": "Protein Structure",
         "parkinson_total": "Parkinsons Telemonitoring"
     },
     "metrics": {
