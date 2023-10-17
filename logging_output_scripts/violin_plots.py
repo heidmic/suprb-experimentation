@@ -27,11 +27,8 @@ plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.tight_layout()
 
 
-mse = "metrics.test_neg_mean_squared_error"
-#mse = "metrics.elitist_complexity"
-
-
-def create_plots():
+def create_plots(metricname = 'test_neg_mean_squared_error'):
+    metric = 'metrics.' + metricname
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
@@ -63,28 +60,32 @@ def create_plots():
                 print(f"Done for {problem} with {renamed_heuristic}")
 
         if counter and config["normalize_datasets"]:
-            reshaped_var = np.array(res_var[mse])[-counter*64:].reshape(counter, -1) * -1
+            reshaped_var = np.array(res_var[metric])[-counter*64:].reshape(counter, -1) * -1
             scaler.fit(reshaped_var)
             scaled_var = scaler.transform(reshaped_var)
             scaled_var = scaled_var.reshape(1, -1)[0]
-            res_var[mse][-len(scaled_var):] = scaled_var
+            res_var[metric][-len(scaled_var):] = scaled_var
 
         # Invert values since they are stored as negatives
         if not config["normalize_datasets"]:
-            res_var[mse] *= -1
+            if metric == 'metrics.test_neg_mean_squared_error':
+                res_var[metric] *= -1
 
         def ax_config(axis):
             ax.set_xlabel('Optimierer')
-            ax.set_ylabel('Komplexitaet')
+            if metric == 'metrics.test_neg_mean_squared_error':
+                ax.set_ylabel('MSE')
+            else:
+                ax.set_ylabel('Komplexitaet')
             ax.set_box_aspect(1)
 
         problem = problem if not config["normalize_datasets"] else "normalized"
 
         # Store violin-plots of all models in one plot
         fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, density_norm="width", hue='Used_Representation')
+        ax = sns.violinplot(x='Used_Representation', y=metric, data=res_var, density_norm="width", hue='Used_Representation')
         ax_config(ax)
-        fig.savefig(f"{final_output_dir}/{output_dir}/{problem}_elitist_error.png")
+        fig.savefig(f"{final_output_dir}/{output_dir}/{problem}_{metricname}.png")
 
 
 if __name__ == '__main__':

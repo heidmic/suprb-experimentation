@@ -2,11 +2,16 @@
 **/mlruns/**
 mlruns/**
 mlruns_pt/**
+
 # Output
 **/output/**
 **/outputs/**
+
 # PyCharm
 .idea
+
+# Renamescript
+logging_output_scripts/rename.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

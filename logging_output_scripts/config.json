@@ -6,8 +6,7 @@
         "s:ga": "GA",
         "s:saga1": "SAGA1",
         "s:saga2": "SAGA2",
-        "s:saga3": "SAGA3",
-        "s:sas": "SAS"
+        "s:saga3": "SAGA3"
     },
     "datasets": {
         "concrete_strength": "Concrete Strength",
