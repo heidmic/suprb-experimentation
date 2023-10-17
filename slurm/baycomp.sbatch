@@ -2,9 +2,9 @@
 #SBATCH --time=96:00:00
 #SBATCH --partition=cpu
 #SBATCH --output=output/output-%j.txt
-#SBATCH --cpus-per-task=5
-#SBATCH --mem=20G
-#SBATCH --nodelist=oc-compute03
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=8G
+#SBATCH --nodelist=oc-compute02
 
 USER="krischma"
 script="logging_output_scripts/stat_analysis.py"
