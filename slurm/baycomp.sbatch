@@ -4,7 +4,7 @@
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=20G
-#SBATCH --nodelist=oc-compute02
+#SBATCH --nodelist=oc-compute03
 
 USER="krischma"
 script="logging_output_scripts/stat_analysis.py"
