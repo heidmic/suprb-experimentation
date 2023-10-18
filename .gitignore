@@ -12,6 +12,7 @@ mlruns_pt/**
 
 # Renamescript
 logging_output_scripts/rename.py
+logging_output_scripts/test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
