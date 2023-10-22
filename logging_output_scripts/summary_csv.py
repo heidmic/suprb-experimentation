@@ -8,7 +8,7 @@ Leave out/add metrics that you want to evaluate
 """
 
 elitist_complexity = "metrics.elitist_complexity"
-mse = "metrics.elitist_error"
+mse = "metrics.test_neg_mean_squared_error"
 
 
 def create_summary_csv():
