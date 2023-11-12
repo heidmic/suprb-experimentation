@@ -27,7 +27,7 @@ random_state = 42
 
 # Values that will be chosen as default for all combinations
 global_params = Bunch(**{
-    'solution_composition__n_iter': 32,
+    'solution_composition__n_iter': 16,
     'rule_generation__n_iter': 250,
     'solution_composition__population_size': 32,
     'rule_generation__lmbda': 20,
@@ -36,32 +36,30 @@ global_params = Bunch(**{
 
 individual_dataset_params = {
     'airfoil_self_noise': {
-        'n_iter': 32,
+        'n_iter': 16,
         'n_rules': 4
     },
     'combined_cycle_power_plant': {
-        'n_iter': 32,
+        'n_iter': 16,
         'n_rules': 4
     },
     'concrete_strength': {
-        'n_iter': 32,
+        'n_iter': 16,
         'n_rules': 4
     },
-    'protein_structure': {
-        'n_iter': 36,
+    'energy': {
+        'n_iter': 16,
         'n_rules': 4
     },
-    'parkinson_total': {
-        'n_iter': 36,
-        'n_rules': 4
-    }
+
+
 }
 
 estimator = (SupRB(
     rule_generation=es.ES1xLambda(
         operator='&',
         lmbda=20,
-        init=rule.initialization.NormalInit(sigma=np.array([0.00000001, 1]), fitness=rule.fitness.VolumeWu(alpha=0.8)),
+        init=rule.initialization.NormalInit(sigma=np.array([0.0001, 1]), fitness=rule.fitness.VolumeWu(alpha=0.8)),
         mutation=mutation.Uniform(sigma=np.array([1, 1]))
     ),
     solution_composition=ga.GeneticAlgorithm(
@@ -86,6 +84,6 @@ cv = 4,
 n_jobs_cv = 4,
 n_jobs = 4,
 n_calls = 10000,
-timeout = 72 * 60 * 60,  # 72 hours
+timeout = 15 * 60 * 60,  # 72 hours
 verbose = 10
 )
