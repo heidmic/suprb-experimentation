@@ -2,7 +2,7 @@
 # We could directly refer to a commit here, but we probably shouldn't merge unstable features into master, anyway.
 # If you are not logged into GitHub while running this command, you may need to install the package manually
 # Reference Link: https://docs.readthedocs.io/en/stable/guides/private-python-packages.html
--e git+https://github.com/heidmic/suprb@109_introduce_hyperellipsoidal_conditions#egg=suprb
+Add-e git+https://github.com/heidmic/suprb@149_introduce_general_ellispoids#egg=suprb
 
 # Other requirements
 numpy~=1.22.4
