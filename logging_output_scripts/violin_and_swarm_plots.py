@@ -41,7 +41,7 @@ def create_plots():
 
     final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
-    
+
     for problem in config['datasets']:
         first = True
         res_var = 0
@@ -76,7 +76,7 @@ def create_plots():
             ax.set_xlabel('Estimator', weight="bold")
             ax.set_ylabel('MSE', weight="bold")
             ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
-                        else "Normalized Datasets", style="italic")
+                         else "Normalized Datasets", style="italic")
             ax.set_box_aspect(1)
 
         problem = problem if not config["normalize_datasets"] else "normalized"
@@ -101,9 +101,9 @@ def create_plots():
 
         order = np.sort(res_var['Used_Representation'].unique())
         ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
-                        showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
+                         showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
         ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
-                        data=res_var, ci=None, color='black')
+                           data=res_var, ci=None, color='black')
         ax_config(ax)
         fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
 

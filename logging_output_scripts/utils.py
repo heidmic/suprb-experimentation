@@ -20,7 +20,7 @@ def get_df(heuristic, dataset):
         if not df.empty:
             print("found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n\n\n\n")
             return df
-    
+
     print(f"No run found with {heuristic} and {dataset}")
 
 
