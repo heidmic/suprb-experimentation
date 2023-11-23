@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --time=73:00:00
 #SBATCH --partition=cpu
-#SBATCH --output=/data/oc-compute03/niemeith/suprb-experimentation/output/he.txt
+#SBATCH --output=/data/oc-compute03/niemeith/suprb-experimentation/output/he-%j.txt
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=20G
 #SBATCH --nodelist=oc-compute03

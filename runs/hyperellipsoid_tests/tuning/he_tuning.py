@@ -43,7 +43,7 @@ def che_space(trial: Trial, params: Bunch):
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
 
     params.rule_generation__operator = \
-        trial.suggest_categorical('operator', ['&', ',', '+'])
+        trial.suggest_categorical('operator', ['&', '+'])
 
     if params.rule_generation__operator in ('+', ','):
         params.rule_generation__n_iter = trial.suggest_int('n_iter_es', low=1, high=50)
