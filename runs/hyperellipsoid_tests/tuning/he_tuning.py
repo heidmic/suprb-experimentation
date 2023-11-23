@@ -6,21 +6,21 @@ from sklearn.utils import Bunch, shuffle
 from suprb.optimizer.rule import mutation
 from suprb.optimizer.solution import ga
 from suprb import rule
-from suprb.rule.matching import GaussianKernelFunction, GaussianKernelFunctionGeneralEllipsoids
+from suprb.rule.matching import GaussianKernelFunction
 
 from experiments import Experiment
 from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-from runs.hyperrectangle_tests.configurations.shared_config import shared_tuning_params, load_dataset, \
+from runs.hyperellipsoid_tests.configurations.shared_config import shared_tuning_params, load_dataset, \
     global_params, individual_dataset_params, random_state
 
 
 @param_space()
 def che_space(trial: Trial, params: Bunch):
     # Matching type
-    params.matching_type = GaussianKernelFunctionGeneralEllipsoids(np.array([]), np.array([]))
+    params.matching_type = GaussianKernelFunction(np.array([]), np.array([]))
 
     # Evolution Strategy - Mutation, Mutation_sigma, Initialization, Init_sigma, Delay (delta) and fitness_alpha
     sigma_space = [0, 3]
@@ -28,17 +28,10 @@ def che_space(trial: Trial, params: Bunch):
     params.rule_generation__mutation = \
         trial.suggest_categorical('mutation', ['Normal', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])
     params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
-    # Unique to CSE
-    params.rule_generation__mutation__sigma = np.array([trial.suggest_float('sigma_mutate_center', *sigma_space),
-                                                        trial.suggest_float('sigma_mutate_spread', *sigma_space)])
 
     params.rule_generation__init = \
         trial.suggest_categorical('initialization', ['MeanInit', 'NormalInit'])
     params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
-    if isinstance(params.rule_generation__init, rule.initialization.NormalInit):
-        # Unique to CSR
-        params.rule_generation__init__sigma = np.array([trial.suggest_float('sigma_init_center', *sigma_space),
-                                                        trial.suggest_float('sigma_init_spread', *sigma_space)])
 
     alpha_space = [0, 0.1]
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
@@ -66,11 +59,11 @@ def che_space(trial: Trial, params: Bunch):
     params.solution_composition__mutation__mutation_rate = trial.suggest_float('mutation_rate', 0, 0.1)
 
 
-datasets = {0: 'energy_cool'}
+datasets = {0: 'airfoil_self_noise', 1: 'combined_cycle_power_plant', 2:'concrete_strength', 3:'energy_cool', 4:'parkinson_total'}
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='energy_cool')
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 def run(problem: str):
     print(f"Problem is {problem}")
     X, y = load_dataset(name=problem, return_X_y=True)

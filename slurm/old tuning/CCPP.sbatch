@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 #SBATCH --time=73:00:00
-#SBATCH --cpus-per-task=15
-#SBATCH --mem-per-cpu=1000
-#SBATCH --output=/data/oc-compute03/niemeith/suprb-experimentation/output/stdoutEEC.txt
+#SBATCH --cpus-per-task=5
+#SBATCH --mem-per-cpu=20480
+#SBATCH --output=/data/oc-compute03/niemeith/suprb-experimentation/output/stdoutCCPP.txt
 USER=niemeith
 
 JOB_DIR=/data/oc-compute03/$USER/suprb-experimentation
 #change this line to the python code you want to execute
-EXPERIMENT=runs/hyperellipsoidal-run/mainEEC.py
+EXPERIMENT=runs/hyperellipsoidal-run/mainCCPP.py
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH python $JOB_DIR/$EXPERIMENT"
+
 
