@@ -1,8 +1,7 @@
-import numpy as np
 import click
 import mlflow
+import numpy as np
 from optuna import Trial
-
 from sklearn.linear_model import Ridge
 from sklearn.utils import Bunch, shuffle
 from sklearn.model_selection import ShuffleSplit
