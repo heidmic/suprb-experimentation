@@ -32,6 +32,10 @@ def che_space(trial: Trial, params: Bunch):
     params.rule_generation__init = \
         trial.suggest_categorical('initialization', ['MeanInit', 'NormalInit'])
     params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
+    if isinstance(params.rule_generation__init, rule.initialization.NormalInit):
+        # Unique to CSR
+        params.rule_generation__init__sigma = np.array([trial.suggest_float('sigma_init_center', *sigma_space),
+                                                        trial.suggest_float('sigma_init_spread', *sigma_space)])
 
     alpha_space = [0, 0.1]
     params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
