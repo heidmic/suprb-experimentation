@@ -84,6 +84,6 @@ cv = 4,
 n_jobs_cv = 4,
 n_jobs = 4,
 n_calls = 10000,
-timeout = 72 * 60 * 60,  # 15 hours
+timeout = 72 * 60 * 60,  # 72 hours
 verbose = 10
 )
