@@ -8,6 +8,6 @@
 
 USER=niemeith
 JOB_DIR=/data/oc-compute03/$USER/suprb-experimentation
-EXPERIMENT=runs/hyperellipsoid_tests/tuning/he_tuning.py
+EXPERIMENT=runs/hyperellipsoid_tests/tuning/ghe_tuning.py
 
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH python $JOB_DIR/$EXPERIMENT"
