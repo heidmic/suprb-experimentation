@@ -22,9 +22,6 @@ from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import es, origin, mutation
 
 
-random_state = 42
-
-
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
     from problems import datasets
@@ -35,6 +32,10 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 def run(problem: str):
+
+
+
+    random_state = 42
     print(f"Problem is {problem}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
@@ -44,7 +45,7 @@ def run(problem: str):
     estimator = SupRB(
         rule_generation=es.ES1xLambda(
             operator='&',
-            n_iter=10_000,
+            n_iter=10000,
             init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                               model=Ridge(alpha=0.01,
                                                           random_state=random_state)),
