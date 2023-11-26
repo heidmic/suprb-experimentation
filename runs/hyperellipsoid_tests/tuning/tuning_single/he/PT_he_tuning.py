@@ -65,11 +65,11 @@ def che_space(trial: Trial, params: Bunch):
     params.solution_composition__mutation__mutation_rate = trial.suggest_float('mutation_rate', 0, 0.1)
 
 
-datasets = {0: 'parkinson_total', 1: 'combined_cycle_power_plant', 2:'concrete_strength', 3:'energy_cool', 4:'airfoil_self_noise'}
+datasets = {0: 'parkinson_total'}
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-p', '--problem', type=click.STRING, default='parkinson_total')
 def run(problem: str):
     print(f"Problem is {problem}")
     X, y = load_dataset(name=problem, return_X_y=True)
@@ -80,7 +80,7 @@ def run(problem: str):
 
     experiment = Experiment(name=f'{problem} General Tuning', params=params, verbose=10)
 
-    tuner = OptunaTuner(X_train=X, y_train=y, **shared_tuning_params,scoring='fitness')
+    tuner = OptunaTuner(X_train=X, y_train=y, **shared_tuning_params, scoring='fitness')
     experiment.with_tuning(che_space, tuner=tuner)
 
     experiment.perform(evaluation=None)
@@ -89,5 +89,4 @@ def run(problem: str):
 
 
 if __name__ == '__main__':
-    for dataset in datasets:
-        run(dataset)
+    run()
