@@ -10,7 +10,7 @@ params_ellipsoid = {
     },
     'airfoil_self_noise': {
         'rule_generation__mutation': getattr(mutation, 'Normal')(),
-        'rule_generation__mutation__sigma': [2.10048645, 1.46846328],
+        'rule_generation__mutation__sigma': np.array([2.10048645, 1.46846328]),
         'rule_generation__init': getattr(initialization, 'NormalInit')(),
         'rule_generation__init__fitness__alpha': 0.037735774746396916,
         'rule_generation__operator': '+',
@@ -36,7 +36,7 @@ params_general_ellipsoid = {
     },
     'airfoil_self_noise': {
         'rule_generation__mutation': getattr(mutation, 'HalfnormIncrease')(),
-        'rule_generation__mutation__sigma': [2.29094545, 1.20525062],
+        'rule_generation__mutation__sigma': np.array([2.29094545, 1.20525062]),
         'rule_generation__init': getattr(initialization, 'NormalInit')(),
         'rule_generation__init__fitness__alpha': 0.048939179265470395,
         'rule_generation__operator': '&',
