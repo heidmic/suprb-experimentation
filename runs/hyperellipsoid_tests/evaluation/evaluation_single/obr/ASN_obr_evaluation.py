@@ -28,7 +28,6 @@ matching_type = {'OBR': OrderedBound(np.array([])), 'HE': GaussianKernelFunction
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 def run(problem: str):
     print(f"Problem is {problem}, Representation is {representation}")
-    test = estimator.get_params().keys()
     # Set all the representation-dependant parameters
     dataset_params = representation_params[representation]
     estimator.matching_type = matching_type[representation]
