@@ -67,14 +67,15 @@ params_ordered_bound = {
         'rule_generation__mutation': getattr(mutation, 'HalfnormIncrease')(),
         'rule_generation__mutation__sigma': 1.4984,
         'rule_generation__init': getattr(initialization, 'MeanInit')(),
-        'rule_generation__init__fitness__alpha': 0.03623607249103525,
+        'rule_generation__init__fitness__alpha': 0.0362,
+        'rule_generation__init__sigma': 1,
         'rule_generation__operator': '+',
         'rule_ge_iter': 48,
         'solution_composition__selection': getattr(ga.selection, 'Tournament')(),
         'solution_composition__selection__k': 3,
         'solution_composition__crossover': getattr(ga.crossover, 'NPoint')(),
         'solution_composition__crossover__n': 3,
-        'solution_composition__mutation__mutation_rate': 0.012846051914
+        'solution_composition__mutation__mutation_rate': 0.0128
     },
     'concrete_strength': {
 
