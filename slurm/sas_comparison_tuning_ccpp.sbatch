@@ -9,7 +9,7 @@
 USER="krischma"
 solution_comp="sas"
 dataset="combined_cycle_power_plant"
-experiment="runs/solution_composition/saga_comparison_tuning.py"
+experiment="runs/saga_comparison_tests/saga_comparison_tuning.py"
 JOB_DIR=/data/oc-compute02/$USER/suprb-experimentation
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
 python $JOB_DIR/$experiment -p $dataset -s $solution_comp -j $SLURM_JOB_ID"
