@@ -133,7 +133,7 @@ def run(problem: str, optimizer: str):
         n_jobs=4,
         n_calls=10_000,
         timeout=72 * 60 * 60,  # 72 hours
-        scoring='fitness'
+        scoring='fitness',
         verbose=10
     )
 
