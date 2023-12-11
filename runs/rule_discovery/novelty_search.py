@@ -218,7 +218,7 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
     random_states = np.random.SeedSequence(random_state).generate_state(8)
     experiment.with_random_states(random_states, n_jobs=2)
 
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10')
+    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 
