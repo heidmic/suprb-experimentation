@@ -87,7 +87,7 @@ def load_test_function(
 
 def with_bounds(bounds: list):
     def wrapper(func):
-        func.bounds = np.array(bounds, dtype=np.float)
+        func.bounds = np.array(bounds, dtype=float)
         return func
 
     return wrapper

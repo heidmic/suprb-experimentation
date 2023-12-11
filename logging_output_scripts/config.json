@@ -1,0 +1,21 @@
+{
+    "data_directory": "mlruns_protein",
+    "output_directory": "logging_output_scripts/outputs",
+    "normalize_datasets": false,
+    "heuristics": {
+        "GA": "GA",
+        "RS": "RS",
+        "ABC": "ABC",
+        "ACO": "ACO",
+        "GWO": "GWO",
+        "PSW": "PSW"
+    },
+    "datasets": {
+        "concrete_strength": "Concrete Strength",
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "energy_cool": "Energy Efficiency Cooling",
+        "parkinson_total": "Parkinson",
+        "protein_structure": "Protein"
+    }
+}

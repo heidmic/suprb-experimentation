@@ -49,14 +49,14 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         if isinstance(dataset.data, np.ndarray):
             X = dataset.data
         elif isinstance(dataset.data, pd.DataFrame) or isinstance(dataset.data, pd.Series):
-            X = dataset.data.to_numpy(dtype=np.float)
+            X = dataset.data.to_numpy(dtype=float)
         else:
             X = dataset.data.toarray()
 
         if isinstance(dataset.target, np.ndarray):
             y = dataset.target
         elif isinstance(dataset.target, pd.DataFrame) or isinstance(dataset.target, pd.Series):
-            y = dataset.target.to_numpy(dtype=np.float)
+            y = dataset.target.to_numpy(dtype=float)
         else:
             y = dataset.target.toarray()
 
@@ -99,7 +99,7 @@ def run(problem: str):
         n_jobs=4,
         n_calls=10_000,
         timeout=72 * 60 * 60,  # 72 hours
-        scoring='neg_mean_squared_error',
+        scoring='fitness',
         verbose=10
     )
 
