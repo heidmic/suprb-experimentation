@@ -209,6 +209,6 @@ def run(problem: str, solution_composition: str, job_id: str):
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
 
-
+# For sbatch see slurm/saga_comparison_tuning.sbatch
 if __name__ == '__main__':
     run()
