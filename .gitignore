@@ -1,6 +1,15 @@
 # MlFlow
 **/mlruns/**
 mlruns/**
+mlruns_pt/**
+
+# Output
+**/output/**
+**/outputs/**
+
+# Profiling Output
+/profiling_data
+
 # PyCharm
 .idea
 

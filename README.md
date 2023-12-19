@@ -72,3 +72,8 @@ data_directory --- ES ------ concrete_strength
 
 Attention: **latex_tabulars** needs to specify a **summary_csv_dir** at the top of its file. (Not necessary if all scripts are executed at once) 
 
+
+## Run logging_output_scripts
+
+1) Change **heuristics** and **datasets** at the top of the file
+2) Run the script
