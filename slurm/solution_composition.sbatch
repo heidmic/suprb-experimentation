@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#SBATCH --job-name=solution_composition_${$dataset}_${optimizer}
+#SBATCH --job-name="solution_composition_"$dataset"_"$optimizer
 #SBATCH --partition=epyc
 #SBATCH --time=120:00:00
 #SBATCH --output=output/output-%j.txt
