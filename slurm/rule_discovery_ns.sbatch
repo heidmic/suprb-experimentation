@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#SBATCH --job-name=rule_discovery_${$dataset}_${ns_type}_${archive_pop}
+#SBATCH --job-name="rule_discovery_"$dataset"_"$ns_type"_"$archive_pop
 #SBATCH --partition=epyc
 #SBATCH --time=120:00:00
 #SBATCH --output=output/output-%j.txt
