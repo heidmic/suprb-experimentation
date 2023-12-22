@@ -3,7 +3,6 @@
 #SBATCH --job-name=solution_composition_${$dataset}_${optimizer}
 #SBATCH --partition=epyc
 #SBATCH --time=96:00:00
-#SBATCH --partition=cpu
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=20G
