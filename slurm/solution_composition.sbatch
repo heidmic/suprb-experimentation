@@ -13,7 +13,7 @@ source $conda_exec activate $conda_env
 
 JOB_DIR=/hpc/gpfs2/home/u/sraroman/suprb-experimentation 
 export PYTHONPATH=${PYTHONPATH}:${JOB_DIR}
-srun python $JOB_DIR/$experiment -p $dataset -o $optimizer"
+srun python $JOB_DIR/$experiment -p $dataset -o $optimizer
 
 source $conda_exec deactivate
 
