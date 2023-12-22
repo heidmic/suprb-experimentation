@@ -3,7 +3,6 @@
 #SBATCH --job-name=rule_discovery_${$dataset}
 #SBATCH --partition=epyc
 #SBATCH --time=96:00:00
-#SBATCH --partition=cpu
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=10
 #SBATCH --mem=20G
