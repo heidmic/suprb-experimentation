@@ -5,7 +5,7 @@
 #SBATCH --time=120:00:00
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=10
-#SBATCH --mem=20G
+#SBATCH --mem=40G
 
 conda_exec=$(which conda)
 conda_env="/hpc/gpfs2/scratch/u/sraroman/.conda/envs/venv"
