@@ -1,5 +1,5 @@
-import click
 import mlflow
+import click
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
 from suprb.rule.matching import GaussianKernelFunction, GaussianKernelFunctionGeneralEllipsoids, OrderedBound
