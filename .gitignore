@@ -133,3 +133,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/logging_output_scripts/
