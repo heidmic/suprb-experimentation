@@ -9,7 +9,6 @@ from problems import scale_X_y
 from runs.hyperellipsoid_tests.configurations.shared_config import load_dataset, global_params, estimator, \
     random_state, individual_dataset_params
 from runs.hyperellipsoid_tests.configurations.dataset_params import params_ordered_bound, params_ellipsoid, params_general_ellipsoid
-
 import mlflow
 import click
 import numpy as np
