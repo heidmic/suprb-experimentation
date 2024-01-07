@@ -2,7 +2,7 @@ import json
 import os
 import pandas as pd
 from tabulate import tabulate
-from logging_output_scripts.utils import check_and_create_dir, config
+from logging_output_scripts.utils import check_and_create_dir
 
 
 """
@@ -12,6 +12,8 @@ to create LaTex tables based on the values calculated in Summary_csv.py
 """
 
 summary_csv_dir = "logging_output_scripts/outputs/csv_summary"
+with open('config.json') as f:
+    config = json.load(f)
 final_output_dir = f"{config['output_directory']}"
 check_and_create_dir(final_output_dir, 'latex_tabular')
 
@@ -103,7 +105,7 @@ def write_mse_all():
     """
     Creates tables of shape:
              [Problem i]
-    [MODEL 1]     ...
+    [MODEL tuning ASN]     ...
     [MODEL 2]     ...
         ...
     [MODEL n]
@@ -131,7 +133,7 @@ def write_mse():
     """
     Creates tables of shape:
              [Problem i]
-    [MODEL 1]     ...
+    [MODEL tuning ASN]     ...
     [MODEL 2]     ...
         ...
     [MODEL n]

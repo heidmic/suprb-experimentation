@@ -3,7 +3,7 @@ import json
 import mlflow
 
 def get_df(heuristic, dataset):
-    with open('logging_output_scripts/config.json') as f:
+    with open('config.json') as f:
         config = json.load(f)
 
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
@@ -14,11 +14,11 @@ def get_df(heuristic, dataset):
 
         heuristic_mask = df['tags.mlflow.runName'].str.contains(f"{heuristic}")
         dataset_mask =  df['tags.mlflow.runName'].str.contains(f"{dataset}")
-        fold_mask = df['tags.fold'].str.contains("True", na=False)
-        df = df[heuristic_mask & dataset_mask & fold_mask]
+        #fold_mask = df['tags.fold'].str.contains("True", na=False)
+        #df = df[heuristic_mask & dataset_mask & fold_mask]
+        df = df[heuristic_mask & dataset_mask]
 
         if not df.empty:
-            print("found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n\n\n\n")
             return df
 
     print(f"No run found with {heuristic} and {dataset}")
@@ -27,12 +27,12 @@ def get_df(heuristic, dataset):
 def get_all_runs(problem):
     print("Get all mlflow runs...")
 
-    with open('logging_output_scripts/config.json') as f:
+    with open('config.json') as f:
         config = json.load(f)
 
     all_runs_list = []
     heuristics = [key for key in config['heuristics']]
-    all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
+    all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
 
     for run in all_runs:
         for run_name in mlflow.search_runs([run])['tags.mlflow.runName']:
@@ -56,7 +56,7 @@ def get_dataframe(all_runs_list, heuristic, dataset):
 
         if not df.empty:
             # Filter out individual runs (Removes averaged values)
-            df = df[df['tags.fold'].str.contains("True", na=False)]
+            #df = df[df['tags.fold'].str.contains("True", na=False)]
             return df
         else:
             continue

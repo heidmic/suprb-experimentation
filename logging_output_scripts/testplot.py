@@ -26,12 +26,12 @@ plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.tight_layout()
 
 
-mse = "metrics.test_neg_mean_squared_error"
-# mse = "metrics.elitist_complexity"
+#mse = "metrics.test_neg_mean_squared_error"
+mse = "metrics.elitist_complexity"
 
 
 def create_plots():
-    with open('logging_output_scripts/config.json') as f:
+    with open('config.json') as f:
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"
@@ -69,28 +69,30 @@ def create_plots():
             res_var[mse][-len(scaled_var):] = scaled_var
 
         # Invert values since they are stored as negatives
-        if not config["normalize_datasets"]:
-            res_var[mse] *= -1
+        #if not config["normalize_datasets"]:
+        #res_var[mse] *= -1
 
         def ax_config(axis):
-            ax.set_xlabel('Estimator', weight="bold")
+            ax.set_xlabel('Used Representation', weight="bold")
             ax.set_ylabel('MSE', weight="bold")
-            ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
-                         else "Normalized Datasets", style="italic")
+            ax.set_title("Normalized Datasets", style="italic")
             ax.set_box_aspect(1)
 
-        problem = problem if not config["normalize_datasets"] else "normalized"
+        problem = "normalized"
 
+        print(plt.subplots())
         # Store violin-plots of all models in one plot
         fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, scale="width", scale_hue=False)
+        test = mse
+        test2 = res_var
+        #ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, scale="width", scale_hue=False)
         ax_config(ax)
         fig.savefig(f"{final_output_dir}/violin_plots/{problem}.png")
-
+        df = pd.read_csv('HE.csv')
         # Store swarm-plots of all models in one plot
         fig, ax = plt.subplots()
-        order = np.sort(res_var['Used_Representation'].unique())
-        ax = sns.swarmplot(x='Used_Representation', y=mse, data=res_var, size=4)
+        test = df.mse
+        ax = sns.swarmplot(x=df.mse, y=mse, data=res_var, size=4)
         # ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
         #                    data=res_var, ci=None, color='black')
         ax_config(ax)
@@ -99,11 +101,8 @@ def create_plots():
         # Store line-box-plots
         fig, ax = plt.subplots()
 
-        order = np.sort(res_var['Used_Representation'].unique())
-        ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
-                         showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
-        ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
-                           data=res_var, ci=None, color='black')
+        ax = sns.boxplot(x=df.mse, y=mse, showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
+        ax = sns.pointplot(x=df.mse, y=mse, data=res_var, ci=None, color='black')
         ax_config(ax)
         fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
 

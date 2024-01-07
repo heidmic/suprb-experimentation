@@ -92,7 +92,7 @@ def friedman(X: np.ndarray) -> np.ndarray:
 
 
 @with_bounds([
-    [30, 60],  # (1) M
+    [30, 60],  # (tuning ASN) M
     [0.005, 0.020],  # (2) S
     [0.002, 0.010],  # (3) V_0
     [1_000, 5_000],  # (4) k
@@ -111,7 +111,7 @@ def piston_simulation(X: np.ndarray) -> np.ndarray:
 
 
 @with_bounds([
-    [50, 150],  # (1) R_b1
+    [50, 150],  # (tuning ASN) R_b1
     [25, 70],  # (2) R_b2
     [0.5, 3],  # (3) R_f
     [1.2, 2.5],  # (4) R_c1
@@ -128,7 +128,7 @@ def otl_circuit(X: np.ndarray) -> np.ndarray:
 
 
 @with_bounds([
-    [0.05, 0.15],  # (1) r_w
+    [0.05, 0.15],  # (tuning ASN) r_w
     [100, 50_000],  # (2) r
     [63_070, 115_600],  # (3) T_u
     [990, 1110],  # (4) H_u
@@ -151,7 +151,7 @@ def deg2rad(deg):
 
 
 @with_bounds([
-    [150, 200],  # (1) S_w
+    [150, 200],  # (tuning ASN) S_w
     [220, 300],  # (2) W_fw
     [6, 10],  # (3) A
     [-10, 10],  # (4) lambda_maj

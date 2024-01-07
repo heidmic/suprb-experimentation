@@ -3,7 +3,7 @@ from logging_output_scripts.violin_and_swarm_plots import create_plots
 from logging_output_scripts.stat_analysis import calvo
 from time import sleep
 
-config_filename = "logging_output_scripts/config.json"
+config_filename = "config.json"
 
 dataset_mapping = {
     "combined_cycle_power_plant": "Combined Cycle Power Plant",
@@ -22,7 +22,7 @@ for dataset in datasets:
             with open(config_filename, 'r') as f:
                 config = json.load(f)
 
-            config["heuristics"] = {f"p:{dataset}; r:{1}; f:{filter}; -e:{experience}.": "1",
+            config["heuristics"] = {f"p:{dataset}; r:{1}; f:{filter}; -e:{experience}.": "tuning ASN",
                                     f"p:{dataset}; r:{2}; f:{filter}; -e:{experience}.": "2",
                                     f"p:{dataset}; r:{3}; f:{filter}; -e:{experience}.": "3",
                                     f"p:{dataset}; r:{4}; f:{filter}; -e:{experience}.": "4",

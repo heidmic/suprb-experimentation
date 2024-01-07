@@ -1,0 +1,13 @@
+{
+    "data_directory": "mlruns",
+    "output_directory": "outputs",
+    "filetype": "mlflow",
+    "heuristics": {
+        "OBR-airfoil_self_noise": "OBR",
+        "GHE-airfoil_self_noise": "GHE",
+        "HE-airfoil_self_noise": "HE"
+    },
+    "datasets": {
+        "concrete_strength": "Concrete Strength"
+    }
+}

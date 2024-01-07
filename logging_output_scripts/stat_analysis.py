@@ -48,7 +48,7 @@ sns.set_theme(style="whitegrid",
 
 # Add \the\linewidth into the LaTeX file to get this value (it's in pt).
 linewidth = 213.41443
-# A TeX pt is 1/72.27 inches acc. to https://tex.stackexchange.com/a/53509/191862 .
+# A TeX pt is tuning ASN/72.27 inches acc. to https://tex.stackexchange.com/a/53509/191862 .
 linewidth /= 72.27
 # Add \the\textwidth into the LaTeX file to get this value (it's in pt).
 textwidth = 449.59116
@@ -116,7 +116,7 @@ def cli():
               help="Whether to only analyse ES, NS, NSLC",
               default=False)
 def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = False):
-    with open('logging_output_scripts/config.json') as f:
+    with open('config.json') as f:
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"
@@ -224,7 +224,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 y2 = df[metric].loc[cand2, task]
                 model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
 
-                # Compute 100(1 - alpha)% high density interval.
+                # Compute 100(tuning ASN - alpha)% high density interval.
                 alpha = 0.005
                 hdi = (model.model_.ppf(alpha), model.model_.ppf(1 - alpha))
                 hdis[metrics[metric]][config["datasets"][task]] = {"lower": hdi[0], "upper": hdi[1]}
@@ -240,7 +240,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 # Compute pdf values of posterior.
                 x = np.linspace(xlower, xupper, 1000)
                 # y = model.model_.cdf(x)
-                # x = np.arange(1e-3, 1 - 1e-3, 1e-3)
+                # x = np.arange(1e-3, tuning ASN - 1e-3, 1e-3)
                 y = model.model_.pdf(x)
 
                 xlabel = (f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"

@@ -2,8 +2,8 @@ import os
 import numpy as np
 from baycomp import SignedRankTest
 from itertools import combinations
-from logging_output_scripts.utils import get_dataframe, create_output_dir, config
-
+from logging_output_scripts.utils import get_dataframe
+import json
 
 """
 Uses baycomp-package to calculate probabilities of one model performing
@@ -12,11 +12,13 @@ possible combinations for all models
 NOTE: If you need to compare more than two models at once please refer to: https://github.com/dpaetzel/cmpbayes
 (Using a nix development environment is recommended for cmpbayes)
 """
-
+with open('config.json') as f:
+    config = json.load(f)
 final_output_dir = f"{config['output_directory']}/calc_bay"
-create_output_dir(config['output_directory'])
-create_output_dir(final_output_dir)
-
+#create_output_dir(config['output_directory'])
+#create_output_dir(final_output_dir)
+with open('config.json') as f:
+    config = json.load(f)
 if config['filetype'] == 'csv':
     test_neg_mean_squared_error = "test_neg_mean_squared_error"
 elif config['filetype'] == 'mlflow':
