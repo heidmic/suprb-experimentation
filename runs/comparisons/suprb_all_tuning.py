@@ -298,7 +298,7 @@ def run(problem: str, job_id: str):
     print(experiment_name)
     experiment = Experiment(name=experiment_name,  verbose=10)
 
-    tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params, scoring='fitness')
+    tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_space, tuner=tuner)
 
     random_states = np.random.SeedSequence(random_state).generate_state(8)
