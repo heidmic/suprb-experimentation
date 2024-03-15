@@ -1,10 +1,13 @@
-from logging_output_scripts.utils import get_dataframe, check_and_create_dir, config, get_all_runs
+import json
+from logging_output_scripts.utils import get_dataframe, check_and_create_dir, get_df
 
 """
 Extracts values from csv-Files gained from mlflow, performs calculations and
 stores the results in a new csv-File for all Models specified
 Leave out/add metrics that you want to evaluate
 """
+with open('logging_output_scripts/config.json') as f:
+    config = json.load(f)
 
 final_output_dir = f"{config['output_directory']}"
 elitist_complexity = "metrics.elitist_complexity"
@@ -12,15 +15,16 @@ mse = "metrics.test_neg_mean_squared_error"
 
 
 def create_summary_csv():
-    all_runs_list = get_all_runs()
+    check_and_create_dir(final_output_dir, "csv_summary")
     for heuristic, renamed_heuristic in config['heuristics'].items():
         # Head of csv-File
         header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP,MEAN_MSE,STD_MSE"
+        fold_df = None
 
         values = "\n"
         for problem in config['datasets']:
             values += problem
-            fold_df = get_dataframe(all_runs_list, heuristic, problem)
+            fold_df = get_df(heuristic, problem)
 
             if fold_df is not None:
                 # Calculates mean, min, max, median and std of elitist_complexity across all runs
@@ -45,6 +49,4 @@ def create_summary_csv():
 
 
 if __name__ == '__main__':
-    check_and_create_dir(final_output_dir, "csv_summary")
-
     create_summary_csv()

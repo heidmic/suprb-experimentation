@@ -33,6 +33,9 @@ import json
 
 
 pd.options.display.max_rows = 2000
+# If this doesn't work, because you can't fine Time New Roman as a font do the following:
+# sudo apt install msttcorefonts -qq
+# rm ~/.cache/matplotlib -rf
 
 # TODO Store via PGF backend with nicer LaTeXy fonts etc.
 # https://jwalton.info/Matplotlib-latex-PGF/
@@ -59,7 +62,7 @@ mse = "metrics.test_neg_mean_squared_error"
 
 metrics = {
     mse: "MSE",
-    elitist_complexity: "model complexity"
+    elitist_complexity: "Model Complexity"
 }
 
 
@@ -101,27 +104,14 @@ def cli():
     pass
 
 
-@cli.command()
-@click.option("--latex/--no-latex",
-              help="Generate LaTeX output (tables etc.)",
-              default=True)
-@click.option("--all-variants/--no-all-variants",
-              help="Plot different variants for interpreting run/cv data",
-              default=False)
-@click.option(
-    "--check-mcmc/--no-check-mcmc",
-    help="Whether to show plots/tables for rudimentary MCMC sanity checking",
-    default=False)
-@click.option("--small-set/--no-small-set",
-              help="Whether to only analyse ES, NS, NSLC",
-              default=False)
-def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = False):
+def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = False, ylabel = None):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"
     check_and_create_dir(final_output_dir, "calvo")
 
+    df = None
     df = load_data(config)
 
     # Explore whether throwing away distributional information gives us any
@@ -145,8 +135,7 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
     pd.options.mode.chained_assignment = None
 
     for metric in metrics:
-        fig, ax = plt.subplots(len(variants), figsize=(
-            textwidth, 2.7 if metrics[metric] == "MSE" else 5 / 7 * 2.7), dpi=72)
+        fig, ax = plt.subplots(len(variants), figsize=(textwidth, 5 / 7 * 2.7), dpi=72)
 
         if not all_variants:
             ax = [ax]
@@ -180,7 +169,6 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
             sample = pd.DataFrame(sample, columns=model.infdata_.posterior.weights.algorithm_labels)
 
             xlabel = f"Probability"  # f"Probability of having the lowest {metrics[metric]}"
-            ylabel = "RD method"
             sample = sample.unstack().reset_index(0).rename(columns={"level_0": ylabel, 0: xlabel})
 
             sns.boxplot(data=sample, y=ylabel, x=xlabel, ax=ax[i], fliersize=0.3)
@@ -193,21 +181,15 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
                     dpi=fig.dpi, bbox_inches="tight")
 
 
-@ cli.command()
-@ click.option("--latex/--no-latex",
-               help="Generate LaTeX output (tables etc.)",
-               default=True)
-@ click.argument("cand1",
-                 default="")
-@ click.argument("cand2",
-                 default="")
-@ click.argument("cand1_name",
-                 default="")
-@ click.argument("cand2_name",
-                 default="")
 def ttest(latex, cand1, cand2, cand1_name, cand2_name):
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
+
+    final_output_dir = f"{config['output_directory']}"
+
     check_and_create_dir(final_output_dir, "ttest")
-    df = load_data()
+    df = None
+    df = load_data(config)
     pd.options.mode.chained_assignment = None
 
     hdis = {}
@@ -217,7 +199,8 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
         print(f"# {metrics[metric]}\n")
 
-        fig, ax = plt.subplots(4, figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5), dpi=72)
+        # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5), dpi=72)
+        fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth, 5), dpi=72)
         for i, task in enumerate(config["datasets"]):
             if task in df[metric].loc[cand1]:
                 y1 = df[metric].loc[cand1, task]
@@ -243,11 +226,15 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 # x = np.arange(1e-3, 1 - 1e-3, 1e-3)
                 y = model.model_.pdf(x)
 
-                xlabel = (f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
+                # xlabel = (f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
+                #           if metrics[metric] == "MSE"
+                #           else (
+                #               f"{metrics[metric].capitalize()}({cand2_name})\n- "
+                #               f"{metrics[metric].capitalize()}({cand1_name})"))
+
+                xlabel = (f"{cand2_name} - {cand1_name}"
                           if metrics[metric] == "MSE"
-                          else (
-                              f"{metrics[metric].capitalize()}({cand2_name})\n- "
-                              f"{metrics[metric].capitalize()}({cand1_name})"))
+                          else ( f"{cand2_name} - {cand1_name}\n"))
 
                 ylabel = "Density"
                 data = pd.DataFrame({xlabel: x, ylabel: y})
@@ -271,7 +258,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                            ha="left", va="center", color="C1", fontweight="bold")
 
                 ax[i].set_ylim(top=1.2 * max(y))
-                if metrics[metric] == elitist_complexity:
+                if metrics[metric] == "Model Complexity":
                     # Compute rope for this task.
                     # Remove RS runs.
                     ()
@@ -291,14 +278,21 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                     sample = model.model_.rvs(100000)
 
                     probs[config['datasets'][task]] = {
-                        "p(ES practically higher complexity)": (sample < rope[0]).sum() / len(sample),
-                        "p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
-                        "p(NSLC practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
+                        f"p({cand1_name} practically higher complexity)": (sample < rope[0]).sum() / len(sample),
+                        f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
+                        f"p({cand2_name} practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
 
                 ax[i].set_ylabel(ylabel, weight="bold")
                 ax[i].set_xlabel(xlabel, weight="bold")
-                fig.tight_layout()
-                fig.savefig(f"{final_output_dir}/ttest/{metric}.pdf", dpi=fig.dpi, bbox_inches="tight")
+
+                if metrics[metric] == "Model Complexity":
+                    fig.tight_layout(pad=0.02)
+                else:
+                    fig.tight_layout()
+
+                
+                fig.align_ylabels()
+                fig.savefig(f"{final_output_dir}/ttest/{metric}_{cand1_name}_{cand2_name}_4.pdf", dpi=fig.dpi, bbox_inches="tight")
 
     # https://stackoverflow.com/a/67575847/6936216
     hdis_ = hdis
