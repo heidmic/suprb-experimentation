@@ -195,8 +195,9 @@ def run(problem: str, job_id: str):
             params.solution_composition__init__fitness = trial.suggest_categorical('solution_composition__init__fitness', ['PseudoBIC', 'ComplexityEmary', 'ComplexityWu'])  # nopep8
             params.solution_composition__init__fitness = getattr(suprb.solution.fitness, params.solution_composition__init__fitness)()
 
-            if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
-                params.solution_composition__init__fitness__alpha = trial.suggest_float('solution_composition__init__fitness__alpha', 0.0, 1.0) # nopep8
+            # Don't do this. It will kill your fitness because complexity = 0
+            # if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
+            #     params.solution_composition__init__fitness__alpha = trial.suggest_float('solution_composition__init__fitness__alpha', 0.0, 1.0) # nopep8
 
             params.solution_composition__init__mixing__experience_weight = trial.suggest_float('solution_composition__init__mixing__experience_weight', 0.0, 1.0)
 
