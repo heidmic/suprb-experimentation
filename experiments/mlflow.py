@@ -36,14 +36,17 @@ def _get_default_logger(estimator: BaseEstimator) -> Optional[DefaultLogger]:
 
 def try_log_dict(d: dict, name: str):
     try:
-        mlflow.log_dict(d, name)
-    except TypeError as e1:
         try:
-            mlflow.log_text(json.dumps(d, default=str), name)
-        except TypeError as e2:
-            warnings.warn(f"Logging of {name} as json has failed twice with reasons: {e1}; {e2}")
-            print(d)
-
+            mlflow.log_dict(d, name)
+        except TypeError as e1:
+            try:
+                mlflow.log_text(json.dumps(d, default=str), name)
+            except TypeError as e2:
+                warnings.warn(f"Logging of {name} as json has failed twice with reasons: {e1}; {e2}")
+                print(d)
+    except:
+        warnings.warn(f"Logging of {name} as json has failed with Error (other than TypeErrors)")
+        print(d)
 
 def log_experiment(experiment: Experiment):
     _log_experiment(experiment, parent_name='', depth=0)
