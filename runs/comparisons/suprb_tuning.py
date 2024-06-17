@@ -24,7 +24,7 @@ from suprb.solution.initialization import RandomInit
 import suprb.solution.mixing_model as mixing_model
 
 
-random_state = 42
+random_state = 43
 
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
@@ -41,8 +41,9 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.option('-f', '--filter_subpopulation', type=click.STRING, default='FilterSubpopulation')
 @click.option('-e', '--experience_calculation', type=click.STRING, default='ExperienceCalculation')
 @click.option('-w', '--experience_weight', type=click.INT, default=1)
+@click.option('-n', '--study_name', type=click.STRING, default='NoName')
 def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
-        experience_calculation: str, experience_weight: int):
+        experience_calculation: str, experience_weight: int, study_name: str):
     print(f"Problem is {problem}, with job id {job_id}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
@@ -52,16 +53,16 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
     estimator = SupRB(
         rule_generation=es.ES1xLambda(
             operator='&',
-            n_iter=1000,
-            delay=30,
+            n_iter=2,
+            delay=1,
             init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                               model=Ridge(alpha=0.01,
                                                           random_state=random_state)),
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
-        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
-        n_iter=32,
+        solution_composition=ga.GeneticAlgorithm(n_iter=2, population_size=2, selection=ga.selection.Tournament()),
+        n_iter=2,
         n_rules=4,
         verbose=10,
         logger=CombinedLogger(
@@ -69,12 +70,13 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
     )
 
     tuning_params = dict(
+        study_name=study_name,
         estimator=estimator,
         random_state=random_state,
         cv=4,
         n_jobs_cv=4,
         n_jobs=4,
-        n_calls=1000,
+        n_calls=10,
         timeout=60*60*24,  # 24 hours
         scoring='neg_mean_squared_error',
         verbose=10
