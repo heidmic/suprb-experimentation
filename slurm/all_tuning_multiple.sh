@@ -4,6 +4,7 @@ datasets=("concrete_strength" "energy_cool" "combined_cycle_power_plant" "airfoi
 for dset in ${datasets[@]}; do 
 	export dataset=$dset
 	export experiment="runs/comparisons/suprb_all_tuning.py"
+	export study_name=$dset
 	sbatch slurm/all_tuning.sbatch
 
 done
