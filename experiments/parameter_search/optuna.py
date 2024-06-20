@@ -4,6 +4,8 @@ import numpy as np
 import optuna
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
+from sqlalchemy import create_engine, inspect
+
 
 from .base import ParameterTuner
 
@@ -57,16 +59,19 @@ class OptunaTuner(ParameterTuner):
 
         sampler = self._get_optimizer(self.tuner)(seed=self.random_state)
 
-        storage = optuna.storages.RDBStorage(
-            url=f'sqlite:///suprb_optuna.db',
-            engine_kwargs={
-                'connect_args': {
-                    'check_same_thread': False
-                }
-            }
-        )
+        def create_optuna_study(study_name, sampler, db_file='suprb_optuna.db'):
+            storage_name = f'sqlite:///{db_file}'
+            engine = create_engine(storage_name)
 
-        study = optuna.create_study(sampler=sampler, study_name=self.study_name, storage=storage)
+            inspector = inspect(engine)
+            if 'studies' not in inspector.get_table_names():
+                storage = optuna.storages.RDBStorage(url=storage_name)
+            else:
+                storage = optuna.storages.RDBStorage(url=storage_name)
+
+            return optuna.create_study(sampler=sampler, study_name=study_name, storage=storage)
+
+        study = create_optuna_study(self.study_name, sampler)
 
         study.optimize(
             func=objective,
