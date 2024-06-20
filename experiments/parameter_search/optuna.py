@@ -64,7 +64,7 @@ class OptunaTuner(ParameterTuner):
             engine = create_engine(storage_name)
 
             inspector = inspect(engine)
-            if 'studies' not in inspector.get_table_names():
+            if 'studies' not in inspector.get_table_names() and 'alembic_version' not in inspector.get_table_names():
                 storage = optuna.storages.RDBStorage(url=storage_name)
             else:
                 storage = optuna.storages.RDBStorage(url=storage_name)
