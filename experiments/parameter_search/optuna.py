@@ -5,6 +5,7 @@ import optuna
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
 from sqlalchemy import create_engine, inspect
+from optuna.storages._rdb.models import BaseModel
 
 
 from .base import ParameterTuner
@@ -64,12 +65,25 @@ class OptunaTuner(ParameterTuner):
             engine = create_engine(storage_name)
 
             inspector = inspect(engine)
-            if 'studies' not in inspector.get_table_names() and 'alembic_version' not in inspector.get_table_names():
+            # if 'studies' not in inspector.get_table_names() and 'alembic_version' not in inspector.get_table_names():
+            #     storage = optuna.storages.RDBStorage(url=storage_name)
+            # else:
+            #     storage = optuna.storages.RDBStorage(url=storage_name)
+
+            # return optuna.create_study(sampler=sampler, study_name=study_name, storage=storage)
+            if 'studies' not in inspector.get_table_names():
+                # Initialize the Optuna storage if tables do not exist
                 storage = optuna.storages.RDBStorage(url=storage_name)
+                # Ensure the BaseModel metadata is created
+                BaseModel.metadata.create_all(engine)
             else:
+                # Use the existing Optuna storage
                 storage = optuna.storages.RDBStorage(url=storage_name)
 
-            return optuna.create_study(sampler=sampler, study_name=study_name, storage=storage)
+            # Create or load the study
+            study = optuna.create_study(sampler=sampler, study_name=study_name, storage=storage)
+
+            return study
 
         study = create_optuna_study(self.study_name, sampler)
 
