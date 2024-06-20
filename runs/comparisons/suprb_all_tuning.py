@@ -61,7 +61,7 @@ def run(problem: str, job_id: str, study_name: str):
         n_jobs_cv=4,
         n_jobs=4,
         n_calls=1000,
-        timeout=60*60*72,  # 24 hours
+        timeout=60*60*24*6,  # 6 days
         scoring='fitness',
         verbose=10
     )
