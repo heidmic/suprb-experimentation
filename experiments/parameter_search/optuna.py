@@ -57,8 +57,16 @@ class OptunaTuner(ParameterTuner):
 
         sampler = self._get_optimizer(self.tuner)(seed=self.random_state)
 
-        storage_name = f'sqlite:///suprb_optuna.db'
-        study = optuna.create_study(sampler=sampler, study_name=self.study_name, storage=storage_name)
+        storage = optuna.storages.RDBStorage(
+            url=f'sqlite:///suprb_optuna.db',
+            engine_kwargs={
+                'connect_args': {
+                    'check_same_thread': False
+                }
+            }
+        )
+
+        study = optuna.create_study(sampler=sampler, study_name=self.study_name, storage=storage)
 
         study.optimize(
             func=objective,
