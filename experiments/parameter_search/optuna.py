@@ -1,7 +1,6 @@
 from typing import Union, Callable, Any
 
 import numpy as np
-import sqlite3
 import optuna
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
@@ -60,13 +59,6 @@ class OptunaTuner(ParameterTuner):
         sampler = self._get_optimizer(self.tuner)(seed=self.random_state)
 
         storage_name = f'sqlite:///suprb_optuna_{datetime.now().strftime("%Y-%m-%d")}.db'
-
-        try:
-            conn = sqlite3.connect(storage_name)
-            conn.close()
-        except:
-            print("Database already created")
-
         study = optuna.create_study(sampler=sampler,
                                     study_name=self.study_name,
                                     storage=storage_name,
