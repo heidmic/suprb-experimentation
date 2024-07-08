@@ -81,6 +81,7 @@ def run(problem: str, job_id: str, study_name: str):
 
             if params.rule_generation__operator == '&':
                 params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 20, 50)
+
         elif params.rule_generation == 'NoveltySearch':
             # NS base
             params.rule_generation = getattr(suprb.optimizer.rule.ns, params.rule_generation)()
@@ -166,6 +167,9 @@ def run(problem: str, job_id: str, study_name: str):
                 params.rule_generation__mutation__mutation__sigma = trial.suggest_float('rule_generation__mutation__mutation__sigma', 0.05, 0.2)  # nopep8
             else:
                 params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', 0.05, 0.2)  # nopep8
+
+            if params.rule_generation__operator == ',':
+                params.rule_generation__mutation__mutation = trial.suggest_categorical('rule_generation__mutation__mutation', ['Normal', 'Halfnorm', 'Uniform', 'UniformIncrease'])  # nopep8
 
             # Origin Generation
             params.rule_generation__origin_generation = trial.suggest_categorical('rule_generation__origin_generation', ['UniformInputOrigin', 'UniformSamplesOrigin', 'Matching', 'SquaredError'])  # nopep8
