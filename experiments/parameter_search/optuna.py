@@ -61,9 +61,13 @@ class OptunaTuner(ParameterTuner):
         current_date = datetime.now().strftime("%Y-%m-%d")
         storage_name = f'sqlite:///suprb_optuna_{current_date}.db'
         storage_name = f'sqlite:///suprb_optuna.db'
+        storage = optuna.storages.RDBStorage(
+            url=storage_name,
+            skip_table_creation=True
+        )
         study = optuna.create_study(sampler=sampler,
                                     study_name=f"{self.study_name}_new",
-                                    storage=storage_name,
+                                    storage=storage,
                                     load_if_exists=True)
 
         study.optimize(
