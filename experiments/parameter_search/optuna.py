@@ -4,6 +4,7 @@ import numpy as np
 import optuna
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
+from datetime import datetime
 
 from .base import ParameterTuner
 
@@ -57,7 +58,7 @@ class OptunaTuner(ParameterTuner):
 
         sampler = self._get_optimizer(self.tuner)(seed=self.random_state)
 
-        storage_name = f'sqlite:///suprb_optuna.db'
+        storage_name = f'sqlite:///suprb_optuna{datetime.now().strftime("%Y-%m-%d")}.db'
         study = optuna.create_study(sampler=sampler, study_name=self.study_name,
                                     storage=storage_name, load_if_exists=True)
 
