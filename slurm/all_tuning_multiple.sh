@@ -6,5 +6,5 @@ for dset in ${datasets[@]}; do
 	export experiment="runs/comparisons/suprb_all_tuning.py"
 	export study_name=$dset
 	sbatch slurm/all_tuning.sbatch
-
+	sleep 30
 done
