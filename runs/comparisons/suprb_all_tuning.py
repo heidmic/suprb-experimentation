@@ -154,7 +154,10 @@ def run(problem: str, job_id: str, study_name: str):
         if isinstance(params.rule_generation, suprb.optimizer.rule.es.ES1xLambda) or \
            isinstance(params.rule_generation, suprb.optimizer.rule.ns.NoveltySearch):
             # Mutation
-            params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['SigmaRange', 'Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
+            if params.rule_generation__operator == ',':
+                params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation__mutation', ['Normal', 'Halfnorm', 'Uniform', 'UniformIncrease'])  # nopep8
+            else:
+                params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation__mutation', ['Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
             params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()  # nopep8
 
             if isinstance(params.rule_generation__mutation, suprb.optimizer.rule.mutation.SigmaRange):
@@ -167,10 +170,6 @@ def run(problem: str, job_id: str, study_name: str):
                 params.rule_generation__mutation__mutation__sigma = trial.suggest_float('rule_generation__mutation__mutation__sigma', 0.05, 0.2)  # nopep8
             else:
                 params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', 0.05, 0.2)  # nopep8
-
-            if isinstance(params.rule_generation, suprb.optimizer.rule.es.ES1xLambda):
-                if params.rule_generation__operator == ',':
-                    params.rule_generation__mutation__mutation = trial.suggest_categorical('rule_generation__mutation__mutation', ['Normal', 'Halfnorm', 'Uniform', 'UniformIncrease'])  # nopep8
 
             # Origin Generation
             params.rule_generation__origin_generation = trial.suggest_categorical('rule_generation__origin_generation', ['UniformInputOrigin', 'UniformSamplesOrigin', 'Matching', 'SquaredError'])  # nopep8
