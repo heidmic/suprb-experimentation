@@ -156,11 +156,11 @@ def run(problem: str, job_id: str, study_name: str):
             # Mutation
             if hasattr(params, 'rule_generation__operator'):
                 if params.rule_generation__operator == ',':
-                    params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation__mutation', ['Normal', 'Halfnorm', 'Uniform', 'UniformIncrease'])  # nopep8
+                    params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'Halfnorm', 'Uniform', 'UniformIncrease'])  # nopep8
                 else:
-                    params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation__mutation', ['Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
+                    params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
             else:
-                params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation__mutation', ['Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
+                params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
             params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()  # nopep8
 
             if isinstance(params.rule_generation__mutation, suprb.optimizer.rule.mutation.SigmaRange):
