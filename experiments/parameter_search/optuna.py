@@ -62,7 +62,7 @@ class OptunaTuner(ParameterTuner):
         storage_name = f'sqlite:///suprb_optuna_{current_date}.db'
         storage_name = f'sqlite:///suprb_optuna.db'
         study = optuna.create_study(sampler=sampler,
-                                    study_name=f"{self.study_name}_{current_date}",
+                                    study_name=f"{self.study_name}_new",
                                     storage=storage_name,
                                     load_if_exists=True)
 
