@@ -81,7 +81,6 @@ def run(problem: str, job_id: str, study_name: str):
 
             if params.rule_generation__operator == '&':
                 params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 20, 50)
-
         elif params.rule_generation == 'NoveltySearch':
             # NS base
             params.rule_generation = getattr(suprb.optimizer.rule.ns, params.rule_generation)()
@@ -154,13 +153,7 @@ def run(problem: str, job_id: str, study_name: str):
         if isinstance(params.rule_generation, suprb.optimizer.rule.es.ES1xLambda) or \
            isinstance(params.rule_generation, suprb.optimizer.rule.ns.NoveltySearch):
             # Mutation
-            if hasattr(params, 'rule_generation__operator'):
-                if params.rule_generation__operator == ',':
-                    params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'Halfnorm', 'Uniform', 'UniformIncrease'])  # nopep8
-                else:
-                    params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
-            else:
-                params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
+            params.rule_generation__mutation = trial.suggest_categorical('rule_generation__mutation', ['SigmaRange', 'Normal', 'Halfnorm', 'HalfnormIncrease', 'Uniform', 'UniformIncrease'])  # nopep8
             params.rule_generation__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_generation__mutation)()  # nopep8
 
             if isinstance(params.rule_generation__mutation, suprb.optimizer.rule.mutation.SigmaRange):
