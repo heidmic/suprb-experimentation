@@ -64,22 +64,17 @@ class OptunaTuner(ParameterTuner):
                                     storage=storage_name,
                                     load_if_exists=True)
 
-        try:
-            study.optimize(
-                func=objective,
-                n_trials=self.n_calls,
-                n_jobs=self.n_jobs if self.n_jobs is not None else 1,
-                timeout=self.timeout,
-            )
+        study.optimize(
+            func=objective,
+            n_trials=self.n_calls,
+            n_jobs=self.n_jobs if self.n_jobs is not None else 1,
+            timeout=self.timeout,
+        )
 
-            self.tuned_params_ = parameter_space(study.best_trial)
+        self.tuned_params_ = parameter_space(study.best_trial)
 
-            self.tuning_result_ = Bunch()
-            self.tuning_result_.objective_history = [trial.value for trial in study.trials]
-            self.tuning_result_.params_history = [trial.params for trial in study.trials]
-        except ValueError as e:
-            print(f"Something went wrong in optuna optmiize: {e}")
-            self.tuning_result_ = Bunch()
-            self.tuned_params_ = dict()
+        self.tuning_result_ = Bunch()
+        self.tuning_result_.objective_history = [trial.value for trial in study.trials]
+        self.tuning_result_.params_history = [trial.params for trial in study.trials]
 
         return self.tuned_params_, self.tuning_result_
