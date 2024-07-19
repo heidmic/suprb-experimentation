@@ -90,9 +90,10 @@ def create_plots():
         for name, function in plots.items():
             for y_label, y_axis in y_axis_label.items():
                 fig, ax = plt.subplots()
-                ax = function(x='Used_Representation', y=y_axis, data=res_var)
+                ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
                 ax_config(ax, y_label)
                 fig.savefig(f"{final_output_dir}/{name}/{problem}_{y_label}.png")
+                plt.close(fig)
 
         # # Store line-box-plots
         # fig, ax = plt.subplots()
