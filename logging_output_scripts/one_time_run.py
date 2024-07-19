@@ -33,7 +33,7 @@ rule_discovery = {
         " NS True": "NS-P",
         "MCNS True": "MCNS-P",
         "NSLC True": "NSLC-P",
-        "NSLC Tuning": "NSLC-P"
+        # "NSLC Tuning": "NSLC-P"
     }
 
 saga = {
