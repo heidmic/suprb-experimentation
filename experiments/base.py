@@ -92,7 +92,7 @@ class Experiment:
                 try:
                     i = 1
                     for score in self.estimators_:
-                        suprb_json.dump(score, f"output_json/{tuning_start}_config_{i}.json")
+                        suprb_json.dump(score, f"output_json/{self.name}_config_{i}.json")
                         i += 1
                 except:
                     print("JSON dump did not work! Continue eval!")
@@ -176,7 +176,7 @@ class Experiment:
             new_experiments = []
             for i, random_state in enumerate(random_states):
                 new_experiment = self._clone()
-                new_experiment.name = f'RandomState:{i}:{random_state}'
+                new_experiment.name = f'{self.name}:{i}:{random_state}'
                 new_experiment.params |= {'random_state': random_state}
                 new_experiments.append(new_experiment)
             self.experiments = new_experiments
