@@ -36,17 +36,8 @@ def run(problem: str, job_id: str):
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    estimator = SupRB(rule_generation=ES1xLambda(n_iter=2,
-                                             lmbda=2,
-                                             operator='+',
-                                             delay=150,
-                                             random_state=random_state,
-                                             n_jobs=1),
-                  solution_composition=GeneticAlgorithm(n_iter=2,
-                                                        population_size=2,
-                                                        elitist_ratio=0.2,
-                                                        random_state=random_state,
-                                                        n_jobs=1))
+    estimator = SupRB(rule_generation=ES1xLambda(),
+                      solution_composition=GeneticAlgorithm())
 
 
     experiment_name = f'{problem}'
