@@ -52,8 +52,8 @@ if __name__ == '__main__':
     config["datasets"] = datasets
 
     # config["heuristics"] = {0: 0}
-    config["heuristics"] = rule_discovery
-    # config["heuristics"] = solution_composition
+    # config["heuristics"] = rule_discovery
+    config["heuristics"] = solution_composition
     # config["heuristics"] = saga
 
     with open("logging_output_scripts/config.json", "w") as f:
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     create_plots()
     # create_summary_csv()
     # write_complexity_all({-1: ' ', 0: 'CS', 1: 'CCPP', 2: 'ASN', 3: 'PPPTS', 4:'PT'})
-    # calvo(ylabel="Solution Composition")
+    calvo(ylabel="Solution Composition")
     # calvo(ylabel="Rule Discovery")
     # ttest(latex=False, cand1="s:ga", cand2="s:saga2", cand1_name="GA", cand2_name="SAGA2")
     # ttest(latex=False, cand1="s:ga", cand2="s:saga3", cand1_name="GA", cand2_name="SAGA3")
