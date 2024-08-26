@@ -120,3 +120,12 @@ def check_and_create_dir(output_folder, output_dir):
 
     if not os.path.isdir(directory):
         os.mkdir(directory)
+
+datasets_map = {
+        "combined_cycle_power_plant": "ccpp",
+        "airfoil_self_noise": "asn",
+        "concrete_strength": "cs",
+        "energy_cool": "eec",
+        "protein_structure": "pppts",   
+        "parkinson_total": "pt"
+}

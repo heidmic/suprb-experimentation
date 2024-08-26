@@ -14,8 +14,6 @@ with open('logging_output_scripts/config.json') as f:
     config = json.load(f)
 
 summary_csv_dir = "logging_output_scripts/outputs/csv_summary"
-final_output_dir = f"{config['output_directory']}"
-check_and_create_dir(final_output_dir, 'latex_tabular')
 
 # Empty string needed for formatting purposes
 
@@ -233,6 +231,8 @@ def single_table_all_complexity():
 
 # Add / leave out certain tables
 if __name__ == '__main__':
+    final_output_dir = f"{config['output_directory']}"
+    check_and_create_dir(final_output_dir, 'latex_tabular')
     # write_complexity()
     # write_complexity_all()
     # Only use if genomes are actually tracked.
