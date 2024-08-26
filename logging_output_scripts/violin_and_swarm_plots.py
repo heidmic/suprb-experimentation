@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import json
+from utils import datasets_map
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -36,8 +37,8 @@ def create_plots():
 
     final_output_dir = f"{config['output_directory']}"
 
-    for output_dir in ["violin_plots", "swarm_plots", "line_plots"]:
-        check_and_create_dir(final_output_dir, output_dir)
+    # for output_dir in ["violin_plots", "swarm_plots", "line_plots"]:
+    #     check_and_create_dir(final_output_dir, output_dir)
 
     final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
@@ -82,8 +83,8 @@ def create_plots():
         problem = problem if not config["normalize_datasets"] else "normalized"
 
         ################### MSE ###########################
-        plots = {"violin_plots": sns.violinplot,
-                 "swarm_plots": sns.swarmplot}
+        plots = {"violin": sns.violinplot,
+                 "swarm": sns.swarmplot}
         y_axis_label = {"MSE": mse,
                         "Complexity": complexity}
         
@@ -92,7 +93,7 @@ def create_plots():
                 fig, ax = plt.subplots()
                 ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
                 ax_config(ax, y_label)
-                fig.savefig(f"{final_output_dir}/{name}/{problem}_{y_label}.png")
+                fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
                 plt.close(fig)
 
         # # Store line-box-plots

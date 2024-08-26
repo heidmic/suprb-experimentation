@@ -90,6 +90,8 @@ def load_data(config):
     df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
     df = df[metrics.keys()]
 
+    # Only for empty complexity otherwise comment out
+    df = df.fillna(0)
     assert not df.isna().any().any(), "Some values are missing"
     return df
 
@@ -109,7 +111,7 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"
-    check_and_create_dir(final_output_dir, "calvo")
+    # check_and_create_dir(final_output_dir, "calvo")
 
     df = None
     df = load_data(config)
@@ -153,6 +155,9 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
             smart_print(ranks.mean(), latex=latex)
 
             d.rename(columns=config["heuristics"], inplace=True)
+            d = d.apply(lambda x: x.dropna().reset_index(drop=True))
+
+            print(d.to_numpy())
 
             # NOTE We fix the random seed here to enable model caching.
             model = cmpbayes.Calvo(
@@ -177,7 +182,7 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
             ax[i].set_ylabel(ylabel, weight="bold")
 
         fig.tight_layout()
-        fig.savefig(f"{final_output_dir}/calvo/{metric}{'' if not small_set else '-small'}.pdf",
+        fig.savefig(f"{final_output_dir}/calvo_{metric}{'' if not small_set else '-small'}.pdf",
                     dpi=fig.dpi, bbox_inches="tight")
 
 
