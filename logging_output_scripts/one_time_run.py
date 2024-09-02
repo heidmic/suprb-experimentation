@@ -178,9 +178,9 @@ if __name__ == '__main__':
 
     all_runs_df = mlflow.search_runs(search_all_experiments=True)
 
-    # setting = adeles
-    # run_main()
-    # exit()
+    setting = adeles
+    run_main()
+    exit()
 
     for mixing_num in mixing:
         setting = ["logging_output_scripts/outputs/MIX", mixing_num, "Number of rules participating", True]
