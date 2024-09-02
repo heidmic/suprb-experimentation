@@ -74,10 +74,11 @@ def create_plots():
             res_var[mse] *= -1
 
         def ax_config(axis, y_label):
-            ax.set_xlabel('Estimator', weight="bold")
+            x_lab = "Number of rules participating" if config["normalize_datasets"] else "Estimator"
+            ax.set_xlabel(x_lab, weight="bold")
             ax.set_ylabel(y_label, weight="bold")
             ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
-                        else "Normalized Datasets", style="italic")
+                        else result, style="italic")
             # ax.set_box_aspect(1)
 
         problem = problem if not config["normalize_datasets"] else "normalized"
@@ -88,12 +89,22 @@ def create_plots():
         y_axis_label = {"MSE": mse,
                         "Complexity": complexity}
         
+        f_index = heuristic.find('f:')
+        result = heuristic[f_index+2:]
+        result = result.replace('; -e:', '_')
+        result = result.replace('/', '')
+
+        print(res_var.columns)
+        
         for name, function in plots.items():
             for y_label, y_axis in y_axis_label.items():
                 fig, ax = plt.subplots()
                 ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
                 ax_config(ax, y_label)
-                fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
+                if problem == "normalized":
+                    fig.savefig(f"{final_output_dir}/{name}_{result}_{y_label}.png")
+                else:
+                    fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
                 plt.close(fig)
 
         # # Store line-box-plots

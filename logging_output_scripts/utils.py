@@ -5,11 +5,12 @@ import mlflow
 results_dict = {}
 
 
-def filter_runs():
+def filter_runs(all_runs_df=None):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
-    all_runs_df = mlflow.search_runs(search_all_experiments=True)
+    if all_runs_df is not None:
+        all_runs_df = mlflow.search_runs(search_all_experiments=True)
 
     for heuristic in config["heuristics"].keys():
         for dataset in config["datasets"].keys():
@@ -127,5 +128,7 @@ datasets_map = {
         "concrete_strength": "cs",
         "energy_cool": "eec",
         "protein_structure": "pppts",   
-        "parkinson_total": "pt"
+        "parkinson_total": "pt",
+        "normalized": "normalized",
+        "0":"0"
 }
