@@ -21,7 +21,6 @@ from suprb.logging.stdout import StdoutLogger
 
 random_state = 42
 
-
 def run():
     product_twins = np.load('arrays.npz')
     X, y = product_twins['arr1'], product_twins['arr2']
