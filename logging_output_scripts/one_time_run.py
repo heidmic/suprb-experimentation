@@ -140,15 +140,15 @@ saga = {
         "s:sas": "SAGA4"
     }
 
-adeles = {"":""}
+empty = {"":""}
 
 if __name__ == '__main__':
     with open("logging_output_scripts/config.json", "r") as f:
         config = json.load(f)
 
     def run_main():
-        # config["datasets"] = {"0":"0"}
-        config["datasets"] = datasets
+        config["datasets"] = {"0":"0"}
+        # config["datasets"] = datasets
         config["output_directory"] = setting[0]
         if not os.path.isdir("logging_output_scripts/outputs"):
             os.mkdir("logging_output_scripts/outputs")
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     rd = ["logging_output_scripts/outputs/RD", rule_discovery, "Rule Discovery", False]
     sc = ["logging_output_scripts/outputs/SC", solution_composition, "Solution Composition", False]
     xcsf = ["logging_output_scripts/outputs/RBML", asoc, "Rule Discovery", False]
-    adeles = ["logging_output_scripts/outputs/ADELES", adeles, "Rule Discovery", False]
+    adeles = ["logging_output_scripts/outputs/ADELES", empty, "Rule Discovery", False]
 
     all_runs_df = mlflow.search_runs(search_all_experiments=True)
 

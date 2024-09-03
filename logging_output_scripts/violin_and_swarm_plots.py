@@ -94,8 +94,6 @@ def create_plots():
         result = result.replace('; -e:', '_')
         result = result.replace('/', '')
 
-        print(res_var.columns)
-        
         for name, function in plots.items():
             for y_label, y_axis in y_axis_label.items():
                 fig, ax = plt.subplots()

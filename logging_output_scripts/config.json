@@ -1,1 +1,11 @@
-{"data_directory": "mlruns", "output_directory": "logging_output_scripts/outputs/ADELES", "normalize_datasets": false, "heuristics": {"": ""}, "datasets": {"combined_cycle_power_plant": "Combined Cycle Power Plant", "airfoil_self_noise": "Airfoil Self-Noise", "concrete_strength": "Concrete Strength", "energy_cool": "Energy Efficiency Cooling"}}
+{
+    "data_directory": "mlruns",
+    "output_directory": "logging_output_scripts/outputs/ADELES",
+    "normalize_datasets": false,
+    "heuristics": {
+        "": ""
+    },
+    "datasets": {
+        "0": "0"
+    }
+}

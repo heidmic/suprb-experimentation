@@ -31,11 +31,13 @@ def run():
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    estimator =  SupRB(rule_generation=ES1xLambda(),
-                  solution_composition=GeneticAlgorithm(),
-                  logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
+    # estimator =  SupRB(rule_generation=ES1xLambda(),
+    #               solution_composition=GeneticAlgorithm(),
+    #               logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
 
-    experiment_name = f'SupRB'
+    estimator = DecisionTreeRegressor(random_state=random_state)
+
+    experiment_name = f'Decision Tree'
 
     print(experiment_name)
     experiment = Experiment(name=experiment_name,  verbose=10)
