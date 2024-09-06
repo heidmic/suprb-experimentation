@@ -1,11 +1,1 @@
-{
-    "data_directory": "mlruns",
-    "output_directory": "logging_output_scripts/outputs/ADELES",
-    "normalize_datasets": false,
-    "heuristics": {
-        "": ""
-    },
-    "datasets": {
-        "0": "0"
-    }
-}
+{"data_directory": "mlruns", "output_directory": "logging_output_scripts/outputs/ADELES", "normalize_datasets": false, "heuristics": {"SupRB": "SupRB", "Random Forest": "RF", "Decision Tree": "DT"}, "datasets": {"": ""}}

@@ -2,5 +2,5 @@
 filenames=("basic" "rf" "decision_tree")
 for fname in ${filenames[@]}; do 
 	export filename=$fname
-	sbatch slurm/basic.sbatch
+	sbatch slurm/no_tuning.sbatch
 done
