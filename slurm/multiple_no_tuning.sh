@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-filenames=("basic" "rf" "decision_tree")
+filenames=("basic.py" "rf.py" "decision_tree.py")
 for fname in ${filenames[@]}; do 
 	export filename=$fname
 	sbatch slurm/no_tuning.sbatch
