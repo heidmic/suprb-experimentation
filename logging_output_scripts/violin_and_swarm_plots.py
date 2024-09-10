@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import json
+from utils import datasets_map
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -36,8 +37,8 @@ def create_plots():
 
     final_output_dir = f"{config['output_directory']}"
 
-    for output_dir in ["violin_plots", "swarm_plots", "line_plots"]:
-        check_and_create_dir(final_output_dir, output_dir)
+    # for output_dir in ["violin_plots", "swarm_plots", "line_plots"]:
+    #     check_and_create_dir(final_output_dir, output_dir)
 
     final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
@@ -61,8 +62,6 @@ def create_plots():
                     # Adds additional column for plotting
                     res_var = pd.concat([res_var, current_res])
 
-                print(f"Done for {problem} with {renamed_heuristic}")
-
         if counter and config["normalize_datasets"]:
             reshaped_var = np.array(res_var[mse])[-counter*64:].reshape(counter, -1) * -1
             scaler.fit(reshaped_var)
@@ -75,67 +74,47 @@ def create_plots():
             res_var[mse] *= -1
 
         def ax_config(axis, y_label):
-            ax.set_xlabel('Estimator', weight="bold")
+            x_lab = "Number of rules participating" if config["normalize_datasets"] else "Estimator"
+            ax.set_xlabel(x_lab, weight="bold")
             ax.set_ylabel(y_label, weight="bold")
             ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
-                        else "Normalized Datasets", style="italic")
+                        else result, style="italic")
             # ax.set_box_aspect(1)
 
         problem = problem if not config["normalize_datasets"] else "normalized"
 
         ################### MSE ###########################
-        # Store violin-plots of all models in one plot
-        fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y=mse, data=res_var, scale="width", scale_hue=False)
-        ax_config(ax, 'MSE')
-        fig.savefig(f"{final_output_dir}/violin_plots/{problem}.png")
+        plots = {"violin": sns.violinplot,
+                 "swarm": sns.swarmplot}
+        y_axis_label = {"MSE": mse,
+                        "Complexity": complexity}
+        
+        f_index = heuristic.find('f:')
+        result = heuristic[f_index+2:]
+        result = result.replace('; -e:', '_')
+        result = result.replace('/', '')
 
-        # Store swarm-plots of all models in one plot
-        fig, ax = plt.subplots()
-        order = np.sort(res_var['Used_Representation'].unique())
-        ax = sns.swarmplot(x='Used_Representation', y=mse, data=res_var, size=4)
+        for name, function in plots.items():
+            for y_label, y_axis in y_axis_label.items():
+                fig, ax = plt.subplots()
+                ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
+                ax_config(ax, y_label)
+                if problem == "normalized":
+                    fig.savefig(f"{final_output_dir}/{name}_{result}_{y_label}.png")
+                else:
+                    fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
+                plt.close(fig)
+
+        # # Store line-box-plots
+        # fig, ax = plt.subplots()
+
+        # order = np.sort(res_var['Used_Representation'].unique())
+        # ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
+        #                 showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
         # ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
-        #                    data=res_var, ci=None, color='black')
-        ax_config(ax, 'MSE')
-        fig.savefig(f"{final_output_dir}/swarm_plots/{problem}.png", dpi=500)
-
-        # Store line-box-plots
-        fig, ax = plt.subplots()
-
-        order = np.sort(res_var['Used_Representation'].unique())
-        ax = sns.boxplot(x='Used_Representation', y=mse, order=order,
-                        showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
-        ax = sns.pointplot(x='Used_Representation', y=mse, order=order,
-                        data=res_var, ci=None, color='black')
-        ax_config(ax, 'MSE')
-        fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
-
-        ################### COMPLEXITY ###########################
-        # Store violin-plots of all models in one plot
-        fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y=complexity, data=res_var, scale="width", scale_hue=False)
-        ax_config(ax, 'Complexity')
-        fig.savefig(f"{final_output_dir}/violin_plots/complexity_{problem}.png")
-
-        # Store swarm-plots of all models in one plot
-        fig, ax = plt.subplots()
-        order = np.sort(res_var['Used_Representation'].unique())
-        ax = sns.swarmplot(x='Used_Representation', y=complexity, data=res_var, size=4)
-        # ax = sns.pointplot(x='Used_Representation', y=complexity, order=order,
-        #                    data=res_var, ci=None, color='black')
-        ax_config(ax, 'Complexity')
-        fig.savefig(f"{final_output_dir}/swarm_plots/complexity_{problem}.png", dpi=500)
-
-        # Store line-box-plots
-        fig, ax = plt.subplots()
-
-        order = np.sort(res_var['Used_Representation'].unique())
-        ax = sns.boxplot(x='Used_Representation', y=complexity, order=order,
-                        showfliers=True, linewidth=0.8, showmeans=True, data=res_var)
-        ax = sns.pointplot(x='Used_Representation', y=complexity, order=order,
-                        data=res_var, ci=None, color='black')
-        ax_config(ax, 'Complexity')
-        fig.savefig(f"{final_output_dir}/line_plots/complexity_{problem}.png")
+        #                 data=res_var, ci=None, color='black')
+        # ax_config(ax, 'MSE')
+        # fig.savefig(f"{final_output_dir}/line_plots/{problem}.png")
 
 
 if __name__ == '__main__':
