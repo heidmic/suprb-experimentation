@@ -14,6 +14,7 @@ from experiments.parameter_search import ParameterTuner
 
 import suprb.json as suprb_json
 
+
 def product_dict(**kwargs):
     keys = kwargs.keys()
     vals = kwargs.values()
@@ -87,11 +88,14 @@ class Experiment:
                 self.log(f"Evaluation results were {self.results_}", reason=f'{nested}eval', priority=5)
                 print(dir(self.results_))
                 print(self.estimators_[0].score)
-                print(self.estimators_[0].elitist_)
+                try:
+                    print(self.estimators_[0].elitist_)
+                except Exception as e:
+                    print("This estimator doesn't contain an elitist!")
 
                 if not os.path.exists('output_json'):
                     os.makedirs('output_json')
-                
+
                 try:
                     i = 1
                     for score in self.estimators_:
