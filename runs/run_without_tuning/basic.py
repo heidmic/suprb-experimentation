@@ -50,7 +50,7 @@ def run():
                                                                                    model=Ridge(alpha=0.01, random_state=random_state))),
                       solution_composition=GeneticAlgorithm(n_iter=64,
                                                             n_jobs=20,
-                                                            initS=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=0.1))),
+                                                            init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=0.1))),
                       logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
 
     experiment_name = f'SupRB'
