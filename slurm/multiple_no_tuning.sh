@@ -16,7 +16,7 @@ echo $fitness_weight
 echo $experiment_name
 echo $scaler_type
 sbatch slurm/no_tuning.sbatch
-sleep(10)
+sleep 10
 
 export fitness_weight=0.1
 export experiment_name="FitnessWeightSingleScaler"
@@ -25,7 +25,7 @@ echo $fitness_weight
 echo $experiment_name
 echo $scaler_type
 sbatch slurm/no_tuning.sbatch
-sleep(10)
+sleep 10
 
 export fitness_weight=0.3
 export experiment_name="DefaultDoubleScaler"
@@ -34,7 +34,7 @@ echo $fitness_weight
 echo $experiment_name
 echo $scaler_type
 sbatch slurm/no_tuning.sbatch
-sleep(10)
+sleep 10
 
 export fitness_weight=0.1
 export experiment_name="FitnessWeightDoubleScaler"
