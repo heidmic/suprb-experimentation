@@ -5,7 +5,7 @@
 #SBATCH --time=120:00:00
 #SBATCH --output=output/output-%j.txt
 #SBATCH --cpus-per-task=20
-#SBATCH --mem=20G
+#SBATCH --mem=40G
 
 conda_exec=$(which conda)
 conda_env="/hpc/gpfs2/scratch/u/sraroman/.conda/envs/venv"
@@ -13,6 +13,6 @@ source $conda_exec activate $conda_env
 
 JOB_DIR=/hpc/gpfs2/home/u/sraroman/suprb-experimentation
 export PYTHONPATH=${PYTHONPATH}:${JOB_DIR}
-srun python $JOB_DIR/runs/run_without_tuning/$filename
+srun python $JOB_DIR/runs/run_without_tuning/$filename -n $exp_name -w $weight -s $scaler_type
 
 source $conda_exec deactivate
