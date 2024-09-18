@@ -4,8 +4,8 @@
 #SBATCH --partition=epyc
 #SBATCH --time=120:00:00
 #SBATCH --output=output/output-%j.txt
-#SBATCH --cpus-per-task=10
-#SBATCH --mem=40G
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=20G
 
 conda_exec=$(which conda)
 conda_env="/hpc/gpfs2/scratch/u/sraroman/.conda/envs/venv"
