@@ -27,19 +27,29 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import suprb
 from sklearn.linear_model import Ridge
 from suprb.optimizer.rule import es, origin, mutation
+import click
+
 
 random_state = 42
 
 
-def run():
+@click.command()
+@click.option('-n', '--experiment_name', type=click.STRING, default='SupRB')
+@click.option('-w', '--fitness_weight', type=click.FLOAT, default=0.3)
+@click.option('-s', '--scaler_type', type=click.BOOL, default=True)
+def run(experiment_name: str, fitness_weight: float, scaler_type: bool):
     X = pd.read_parquet('new_data/features_preselection.parq')
     y = pd.read_parquet('new_data/target.parq').iloc[:, 0]
 
     X = X.values
     y = y.values.flatten()
 
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
+    if scaler_type:
+        scaler = StandardScaler()
+        X = scaler.fit_transform(X)
+    else:
+        X, y = scale_X_y(X, y)
+        X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(n_iter=64,
                       n_rules=16,
@@ -50,10 +60,9 @@ def run():
                                                                                    model=Ridge(alpha=0.01, random_state=random_state))),
                       solution_composition=GeneticAlgorithm(n_iter=64,
                                                             n_jobs=20,
-                                                            init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=0.1))),
+                                                            init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight))),
                       logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
 
-    experiment_name = f'SupRB'
     jobs = 8
 
     print(experiment_name)
