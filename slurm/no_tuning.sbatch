@@ -1,4 +1,4 @@
- #!/usr/bin/env bash
+#!/usr/bin/env bash
 
 #SBATCH --job-name="suprb"
 #SBATCH --partition=epyc
