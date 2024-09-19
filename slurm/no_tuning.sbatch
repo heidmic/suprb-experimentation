@@ -4,7 +4,7 @@
 #SBATCH --partition=epyc
 #SBATCH --time=120:00:00
 #SBATCH --output=output/output-%j.txt
-#SBATCH --cpus-per-task=8 
+#SBATCH --cpus-per-task=20
 #SBATCH --mem-per-cpu=5G
 
 module purge
