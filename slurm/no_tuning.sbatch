@@ -15,5 +15,4 @@ export OMP_NUM_THREADS=1
 
 JOB_DIR=/hpc/gpfs2/home/u/sraroman/suprb-experimentation
 export PYTHONPATH=${PYTHONPATH}:${JOB_DIR}
-ihrem Slurm-Skript nicht definiert:
 srun python $JOB_DIR/runs/run_without_tuning/$filename -n $exp_name -w $weight -s $scaler_type
