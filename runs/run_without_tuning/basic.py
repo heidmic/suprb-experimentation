@@ -53,13 +53,13 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool):
 
     estimator = SupRB(n_iter=64,
                       n_rules=16,
-                      n_jobs=20,
-                      rule_generation=ES1xLambda(n_jobs=20,
+                      n_jobs=-1,
+                      rule_generation=ES1xLambda(n_jobs=-1,
                                                  origin_generation=origin.SquaredError(),
                                                  init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                                                                    model=Ridge(alpha=0.01, random_state=random_state))),
                       solution_composition=GeneticAlgorithm(n_iter=64,
-                                                            n_jobs=20,
+                                                            n_jobs=-1,
                                                             init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight))),
                       logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
 
