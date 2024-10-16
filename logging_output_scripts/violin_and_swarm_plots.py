@@ -1,4 +1,4 @@
-from logging_output_scripts.utils import check_and_create_dir, get_dataframe, get_all_runs, get_df
+from logging_output_scripts.utils import get_normalized_df, check_and_create_dir, get_dataframe, get_all_runs, get_df
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -24,6 +24,8 @@ sns.set_theme(style="whitegrid",
 
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+plt.rcParams['figure.dpi'] = 200
+
 plt.tight_layout()
 
 
@@ -43,13 +45,16 @@ def create_plots():
     final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
     
+    
     for problem in config['datasets']:
+    # for yy in [0]:
         first = True
         res_var = 0
         counter = 0
         fold_df = None
 
         for heuristic, renamed_heuristic in config['heuristics'].items():
+            # fold_df = get_normalized_df(heuristic)
             fold_df = get_df(heuristic, problem)
             if fold_df is not None:
                 counter += 1
@@ -75,28 +80,48 @@ def create_plots():
 
         def ax_config(axis, y_label):
             x_lab = "Number of rules participating" if config["normalize_datasets"] else "Estimator"
-            ax.set_xlabel(x_lab, weight="bold")
+            # x_lab = r"l"
+            ax.set_xlabel(x_lab, weight="bold", fontstyle='italic')
             ax.set_ylabel(y_label, weight="bold")
-            ax.set_title(config['datasets'][problem] if not config["normalize_datasets"]
-                        else result, style="italic")
+            ax.set_title(config['datasets'][problem] if not config["normalize_datasets"] else result, style="italic")
+            # ax.set_title(result, style="italic")
             # ax.set_box_aspect(1)
 
-        problem = problem if not config["normalize_datasets"] else "normalized"
+        # problem = problem if not config["normalize_datasets"] else "normalized"
+        # problem = "normalized"
 
         ################### MSE ###########################
-        plots = {"violin": sns.violinplot,
-                 "swarm": sns.swarmplot}
+        plots = {#"violin": sns.violinplot,
+                 "swarm": sns.swarmplot,
+                #  "box": sns.boxplot
+                 }
+        
         y_axis_label = {"MSE": mse,
-                        "Complexity": complexity}
+                        "Complexity": complexity
+                        }
+        
+        # y_axis_label = {"Normalized MSE": mse,
+        #                 "Normalized Complexity": complexity
+        #                 }
         
         f_index = heuristic.find('f:')
         result = heuristic[f_index+2:]
-        result = result.replace('; -e:', '_')
-        result = result.replace('/', '')
+        # result = result.replace('; -e:', '')
+        # result = result.replace('/', '')
+        # result = result.replace('CapExperienceWithDimensionality', ' & Experience Cap (dim)')
+        # result = result.replace('CapExperience', ' & Experience Cap')
+        # result = result.replace('FilterSubpopulation', '')
+        # result = result.replace('ExperienceCalculation', '')
+        # result = result.replace('NBestFitness', r"l Best")
+        # result = result.replace('NRandom', r"l Random")
+        # if result == "":
+        #     result = "Base"
+        # if result[1] == "&":
+        #     result = result[2:]
 
         for name, function in plots.items():
             for y_label, y_axis in y_axis_label.items():
-                fig, ax = plt.subplots()
+                fig, ax = plt.subplots(dpi=400)
                 ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
                 ax_config(ax, y_label)
                 if problem == "normalized":

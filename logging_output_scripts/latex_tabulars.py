@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from tabulate import tabulate
 from logging_output_scripts.utils import check_and_create_dir
-
+import utils
 
 """
 This script uses the tabulate package (https://pypi.org/project/tabulate/)
@@ -13,7 +13,8 @@ to create LaTex tables based on the values calculated in Summary_csv.py
 with open('logging_output_scripts/config.json') as f:
     config = json.load(f)
 
-summary_csv_dir = "logging_output_scripts/outputs/csv_summary"
+final_output_dir = f"{config['output_directory']}"
+summary_csv_dir = f"{final_output_dir}/csv_summary"
 
 # Empty string needed for formatting purposes
 
@@ -46,7 +47,7 @@ def write_complexity_all(dataset_shorts):
         df = pd.read_csv(f"{summary_csv_dir}/{config['heuristics'][heuristic]}_summary.csv")
         for column_name, column_name_short in zip(comp_column.values(), comp_column_short.values()):
             data_res = load_problem_columns(df, column_name)
-            comp_list.append((config["heuristics"][heuristic], column_name_short, data_res[0], data_res[1], data_res[2], data_res[3], data_res[4]))
+            comp_list.append((config["heuristics"][heuristic], column_name_short, data_res[0], data_res[1], data_res[2], data_res[3]))
 
     res = tabulate(comp_list, tablefmt="latex_booktabs", headers=dataset_shorts.values())
 
@@ -186,7 +187,7 @@ def single_table_all_mse(dataset_shorts):
     columns = []
     for heuristic in config["heuristics"]:
         # Each row features one problem for one model
-        row = []
+        row = [utils.datasets_map[heuristic]]
         for problem in config["datasets"]:
             df = pd.read_csv(f"{summary_csv_dir}/{config['heuristics'][heuristic]}_summary.csv")
             res = df[df['Problem'].str.contains(problem)]
@@ -194,15 +195,14 @@ def single_table_all_mse(dataset_shorts):
                        str(round(float(res['STD_MSE']), 2)))
         columns.append(row)
     frame = pd.DataFrame(columns)
-    headers = [x for y in [['MSE'] for i in range(
-        frame.shape[1]-1)] for x in y]
+    headers = [x for y in [['MSE'] for i in range(frame.shape[1]-1)] for x in y]
     headers = [i for i in range(frame.shape[1]-1)]
     latex = tabulate(frame, tablefmt="latex_booktabs", headers=headers)
     splits = latex.split("\\toprule")
     methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in dataset_shorts.values()])
     print(methods)
     latex = splits[0]+"\\toprule"+methods+splits[1]
-    with open(f"{final_output_dir}/latex_tabular/mse_all.txt", "w") as file:
+    with open(f"{final_output_dir}/latex_tabular/latex_mse.txt", "w") as file:
         file.write(latex)
 
 
@@ -210,7 +210,7 @@ def single_table_all_complexity():
     columns = []
     for heuristic in config["heuristics"]:
         # Each row features one problem for one model
-        row = []
+        row = [utils.datasets_map[heuristic]]
         for problem in config["datasets"]:
             df = pd.read_csv(f"{summary_csv_dir}/{config['heuristics'][heuristic]}_summary.csv")
             res = df[df['Problem'].str.contains(problem)]
@@ -225,7 +225,7 @@ def single_table_all_complexity():
     splits = latex.split("\\toprule")
     methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in config["datasets"]])
     latex = splits[0]+"\\toprule"+methods+splits[1]
-    with open(f"{final_output_dir}/latex_tabular/complexity_all.txt", "w") as file:
+    with open(f"{final_output_dir}/latex_tabular/latex_complexity.txt", "w") as file:
         file.write(latex)
 
 

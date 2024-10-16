@@ -1,20 +1,22 @@
 import json
 import os
 import mlflow
+import numpy as np
 
 from logging_output_scripts.violin_and_swarm_plots import create_plots
 from logging_output_scripts.summary_csv import create_summary_csv
 from logging_output_scripts.stat_analysis import calvo, ttest
 from logging_output_scripts.latex_tabulars import write_complexity_all
 from logging_output_scripts.utils import filter_runs
+from logging_output_scripts import latex_tabulars
 
 datasets = {
         "combined_cycle_power_plant": "Combined Cycle Power Plant",
         "airfoil_self_noise": "Airfoil Self-Noise",
         "concrete_strength": "Concrete Strength",
-        "energy_cool": "Energy Efficiency Cooling",
-        # "protein_structure": "Physiochemical Properties of Protein Tertiary Structure",   
-        # "parkinson_total": "Parkinson's Telemonitoring"
+        # "energy_cool": "Energy Efficiency Cooling",
+        "protein_structure": "Physiochemical Properties of Protein Tertiary Structure",   
+        "parkinson_total": "Parkinson's Telemonitoring"
 }
 
 solution_composition = {
@@ -29,20 +31,20 @@ solution_composition = {
 rule_discovery = {
         "ES Tuning": "ES",
         "RS Tuning": "RS",
-        " NS False": "NS-G",
-        "MCNS False": "MCNS-G",
-        "NSLC False": "NSLC-G",
         " NS True": "NS-P",
         "MCNS True": "MCNS-P",
         "NSLC True": "NSLC-P",
+        " NS False": "NS-G",
+        "MCNS False": "MCNS-G",
+        "NSLC False": "NSLC-G",
         # "NSLC Tuning": "NSLC-P"
     }
 
 asoc = {
-        "ES Tuning": "ES",
+        "ES Tuning": "SupRB",
         "XCSF": "XCSF",
-        "Random Forest": "RF",
-        "Decision Tree": "DT",
+        "Decision Tree": "Decision Tree",
+        "Random Forest": "Random Forest",
 }
 
 mixing1 = {"r:1; f:FilterSubpopulation; -e:ExperienceCalculation": "1",
@@ -117,6 +119,21 @@ mixing12 = {"r:1; f:RouletteWheel; -e:CapExperienceWithDimensionality": "1",
             "r:4; f:RouletteWheel; -e:CapExperienceWithDimensionality": "4",
             "r:5; f:RouletteWheel; -e:CapExperienceWithDimensionality": "5",}
 
+mixing_calvo = {
+"r:3; f:FilterSubpopulation; -e:ExperienceCalculation": "Base",
+"r:3; f:FilterSubpopulation; -e:CapExperience/": "Experience Cap",
+"r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "Experience Cap (dim)",
+"r:3; f:NBestFitness; -e:ExperienceCalculation": r"$l$ Best",
+"r:3; f:NBestFitness; -e:CapExperience/": r"$l$ Best & Experience Cap",
+"r:3; f:NBestFitness; -e:CapExperienceWithDimensionality": r"$l$ Best & Experience Cap (dim)",
+"r:3; f:NRandom; -e:ExperienceCalculation": r"$l$ Random",
+"r:3; f:NRandom; -e:CapExperience/": r"$l$ Random & Experience Cap",
+"r:3; f:NRandom; -e:CapExperienceWithDimensionality": r"$l$ Random & Experience Cap (dim)",
+"r:3; f:RouletteWheel; -e:ExperienceCalculation": "RouletteWheel",
+"r:3; f:RouletteWheel; -e:CapExperience/": "RouletteWheel & Experience Cap",
+"r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "RouletteWheel & Experience Cap (dim)"
+}
+
 mixing = []
 mixing.append(mixing1)
 mixing.append(mixing2)
@@ -131,6 +148,23 @@ mixing.append(mixing10)
 mixing.append(mixing11)
 mixing.append(mixing12)
 
+# all_runs_df = mlflow.search_runs(search_all_experiments=True)
+
+
+# for dataset in datasets:
+#     mse = "metrics.test_neg_mean_squared_error"
+#     complexity = "metrics.elitist_complexity"
+
+#     df = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) & (all_runs_df["tags.fold"] == 'True')]
+#     df = df[["tags.mlflow.runName", mse, complexity]]
+#     print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
+
+
+#     df[mse] *= -1
+#     # df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
+#     # df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
+#     df.to_csv(f"{dataset}_all.csv", index=False)
+# exit()
 
 saga = {
         "s:ga": "GA",
@@ -149,8 +183,8 @@ if __name__ == '__main__':
         config = json.load(f)
 
     def run_main():
-        config["datasets"] = {"":""}
-        # config["datasets"] = datasets
+        # config["datasets"] = {"":""}
+        config["datasets"] = datasets
         config["output_directory"] = setting[0]
         if not os.path.isdir("logging_output_scripts/outputs"):
             os.mkdir("logging_output_scripts/outputs")
@@ -166,24 +200,97 @@ if __name__ == '__main__':
             json.dump(config, f)
 
         filter_runs(all_runs_df)
-        create_plots()
+        # create_plots()
         # create_summary_csv()
-        # write_complexity_all({-1: ' ', 0: 'CS', 1: 'CCPP', 2: 'ASN', 3: 'PPPTS', 4:'PT'})
-        # calvo(ylabel=setting[2])
+        
+        calvo(ylabel=setting[2])
+        # final_output_dir = f"{config['output_directory']}"
+        # latex_tabulars.check_and_create_dir(final_output_dir, 'latex_tabular')
+        # latex_tabulars.single_table_all_mse({-1: ' ', 0: 'CCPP', 1: 'ASN', 2: 'CS', 3: 'PPPT', 4: 'PT'})
+        # latex_tabulars.single_table_all_complexity()
 
-        # ttest(latex=False, cand1="s:ga", cand2="s:saga2", cand1_name="GA", cand2_name="SAGA2")
+
+        if setting[0] == "logging_output_scripts/outputs/RBML":
+            ttest(latex=False, cand1="XCSF", cand2="ES Tuning", cand1_name="XCSF", cand2_name="SupRB")
+            ttest(latex=False, cand1="Decision Tree", cand2="ES Tuning", cand1_name="Decision Tree", cand2_name="SupRB")
+            ttest(latex=False, cand1="Random Forest", cand2="ES Tuning", cand1_name="Random Forest", cand2_name="SupRB")
+
+        if setting[0] == "logging_output_scripts/outputs/RD":
+            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="NSLC-P", cand2_name="ES")
+            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1="NSLC False", cand2="ES Tuning", cand1_name="NSLC-G", cand2_name="ES")
+            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1="MCNS True", cand2="ES Tuning", cand1_name="MCNS-P", cand2_name="ES")
+            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1="MCNS False", cand2="ES Tuning", cand1_name="MCNS-G", cand2_name="ES")
+            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1=" NS True", cand2="ES Tuning", cand1_name="NS-P", cand2_name="ES")
+            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1=" NS False", cand2="ES Tuning", cand1_name="NS-G", cand2_name="ES")
+        
+        if setting[0] == "logging_output_scripts/outputs/SC":
+            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="RS", cand2_name="GA")
+            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
+
+            ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2="GeneticAlgorithm", cand1_name="ABC", cand2_name="GA")
+            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
+
+            ttest(latex=False, cand1="AntColonyOptimization", cand2="GeneticAlgorithm", cand1_name="ACO", cand2_name="GA")
+            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
+
+            ttest(latex=False, cand1="GreyWolfOptimizer", cand2="GeneticAlgorithm", cand1_name="GWO", cand2_name="GA")
+            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
+            
+            ttest(latex=False, cand1="ParticleSwarmOptimization", cand2="GeneticAlgorithm", cand1_name="PSW", cand2_name="GA")
+            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
+
+        if setting[0] == "logging_output_scripts/outputs/MIX":
+            # ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
+
+            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
+            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
+
+            ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap", cand2_name="Base")
+            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
+
+            ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap (dim)", cand2_name="Base")
+            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
+
+            ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/", cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality", cand1_name="Experience Cap", cand2_name="Experience Cap (dim)")
+            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
+
+        if setting[0] == "logging_output_scripts/outputs/SAGA":
+            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="SAGA1", cand2_name="GA")
+            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1="s:saga2", cand2="s:ga", cand1_name="SAGA2", cand2_name="GA")
+            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1="s:saga3", cand2="s:ga", cand1_name="SAGA3", cand2_name="GA")
+            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
+
+            ttest(latex=False, cand1="s:sas", cand2="s:ga", cand1_name="SAGA4", cand2_name="GA")
+            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
+
         
     rd = ["logging_output_scripts/outputs/RD", rule_discovery, "Rule Discovery", False]
     sc = ["logging_output_scripts/outputs/SC", solution_composition, "Solution Composition", False]
-    xcsf = ["logging_output_scripts/outputs/RBML", asoc, "Rule Discovery", False]
+    xcsf = ["logging_output_scripts/outputs/RBML", asoc, "Estimator", False]
     adeles = ["logging_output_scripts/outputs/ADELES", adel, "Rule Discovery", False]
+    mix_calvo = ["logging_output_scripts/outputs/MIX", mixing_calvo, "Mixing Variant", True]
+    sagas = ["logging_output_scripts/outputs/SAGA", saga, "Solution Composition", False]
 
     all_runs_df = mlflow.search_runs(search_all_experiments=True)
 
-    setting = adeles
+    setting = rd
     run_main()
     exit()
 
     for mixing_num in mixing:
-        setting = ["logging_output_scripts/outputs/MIX", mixing_num, "Number of rules participating", True]
+        setting = ["logging_output_scripts/outputs/MIX", mixing_num, "Number of rules participating", False]
         run_main()
