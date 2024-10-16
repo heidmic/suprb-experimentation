@@ -40,7 +40,7 @@ def create_summary_csv():
                 values += "," + str(round(mean_squared_error.mean(), 4))
                 values += "," + str(round(mean_squared_error.std(), 4))
 
-                values += '\n\n'
+                values += '\n'
 
                 print(f"Done for {problem} with {renamed_heuristic}")
 

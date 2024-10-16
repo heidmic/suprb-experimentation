@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from IPython import embed
-from logging_output_scripts.utils import get_dataframe, check_and_create_dir, get_all_runs, get_df
+from logging_output_scripts.utils import get_csv_df, get_dataframe, check_and_create_dir, get_all_runs, get_df, get_normalized_df
 import json
 
 
@@ -79,15 +79,50 @@ def load_data(config):
     # all_runs_list = get_all_runs()
 
     for heuristic in config['heuristics']:
+        # df = get_normalized_df(heuristic)
+        # if df is not None:
+        #     df[mse] *= -1
+        #     dfs.append(df)
+        #     keys.append((heuristic))
+
         for problem in config['datasets']:
             # df = get_dataframe(all_runs_list, heuristic, problem)
             df = get_df(heuristic, problem)
+            # df = get_csv_df(heuristic, problem)
             if df is not None:
                 df[mse] *= -1
                 dfs.append(df)
                 keys.append((heuristic, problem))
 
+    # datasets = ["combined_cycle_power_plant","airfoil_self_noise","concrete_strength","energy_cool"]
+    # df = pd.DataFrame()
+    # for dataset in datasets:
+    #     df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
+    #     # df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
+
+    # all_runs_df = df
+
+    # for heuristic in config["heuristics"].keys():
+    #     for dataset in config["datasets"].keys():
+    #         df = all_runs_df[
+    #             all_runs_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False) &
+    #             all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) 
+    #             # (all_runs_df["tags.fold"] == 'True')
+    #         ]
+            
+    #         if not df.empty:
+    #             print(f"Dataframe found for {heuristic} and {dataset}")
+    #         else:
+    #             print(f"No run found with {heuristic} and {dataset}")
+
+    #         if df is not None:
+    #             # df[mse] *= -1
+    #             dfs.append(df)
+    #             keys.append((heuristic, dataset))
+
+    # dfs = [df.reset_index() for df in dfs]
     df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
+    # df = pd.concat(dfs, keys=keys, verify_integrity=True)
     df = df[metrics.keys()]
 
     # Only for empty complexity otherwise comment out
@@ -138,7 +173,11 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
     pd.options.mode.chained_assignment = None
 
     for metric in metrics:
-        fig, ax = plt.subplots(len(variants), figsize=(textwidth, 5 / 7 * 2.7), dpi=72)
+
+        fig, ax = plt.subplots(len(variants), figsize=(8,6), dpi=72)
+        plt.subplots_adjust(hspace=5)
+
+        # fig, ax = plt.subplots(len(variants), figsize=(textwidth, 5 / 7 * 2.7), dpi=72)
 
         if not all_variants:
             ax = [ax]
@@ -219,97 +258,112 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
         # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5), dpi=72)
         fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth, 5), dpi=72)
         for i, task in enumerate(config["datasets"]):
+            if metric not in df:
+                continue
             if task in df[metric].loc[cand1]:
-                y1 = df[metric].loc[cand1, task]
-                y2 = df[metric].loc[cand2, task]
-                model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
+                y1 = df[metric].loc[cand1, task].to_numpy()
+                y2 = df[metric].loc[cand2, task].to_numpy()
+            # # else:
+            # y2 = df[metric].loc[cand1, task].to_numpy()
+            # y1 = df[metric].loc[cand2, task].to_numpy()
 
-                # Compute 100(1 - alpha)% high density interval.
-                alpha = 0.005
-                hdi = (model.model_.ppf(alpha), model.model_.ppf(1 - alpha))
-                hdis[metrics[metric]][config["datasets"][task]] = {"lower": hdi[0], "upper": hdi[1]}
+            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
 
-                # Compute bounds of the plots based on ppf.
-                xlower_ = model.model_.ppf(1e-6)
-                xlower_ -= xlower_ * 0.07
-                xupper_ = model.model_.ppf(1 - 1e-6)
-                xupper_ += xupper_ * 0.07
-                xlower = np.abs([xlower_, xupper_, *hdi]).max()
-                xupper = -xlower
+            # Compute 100(1 - alpha)% high density interval.
+            alpha = 0.005
+            hdi = (model.model_.ppf(alpha), model.model_.ppf(1 - alpha))
+            hdis[metrics[metric]][config["datasets"][task]] = {"lower": hdi[0], "upper": hdi[1]}
 
-                # Compute pdf values of posterior.
-                x = np.linspace(xlower, xupper, 1000)
-                # y = model.model_.cdf(x)
-                # x = np.arange(1e-3, 1 - 1e-3, 1e-3)
-                y = model.model_.pdf(x)
+            # Compute bounds of the plots based on ppf.
+            xlower_ = model.model_.ppf(1e-6)
+            xlower_ -= xlower_ * 0.07
+            xupper_ = model.model_.ppf(1 - 1e-6)
+            xupper_ += xupper_ * 0.07
+            xlower = np.abs([xlower_, xupper_, *hdi]).max()
+            xupper = -xlower
 
-                # xlabel = (f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
-                #           if metrics[metric] == "MSE"
-                #           else (
-                #               f"{metrics[metric].capitalize()}({cand2_name})\n- "
-                #               f"{metrics[metric].capitalize()}({cand1_name})"))
+            # Compute pdf values of posterior.
+            x = np.linspace(xlower, xupper, 1000)
+            # y = model.model_.cdf(x)
+            # x = np.arange(1e-3, 1 - 1e-3, 1e-3)
+            y = model.model_.pdf(x)
 
-                xlabel = (f"{cand2_name} - {cand1_name}"
-                          if metrics[metric] == "MSE"
-                          else ( f"{cand2_name} - {cand1_name}\n"))
+            # xlabel = (f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
+            #           if metrics[metric] == "MSE"
+            #           else (
+            #               f"{metrics[metric].capitalize()}({cand2_name})\n- "
+            #               f"{metrics[metric].capitalize()}({cand1_name})"))
 
+            
+            
+            if (len(list(config["datasets"])) - 1) == i:
+                xlabel = (f"MSE({cand2_name}) - MSE({cand1_name})"
+                        if metrics[metric] == "MSE"
+                        else ( f"COMP({cand2_name}) - COMP({cand1_name})\n"))
+            
                 ylabel = "Density"
-                data = pd.DataFrame({xlabel: x, ylabel: y})
+            else:
+                xlabel = " "
+                ylabel = "  "
 
-                # Plot posterior.
-                # sns.histplot(model.model_.rvs(50000),
-                #              bins=100,
-                #              ax=ax[i],
-                #              stat="density")
-                sns.lineplot(data=data, x=xlabel, y=ylabel, ax=ax[i])
-                ax[i].fill_between(x, 0, y, alpha=0.33)
-                ax[i].set_xlabel("")
-                ax[i].set_ylabel("")
-                ax[i].set_title(f"{config['datasets'][task]}", style="italic")
 
-                # Add HDI lines and values.
-                ax[i].vlines(x=hdi, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C1", linestyles="dashed")
-                ax[i].text(x=hdi[0], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[0], 2),
-                           ha="right", va="center", color="C1", fontweight="bold")
-                ax[i].text(x=hdi[1], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[1], 2),
-                           ha="left", va="center", color="C1", fontweight="bold")
+            data = pd.DataFrame({xlabel: x, ylabel: y})
 
-                ax[i].set_ylim(top=1.2 * max(y))
-                if metrics[metric] == "Model Complexity":
-                    # Compute rope for this task.
-                    # Remove RS runs.
-                    ()
-                    d_ = df[metric].unstack("algorithm")[[alg for alg in config["heuristics"]]].stack()
-                    # d_ = df[metric]  # .unstack(0).stack()
-                    ()
-                    # Rope is based on std of the other algorithms.
-                    stds = d_[task].groupby("algorithm").std()
-                    rope = stds.mean()
-                    rope = [-rope, rope]
+            # Plot posterior.
+            # sns.histplot(model.model_.rvs(50000),
+            #              bins=100,
+            #              ax=ax[i],
+            #              stat="density")
+            sns.lineplot(data=data, x=xlabel, y=ylabel, ax=ax[i])
+            ax[i].fill_between(x, 0, y, alpha=0.33)
+            ax[i].set_xlabel("")
+            ax[i].set_ylabel("")
+            ax[i].set_title(f"{config['datasets'][task]}", style="italic", pad=10.0)
 
-                    # Add rope lines and values.
-                    ax[i].vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
-                    ax[i].fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
+            # Add HDI lines and values.
+            ax[i].vlines(x=hdi, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C1", linestyles="dashed")
+            ax[i].text(x=hdi[0], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[0], 2),
+                        ha="right", va="center", color="C1", fontweight="bold")
+            ax[i].text(x=hdi[1], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[1], 2),
+                        ha="left", va="center", color="C1", fontweight="bold")
 
-                    # Compute probabilities.
-                    sample = model.model_.rvs(100000)
+            ax[i].set_ylim(top=1.2 * max(y))
+            if metrics[metric] == "Model Complexity":
+                # Compute rope for this task.
+                # Remove RS runs.
+                ()
+                d_ = df[metric].unstack("algorithm")[[alg for alg in config["heuristics"]]].stack()
+                # d_ = df[metric]  # .unstack(0).stack()
+                ()
+                # Rope is based on std of the other algorithms.
+                stds = d_[task].groupby("algorithm").std()
+                rope = stds.mean()
+                rope = [-rope, rope]
 
-                    probs[config['datasets'][task]] = {
-                        f"p({cand1_name} practically higher complexity)": (sample < rope[0]).sum() / len(sample),
-                        f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
-                        f"p({cand2_name} practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
+                # Add rope lines and values.
+                ax[i].vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
+                ax[i].fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
 
-                ax[i].set_ylabel(ylabel, weight="bold")
-                ax[i].set_xlabel(xlabel, weight="bold")
+                # Compute probabilities.
+                sample = model.model_.rvs(100000)
 
-                if metrics[metric] == "Model Complexity":
-                    fig.tight_layout(pad=0.02)
-                else:
-                    fig.tight_layout()
+                probs[config['datasets'][task]] = {
+                    f"p({cand1_name} practically higher complexity)": (sample < rope[0]).sum() / len(sample),
+                    f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
+                    f"p({cand2_name} practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
 
-                
-                fig.align_ylabels()
-                fig.savefig(f"{final_output_dir}/ttest/{metric}_{cand1_name}_{cand2_name}_4.pdf", dpi=fig.dpi, bbox_inches="tight")
+            ax[i].set_ylabel(ylabel, weight="bold")
+            ax[i].set_xlabel(xlabel, weight="bold")
+
+            if metrics[metric] == "Model Complexity":
+                fig.tight_layout(pad=0.1)
+            else:
+                fig.tight_layout(pad=0.1)
+
+            nname = "mse" if metric == "metrics.test_neg_mean_squared_error" else "complexity"
+            
+            fig.align_ylabels()
+            fig.savefig(f"{final_output_dir}/ttest/ttest_{cand1_name}_{cand2_name}_{nname}.pdf", dpi=fig.dpi, bbox_inches="tight")
 
     # https://stackoverflow.com/a/67575847/6936216
     hdis_ = hdis
