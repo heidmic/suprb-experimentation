@@ -14,7 +14,7 @@ datasets = {
         "combined_cycle_power_plant": "Combined Cycle Power Plant",
         "airfoil_self_noise": "Airfoil Self-Noise",
         "concrete_strength": "Concrete Strength",
-        # "energy_cool": "Energy Efficiency Cooling",
+        "energy_cool": "Energy Efficiency Cooling",
         "protein_structure": "Physiochemical Properties of Protein Tertiary Structure",   
         "parkinson_total": "Parkinson's Telemonitoring"
 }
@@ -203,7 +203,7 @@ if __name__ == '__main__':
         # create_plots()
         # create_summary_csv()
         
-        calvo(ylabel=setting[2])
+        # calvo(ylabel=setting[2])
         # final_output_dir = f"{config['output_directory']}"
         # latex_tabulars.check_and_create_dir(final_output_dir, 'latex_tabular')
         # latex_tabulars.single_table_all_mse({-1: ' ', 0: 'CCPP', 1: 'ASN', 2: 'CS', 3: 'PPPT', 4: 'PT'})
