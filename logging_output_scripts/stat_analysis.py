@@ -202,7 +202,7 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
             # NOTE We fix the random seed here to enable model caching.
             model = cmpbayes.Calvo(
                 d.to_numpy(),
-                higher_better=False, algorithm_labels=d.columns.to_list()).fit(num_samples=10000, random_seed=1)
+                higher_better=False, algorithm_labels=d.columns.to_list()).fit(num_samples=100000, random_seed=1)
 
             if check_mcmc:
                 smart_print(az.summary(model.infdata_), latex=latex)
@@ -256,7 +256,8 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
         print(f"# {metrics[metric]}\n")
 
         # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5), dpi=72)
-        fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth, 5), dpi=72)
+        # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth, 5), dpi=72)
+        fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(textwidth, 5), dpi=72)
         for i, task in enumerate(config["datasets"]):
             if metric not in df:
                 continue
@@ -267,7 +268,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
             # y2 = df[metric].loc[cand1, task].to_numpy()
             # y1 = df[metric].loc[cand2, task].to_numpy()
 
-            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit()
+            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit(num_samples=100000)
 
             # Compute 100(1 - alpha)% high density interval.
             alpha = 0.005
@@ -296,7 +297,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             
             
-            if (len(list(config["datasets"])) - 1) == i:
+            if not (i == 1 or i == 3):
                 xlabel = (f"MSE({cand2_name}) - MSE({cand1_name})"
                         if metrics[metric] == "MSE"
                         else ( f"COMP({cand2_name}) - COMP({cand1_name})\n"))
@@ -306,6 +307,8 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 xlabel = " "
                 ylabel = "  "
 
+            xlabel = " "
+            ylabel = "  "
 
             data = pd.DataFrame({xlabel: x, ylabel: y})
 
@@ -314,20 +317,21 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
             #              bins=100,
             #              ax=ax[i],
             #              stat="density")
-            sns.lineplot(data=data, x=xlabel, y=ylabel, ax=ax[i])
-            ax[i].fill_between(x, 0, y, alpha=0.33)
-            ax[i].set_xlabel("")
-            ax[i].set_ylabel("")
-            ax[i].set_title(f"{config['datasets'][task]}", style="italic", pad=10.0)
+            ax_val = ax[int(i/2)][i % 2]
+            sns.lineplot(data=data, x=xlabel, y=ylabel, ax=ax_val)
+            ax_val.fill_between(x, 0, y, alpha=0.33)
+            ax_val.set_xlabel("")
+            ax_val.set_ylabel("")
+            ax_val.set_title(f"{config['datasets'][task]}", style="italic", pad=15.0)
 
             # Add HDI lines and values.
-            ax[i].vlines(x=hdi, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C1", linestyles="dashed")
-            ax[i].text(x=hdi[0], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[0], 2),
+            ax_val.vlines(x=hdi, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C1", linestyles="dashed")
+            ax_val.text(x=hdi[0], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[0], 2),
                         ha="right", va="center", color="C1", fontweight="bold")
-            ax[i].text(x=hdi[1], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[1], 2),
+            ax_val.text(x=hdi[1], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[1], 2),
                         ha="left", va="center", color="C1", fontweight="bold")
 
-            ax[i].set_ylim(top=1.2 * max(y))
+            ax_val.set_ylim(top=1.2 * max(y))
             if metrics[metric] == "Model Complexity":
                 # Compute rope for this task.
                 # Remove RS runs.
@@ -341,8 +345,8 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 rope = [-rope, rope]
 
                 # Add rope lines and values.
-                ax[i].vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
-                ax[i].fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
+                ax_val.vlines(x=rope, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C2", linestyles="dotted")
+                ax_val.fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
 
                 # Compute probabilities.
                 sample = model.model_.rvs(100000)
@@ -352,8 +356,8 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                     f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
                     f"p({cand2_name} practically higher complexity)": (rope[1] < sample).sum() / len(sample)}
 
-            ax[i].set_ylabel(ylabel, weight="bold")
-            ax[i].set_xlabel(xlabel, weight="bold")
+            ax_val.set_ylabel(ylabel, weight="bold")
+            ax_val.set_xlabel(xlabel, weight="bold")
 
             if metrics[metric] == "Model Complexity":
                 fig.tight_layout(pad=0.1)
@@ -362,6 +366,13 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             nname = "mse" if metric == "metrics.test_neg_mean_squared_error" else "complexity"
             
+            xlabel = (f"MSE({cand2_name}) - MSE({cand1_name})"
+                        if metrics[metric] == "MSE"
+                        else ( f"COMP({cand2_name}) - COMP({cand1_name})\n"))
+            ylabel = "Density"
+            fig.text(0.5, 0.001, xlabel, ha='center')
+            fig.text(0.01, 0.5, ylabel, ha='center', rotation=90)
+
             fig.align_ylabels()
             fig.savefig(f"{final_output_dir}/ttest/ttest_{cand1_name}_{cand2_name}_{nname}.pdf", dpi=fig.dpi, bbox_inches="tight")
 
