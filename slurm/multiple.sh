@@ -14,7 +14,7 @@ for dset in ${datasets[@]}; do
 
 		echo $experiment $dataset $opt
 		sbatch slurm/solution_composition.sbatch
-		sleep(10)
+		sleep 10
 	done
 
 	# ############################ RULE DISCOVERY - ES ################################
