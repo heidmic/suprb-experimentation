@@ -143,7 +143,7 @@ def run(problem: str, optimizer: str):
 
         params.rule_generation__mutation__sigma = trial.suggest_float(
             'rule_generation__mutation__sigma', *sigma_space)
-        params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 100)
+        params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 200)
         params.rule_generation__init__fitness__alpha = trial.suggest_float(
             'rule_generation__init__fitness__alpha', 0.01, 0.2)
 
