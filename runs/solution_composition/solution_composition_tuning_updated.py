@@ -51,7 +51,6 @@ from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 
 
-
 from experiments import Experiment
 from experiments.mlflow import log_experiment
 from experiments.parameter_search import solution_composition_space
@@ -60,6 +59,7 @@ from problems import scale_X_y
 
 
 random_state = 42
+
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
@@ -93,7 +93,6 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         else:
             y = dataset.target.toarray()
 
-
         return X, y
 
 
@@ -117,7 +116,7 @@ def run(problem: str, optimizer: str):
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
-        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
+        solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32),
         n_iter=32,
         n_rules=4,
         verbose=10,
@@ -139,8 +138,17 @@ def run(problem: str, optimizer: str):
 
     @param_space()
     def suprb_space(trial: Trial, params: Bunch):
-        params.solution_composition = optimizer # trial.suggest_categorical('solution_composition', ['GeneticAlgorithm', 'ArtificialBeeColonyAlgorithm', 'AntColonyOptimization', 'GreyWolfOptimizer', 'ParticleSwarmOptimization', "RandomSearch"])  # nopep8
-        
+        # ES
+        sigma_space = [0, np.sqrt(X.shape[1])]
+
+        params.rule_generation__mutation__sigma = trial.suggest_float(
+            'rule_generation__mutation__sigma', *sigma_space)
+        params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 100)
+        params.rule_generation__init__fitness__alpha = trial.suggest_float(
+            'rule_generation__init__fitness__alpha', 0.01, 0.2)
+
+        params.solution_composition = optimizer  # trial.suggest_categorical('solution_composition', ['GeneticAlgorithm', 'ArtificialBeeColonyAlgorithm', 'AntColonyOptimization', 'GreyWolfOptimizer', 'ParticleSwarmOptimization', "RandomSearch"])  # nopep8
+
         if params.solution_composition == 'GeneticAlgorithm':
             # GA base
             params.solution_composition = getattr(suprb.optimizer.solution.ga, params.solution_composition)()
@@ -163,22 +171,23 @@ def run(problem: str, optimizer: str):
             # if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
             #     params.solution_composition__init__fitness__alpha = trial.suggest_float('solution_composition__init__fitness__alpha', 0.0, 1.0) # nopep8
 
-            params.solution_composition__init__mixing__experience_weight = trial.suggest_float('solution_composition__init__mixing__experience_weight', 0.0, 1.0)
+            params.solution_composition__init__mixing__experience_weight = trial.suggest_float(
+                'solution_composition__init__mixing__experience_weight', 0.0, 1.0)
 
             params.solution_composition__init__mixing__experience_calculation = trial.suggest_categorical('solution_composition__init__mixing__experience_calculation', ['ExperienceCalculation', 'CapExperience', 'CapExperienceWithDimensionality'])  # nopep8
-            params.solution_composition__init__mixing__experience_calculation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__experience_calculation)() # nopep8
+            params.solution_composition__init__mixing__experience_calculation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__experience_calculation)()  # nopep8
 
             if isinstance(params.solution_composition__init__mixing__experience_calculation, suprb.solution.mixing_model.CapExperienceWithDimensionality):
-                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 2, 5) # nopep8
+                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 2, 5)  # nopep8
             else:
-                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50) # nopep8
+                params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)  # nopep8
 
             params.solution_composition__init__mixing__filter_subpopulation = trial.suggest_categorical('solution_composition__init__mixing__filter_subpopulation', ['FilterSubpopulation', 'NBestFitness', 'NRandom', 'RouletteWheel'])  # nopep8
-            params.solution_composition__init__mixing__filter_subpopulation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__filter_subpopulation)() # nopep8
-            
+            params.solution_composition__init__mixing__filter_subpopulation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__filter_subpopulation)()  # nopep8
+
             params.solution_composition__init__mixing__filter_subpopulation__rule_amount = trial.suggest_int('solution_composition__init__mixing__filter_subpopulation__rule_amount', 4, 10)  # nopep8
 
-            # GA selection 
+            # GA selection
             params.solution_composition__selection = trial.suggest_categorical('solution_composition__selection', ['Random', 'RouletteWheel', 'LinearRank', 'Tournament'])  # nopep8
             params.solution_composition__selection = getattr(suprb.optimizer.solution.ga.selection, params.solution_composition__selection)()  # nopep8
 
@@ -194,11 +203,12 @@ def run(problem: str, optimizer: str):
             params.solution_composition__crossover__crossover_rate = trial.suggest_float('solution_composition__crossover__crossover_rate', 0.7, 1.0)  # nopep8
             if isinstance(params.solution_composition__crossover__crossover_rate, suprb.optimizer.solution.ga.crossover.NPoint):
                 params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)  # nopep8
-        
+
         elif params.solution_composition == 'ArtificialBeeColonyAlgorithm':
             params.solution_composition = getattr(suprb.optimizer.solution.abc, params.solution_composition)()
 
-            params.solution_composition__food = trial.suggest_categorical('solution_composition__food', ['Sigmoid', 'Bitwise', 'DimensionFlips'])
+            params.solution_composition__food = trial.suggest_categorical(
+                'solution_composition__food', ['Sigmoid', 'Bitwise', 'DimensionFlips'])
             params.solution_composition__food = getattr(suprb.optimizer.solution.abc.food, params.solution_composition__food)()
 
             params.solution_composition__trials_limit = trial.suggest_int('solution_composition__trials_limit', 1, 32)
@@ -227,7 +237,8 @@ def run(problem: str, optimizer: str):
         elif params.solution_composition == 'ParticleSwarmOptimization':
             params.solution_composition = getattr(suprb.optimizer.solution.pso, params.solution_composition)()
 
-            params.solution_composition__movement = trial.suggest_categorical('solution_composition__movement', ['Sigmoid', 'SigmoidQuantum', 'BinaryQuantum'])
+            params.solution_composition__movement = trial.suggest_categorical(
+                'solution_composition__movement', ['Sigmoid', 'SigmoidQuantum', 'BinaryQuantum'])
             params.solution_composition__movement = getattr(suprb.optimizer.solution.pso.movement, params.solution_composition__movement)()
 
             params.solution_composition__a_min = trial.suggest_float('solution_composition__a_min', 0, 3)
@@ -237,15 +248,16 @@ def run(problem: str, optimizer: str):
                 params.solution_composition__movement__b = trial.suggest_float('solution_composition__movement__b', 0, 3)
                 params.solution_composition__movement__c = trial.suggest_float('solution_composition__movement__c', 0, 3)
             elif isinstance(params.solution_composition__movement, suprb.optimizer.solution.pso.movement.BinaryQuantum):
-                params.solution_composition__movement__p_learning = trial.suggest_float('solution_composition__movement__p_learning', 0.01, 1)
-                params.solution_composition__movement__n_attractors = trial.suggest_int('solution_composition__movement__n_attractors', 1, 32 // 2)
+                params.solution_composition__movement__p_learning = trial.suggest_float(
+                    'solution_composition__movement__p_learning', 0.01, 1)
+                params.solution_composition__movement__n_attractors = trial.suggest_int(
+                    'solution_composition__movement__n_attractors', 1, 32 // 2)
 
         elif params.solution_composition == 'RandomSearch':
             params.solution_composition = getattr(suprb.optimizer.solution.rs, params.solution_composition)()
 
             params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 64, 128)
             params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 64, 128)
-
 
     experiment_name = f'SupRB Tuning o:{optimizer} p:{problem}'
     print(experiment_name)

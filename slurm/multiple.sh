@@ -16,31 +16,31 @@ for dset in ${datasets[@]}; do
 		sbatch slurm/solution_composition.sbatch
 	done
 
-	############################ RULE DISCOVERY - ES ################################
+	# ############################ RULE DISCOVERY - ES ################################
 
-	export experiment="runs/rule_discovery/evolution_strategy.py"
-	echo $experiment $dataset
-	sbatch slurm/rule_discovery.sbatch
+	# export experiment="runs/rule_discovery/evolution_strategy.py"
+	# echo $experiment $dataset
+	# sbatch slurm/rule_discovery.sbatch
 
-	############################ RULE DISCOVERY - RS ################################
+	# ############################ RULE DISCOVERY - RS ################################
 
-	export experiment="runs/rule_discovery/random_search.py"
-	echo $experiment $dataset
-	sbatch slurm/rule_discovery.sbatch
+	# export experiment="runs/rule_discovery/random_search.py"
+	# echo $experiment $dataset
+	# sbatch slurm/rule_discovery.sbatch
 
-	############################ RULE DISCOVERY - NS ################################
+	# ############################ RULE DISCOVERY - NS ################################
 
-	export experiment="runs/rule_discovery/novelty_search.py"
-	ns_types=("NS" "MCNS" "NSLC")
+	# export experiment="runs/rule_discovery/novelty_search.py"
+	# ns_types=("NS" "MCNS" "NSLC")
 
-	for ns in ${ns_types[@]}; do
-		export ns_type=$ns
-		export archive_pop=true
-		echo $experiment $dataset $ns_type $archive_pop
-		sbatch slurm/rule_discovery_ns.sbatch
+	# for ns in ${ns_types[@]}; do
+	# 	export ns_type=$ns
+	# 	export archive_pop=true
+	# 	echo $experiment $dataset $ns_type $archive_pop
+	# 	sbatch slurm/rule_discovery_ns.sbatch
 
-		export archive_pop=false
-		echo $experiment $dataset $ns_type $archive_pop
-		sbatch slurm/rule_discovery_ns.sbatch
-	done
+	# 	export archive_pop=false
+	# 	echo $experiment $dataset $ns_type $archive_pop
+	# 	sbatch slurm/rule_discovery_ns.sbatch
+	# done
 done

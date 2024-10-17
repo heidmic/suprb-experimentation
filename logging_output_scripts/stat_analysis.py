@@ -73,24 +73,29 @@ def smart_print(df, latex):
         print(df.to_markdown())
 
 
+chosen_sample_num = 10
+
+
 def load_data(config):
     dfs = []
     keys = []
     # all_runs_list = get_all_runs()
 
     for heuristic in config['heuristics']:
-        # df = get_normalized_df(heuristic)
+        if config["normalize_datasets"]:
+            df = get_normalized_df(heuristic)
         # if df is not None:
         #     df[mse] *= -1
         #     dfs.append(df)
         #     keys.append((heuristic))
-
         for problem in config['datasets']:
             # df = get_dataframe(all_runs_list, heuristic, problem)
-            df = get_df(heuristic, problem)
+            if not config["normalize_datasets"]:
+                df = get_df(heuristic, problem)
             # df = get_csv_df(heuristic, problem)
             if df is not None:
-                df[mse] *= -1
+                if not config["normalize_datasets"]:
+                    df[mse] *= -1
                 dfs.append(df)
                 keys.append((heuristic, problem))
 
@@ -106,10 +111,10 @@ def load_data(config):
     #     for dataset in config["datasets"].keys():
     #         df = all_runs_df[
     #             all_runs_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False) &
-    #             all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) 
+    #             all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False)
     #             # (all_runs_df["tags.fold"] == 'True')
     #         ]
-            
+
     #         if not df.empty:
     #             print(f"Dataframe found for {heuristic} and {dataset}")
     #         else:
@@ -120,7 +125,9 @@ def load_data(config):
     #             dfs.append(df)
     #             keys.append((heuristic, dataset))
 
-    # dfs = [df.reset_index() for df in dfs]
+    if config["normalize_datasets"]:
+        dfs = [df.reset_index() for df in dfs]
+
     df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
     # df = pd.concat(dfs, keys=keys, verify_integrity=True)
     df = df[metrics.keys()]
@@ -142,7 +149,7 @@ def cli():
     pass
 
 
-def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = False, ylabel = None):
+def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, ylabel=None):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
@@ -173,8 +180,8 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
     pd.options.mode.chained_assignment = None
 
     for metric in metrics:
-
-        fig, ax = plt.subplots(len(variants), figsize=(8,6), dpi=72)
+        num_heuristics = len(config["heuristics"])
+        fig, ax = plt.subplots(len(variants), figsize=(8, 0.5 * num_heuristics), dpi=72)
         plt.subplots_adjust(hspace=5)
 
         # fig, ax = plt.subplots(len(variants), figsize=(textwidth, 5 / 7 * 2.7), dpi=72)
@@ -186,6 +193,8 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
         for mode, f in variants.items():
             i += 1
             d = f(df)[config["heuristics"]]
+
+            print(d)
 
             title = f"Considering {mode} cv runs per task"
 
@@ -202,7 +211,7 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
             # NOTE We fix the random seed here to enable model caching.
             model = cmpbayes.Calvo(
                 d.to_numpy(),
-                higher_better=False, algorithm_labels=d.columns.to_list()).fit(num_samples=100000, random_seed=1)
+                higher_better=False, algorithm_labels=d.columns.to_list()).fit(num_samples=chosen_sample_num, random_seed=1)
 
             if check_mcmc:
                 smart_print(az.summary(model.infdata_), latex=latex)
@@ -229,7 +238,7 @@ def calvo(latex = False, all_variants = False, check_mcmc = False, small_set = F
             result = heuristic[f_index+2:]
             result = result.replace('; -e:', '_')
             result = result.replace('/', '')
-            
+
             fig.savefig(f"{final_output_dir}/calvo_{result}_{metric}{'' if not small_set else '-small'}.pdf",
                         dpi=fig.dpi, bbox_inches="tight")
         else:
@@ -268,7 +277,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
             # y2 = df[metric].loc[cand1, task].to_numpy()
             # y1 = df[metric].loc[cand2, task].to_numpy()
 
-            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit(num_samples=100000)
+            model = cmpbayes.BayesCorrTTest(y1, y2, fraction_test=0.25).fit(num_samples=chosen_sample_num)
 
             # Compute 100(1 - alpha)% high density interval.
             alpha = 0.005
@@ -295,13 +304,11 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
             #               f"{metrics[metric].capitalize()}({cand2_name})\n- "
             #               f"{metrics[metric].capitalize()}({cand1_name})"))
 
-            
-            
             if not (i == 1 or i == 3):
                 xlabel = (f"MSE({cand2_name}) - MSE({cand1_name})"
-                        if metrics[metric] == "MSE"
-                        else ( f"COMP({cand2_name}) - COMP({cand1_name})\n"))
-            
+                          if metrics[metric] == "MSE"
+                          else (f"COMP({cand2_name}) - COMP({cand1_name})\n"))
+
                 ylabel = "Density"
             else:
                 xlabel = " "
@@ -349,7 +356,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 ax_val.fill_between(rope, 0, 1.2 * max(y), alpha=0.33, color="C2")
 
                 # Compute probabilities.
-                sample = model.model_.rvs(100000)
+                sample = model.model_.rvs(chosen_sample_num)
 
                 probs[config['datasets'][task]] = {
                     f"p({cand1_name} practically higher complexity)": (sample < rope[0]).sum() / len(sample),
@@ -365,10 +372,10 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 fig.tight_layout(pad=0.1)
 
             nname = "mse" if metric == "metrics.test_neg_mean_squared_error" else "complexity"
-            
+
             xlabel = (f"MSE({cand2_name}) - MSE({cand1_name})"
-                        if metrics[metric] == "MSE"
-                        else ( f"COMP({cand2_name}) - COMP({cand1_name})\n"))
+                      if metrics[metric] == "MSE"
+                      else (f"COMP({cand2_name}) - COMP({cand1_name})\n"))
             ylabel = "Density"
             fig.text(0.5, 0.001, xlabel, ha='center')
             fig.text(0.01, 0.5, ylabel, ha='center', rotation=90)
