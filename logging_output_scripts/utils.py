@@ -20,7 +20,7 @@ def filter_runs(all_runs_df=None):
                 all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) &
                 (all_runs_df["tags.fold"] == 'True')
             ]
-            
+
             if not filtered_df.empty:
                 print(f"Dataframe found for {heuristic} and {dataset}")
             else:
@@ -28,16 +28,19 @@ def filter_runs(all_runs_df=None):
 
             results_dict[(heuristic, dataset)] = filtered_df
 
+
 def get_normalized_df(heuristic):
-    datasets = ["combined_cycle_power_plant","airfoil_self_noise","concrete_strength","energy_cool"]
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
     df = pd.DataFrame()
-    for dataset in datasets:
-        df = pd.concat([df, pd.read_csv(f"{dataset}.csv")])
+    for dataset in config["datasets"]:
+        df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
 
     return df[df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
 
+
 def get_csv_df(heuristic, dataset):
-    datasets = ["combined_cycle_power_plant","airfoil_self_noise","concrete_strength","energy_cool"]
+    datasets = ["combined_cycle_power_plant", "airfoil_self_noise", "concrete_strength", "energy_cool"]
     df = pd.DataFrame()
     for dataset in datasets:
         df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
@@ -51,10 +54,10 @@ def get_csv_df(heuristic, dataset):
         for dataset in config["datasets"].keys():
             filtered_df = all_runs_df[
                 all_runs_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False) &
-                all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) 
+                all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False)
                 # (all_runs_df["tags.fold"] == 'True')
             ]
-            
+
             if not filtered_df.empty:
                 print(f"Dataframe found for {heuristic} and {dataset}")
             else:
@@ -83,29 +86,27 @@ def get_df(heuristic, dataset):
         print(f"No run found with {heuristic} and {dataset}")
         exit()
 
-
     for run in all_runs:
         df = mlflow.search_runs([run])
         if not 'tags.mlflow.runName' in df:
-            continue 
+            continue
         print(df['tags.mlflow.runName'])
         exit()
         print(df['tags.mlflow.runName'][0])
 
-        dataset_mask =  df['tags.mlflow.runName'].str.contains(f"{dataset}")
+        dataset_mask = df['tags.mlflow.runName'].str.contains(f"{dataset}")
         fold_mask = df['tags.fold'].str.contains("True", na=False)
-        
+
         if heuristic:
             heuristic_mask = df['tags.mlflow.runName'].str.contains(f"{heuristic}")
             df = df[heuristic_mask & dataset_mask & fold_mask]
         else:
             df = df[dataset_mask & fold_mask]
-            
 
         if not df.empty:
             print("found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n\n\n\n")
             return df
-    
+
     print(f"No run found with {heuristic} and {dataset}")
 
 
@@ -158,35 +159,36 @@ def check_and_create_dir(output_folder, output_dir):
     if not os.path.isdir(directory):
         os.mkdir(directory)
 
+
 datasets_map = {
-        "combined_cycle_power_plant": "ccpp",
-        "airfoil_self_noise": "asn",
-        "concrete_strength": "cs",
-        "energy_cool": "eec",
-        "protein_structure": "pppts",   
-        "parkinson_total": "pt",
-        "normalized": "normalized",
-        "0":"0",
-        "GeneticAlgorithm": "GA",
-        "RandomSearch": "RS",
-        "ArtificialBeeColonyAlgorithm": "ABC",
-        "AntColonyOptimization": "ACO",
-        "GreyWolfOptimizer": "GWO",
-        "ParticleSwarmOptimization": "PSO",
-         "ES Tuning": "ES", # "SupRB", #"ES",
-        "RS Tuning": "RS",
-        " NS True": "NS-P",
-        "MCNS True": "MCNS-P",
-        "NSLC True": "NSLC-P",
-        " NS False": "NS-G",
-        "MCNS False": "MCNS-G",
-        "NSLC False": "NSLC-G",
-        "XCSF": "XCSF",
-        "Decision Tree": "DT",
-        "Random Forest": "RF",
-        "s:ga": "GA",
-        "s:saga1": "SAGA1",
-        "s:saga2": "SAGA2",
-        "s:saga3": "SAGA3",
-        "s:sas": "SAGA4"
+    "combined_cycle_power_plant": "ccpp",
+    "airfoil_self_noise": "asn",
+    "concrete_strength": "cs",
+    "energy_cool": "eec",
+    "protein_structure": "pppts",
+    "parkinson_total": "pt",
+    "normalized": "normalized",
+    "0": "0",
+    "GeneticAlgorithm": "GA",
+    "RandomSearch": "RS",
+    "ArtificialBeeColonyAlgorithm": "ABC",
+    "AntColonyOptimization": "ACO",
+    "GreyWolfOptimizer": "GWO",
+    "ParticleSwarmOptimization": "PSO",
+    "ES Tuning": "ES",  # "SupRB", #"ES",
+    "RS Tuning": "RS",
+    " NS True": "NS-P",
+    "MCNS True": "MCNS-P",
+    "NSLC True": "NSLC-P",
+    " NS False": "NS-G",
+    "MCNS False": "MCNS-G",
+    "NSLC False": "NSLC-G",
+    "XCSF": "XCSF",
+    "Decision Tree": "DT",
+    "Random Forest": "RF",
+    "s:ga": "GA",
+    "s:saga1": "SAGA1",
+    "s:saga2": "SAGA2",
+    "s:saga3": "SAGA3",
+    "s:sas": "SAGA4"
 }
