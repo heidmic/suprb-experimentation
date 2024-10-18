@@ -201,14 +201,14 @@ if __name__ == '__main__':
     def run_main():
         # config["datasets"] = {"":""}
         config["datasets"] = datasets
-        if setting[0] == "logging_output_scripts/outputs/SAGA":
+        if setting[0] == "diss-graphs/graphs/SAGA":
             config["datasets"] = saga_datasets
-        if setting[0] == "logging_output_scripts/outputs/MIX":
+        if setting[0] == "diss-graphs/graphs/MIX" or setting[0] == "diss-graphs/graphs/RBML":
             config["datasets"] = mix_datasets
 
         config["output_directory"] = setting[0]
-        if not os.path.isdir("logging_output_scripts/outputs"):
-            os.mkdir("logging_output_scripts/outputs")
+        if not os.path.isdir("diss-graphs/graphs"):
+            os.mkdir("diss-graphs/graphs")
 
         if not os.path.isdir(config["output_directory"]):
             os.mkdir(config["output_directory"])
@@ -236,12 +236,12 @@ if __name__ == '__main__':
         # latex_tabulars.single_table_all_mse({-1: ' ', 0: 'CCPP', 1: 'ASN', 2: 'CS', 3: 'PPPT', 4: 'PT'})
         # latex_tabulars.single_table_all_complexity()
 
-        if setting[0] == "logging_output_scripts/outputs/RBML":
+        if setting[0] == "diss-graphs/graphs/RBML":
             ttest(latex=False, cand1="XCSF", cand2="ES Tuning", cand1_name="XCSF", cand2_name="SupRB")
             ttest(latex=False, cand1="Decision Tree", cand2="ES Tuning", cand1_name="Decision Tree", cand2_name="SupRB")
             ttest(latex=False, cand1="Random Forest", cand2="ES Tuning", cand1_name="Random Forest", cand2_name="SupRB")
 
-        if setting[0] == "logging_output_scripts/outputs/RD":
+        if setting[0] == "diss-graphs/graphs/RD":
             ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="NSLC-P", cand2_name="ES")
             ttest(latex=False, cand1="NSLC False", cand2="ES Tuning", cand1_name="NSLC-G", cand2_name="ES")
             ttest(latex=False, cand1="MCNS True", cand2="ES Tuning", cand1_name="MCNS-P", cand2_name="ES")
@@ -249,14 +249,14 @@ if __name__ == '__main__':
             ttest(latex=False, cand1=" NS True", cand2="ES Tuning", cand1_name="NS-P", cand2_name="ES")
             ttest(latex=False, cand1=" NS False", cand2="ES Tuning", cand1_name="NS-G", cand2_name="ES")
 
-        if setting[0] == "logging_output_scripts/outputs/SC":
+        if setting[0] == "diss-graphs/graphs/SC":
             ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="RS", cand2_name="GA")
             ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2="GeneticAlgorithm", cand1_name="ABC", cand2_name="GA")
             ttest(latex=False, cand1="AntColonyOptimization", cand2="GeneticAlgorithm", cand1_name="ACO", cand2_name="GA")
             ttest(latex=False, cand1="GreyWolfOptimizer", cand2="GeneticAlgorithm", cand1_name="GWO", cand2_name="GA")
             ttest(latex=False, cand1="ParticleSwarmOptimization", cand2="GeneticAlgorithm", cand1_name="PSW", cand2_name="GA")
 
-        if setting[0] == "logging_output_scripts/outputs/MIX":
+        if setting[0] == "diss-graphs/graphs/MIX":
             ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
                   cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
@@ -266,30 +266,33 @@ if __name__ == '__main__':
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
                   cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality", cand1_name="Experience Cap", cand2_name="Experience Cap (dim)")
 
-        if setting[0] == "logging_output_scripts/outputs/SAGA":
+        if setting[0] == "diss-graphs/graphs/SAGA":
             ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="SAGA1", cand2_name="GA")
             ttest(latex=False, cand1="s:saga2", cand2="s:ga", cand1_name="SAGA2", cand2_name="GA")
             ttest(latex=False, cand1="s:saga3", cand2="s:ga", cand1_name="SAGA3", cand2_name="GA")
             ttest(latex=False, cand1="s:sas", cand2="s:ga", cand1_name="SAGA4", cand2_name="GA")
 
-    rd = ["logging_output_scripts/outputs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
-    sc = ["logging_output_scripts/outputs/SC", solution_composition, "Solution Composition", False, "mlruns_csv/SC"]
-    xcsf = ["logging_output_scripts/outputs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]
-    adeles = ["logging_output_scripts/outputs/ADELES", adel, "Rule Discovery", False, "mlruns"]
-    mix_calvo = ["logging_output_scripts/outputs/MIX", mixing_calvo, "Mixing Variant", True, "mlruns_csv/MIX"]
-    sagas = ["logging_output_scripts/outputs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
+    rd = ["diss-graphs/graphs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
+    sc = ["diss-graphs/graphs/SC", solution_composition, "Solution Composition", False, "mlruns_csv/SC"]
+    xcsf = ["diss-graphs/graphs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]
+    adeles = ["diss-graphs/graphs/ADELES", adel, "Rule Discovery", False, "mlruns"]
+    mix_calvo = ["diss-graphs/graphs/MIX", mixing_calvo, "Mixing Variant", True, "mlruns_csv/MIX"]
+    sagas = ["diss-graphs/graphs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
 
-    setting = rd
-    run_main()
+    # setting = rd
+    # run_main()
 
-    setting = sagas
-    run_main()
+    # setting = sagas
+    # run_main()
 
-    setting = mix_calvo
+    # setting = mix_calvo
+    # run_main()
+
+    setting = xcsf
     run_main()
 
     exit()
 
     for mixing_num in mixing:
-        setting = ["logging_output_scripts/outputs/MIX", mixing_num, "Number of rules participating", False]
+        setting = ["diss-graphs/graphs/MIX", mixing_num, "Number of rules participating", False]
         run_main()
