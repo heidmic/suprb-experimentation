@@ -73,7 +73,7 @@ def smart_print(df, latex):
         print(df.to_markdown())
 
 
-chosen_sample_num = 10
+chosen_sample_num = 10000
 
 
 def load_data(config):
@@ -100,8 +100,8 @@ def load_data(config):
     df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
     df = df[metrics.keys()]
 
-    # Only for empty complexity otherwise comment out
-    # df = df[[mse]]
+    if config["data_directory"] == "mlruns_csv/RBML":
+        df[elitist_complexity] = 0.3
 
     assert not df.isna().any().any(), "Some values are missing"
     return df
@@ -148,6 +148,9 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
     pd.options.mode.chained_assignment = None
 
     for metric in metrics:
+        if metric not in df or (config["data_directory"] == "mlruns_csv/RBML" and metric == elitist_complexity):
+            continue
+
         num_heuristics = len(config["heuristics"])
         fig, ax = plt.subplots(len(variants), figsize=(8, 0.5 * num_heuristics), dpi=72)
         plt.subplots_adjust(hspace=5)
@@ -238,7 +241,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                                figsize=(8, 0.75 * math.ceil(len(config["datasets"])/2) * 2), dpi=72)
         ax = ax.ravel()
         for i, task in enumerate(config["datasets"]):
-            if metric not in df:
+            if metric not in df or (config["data_directory"] == "mlruns_csv/RBML" and metric == elitist_complexity):
                 continue
             if task in df[metric].loc[cand1]:
                 y1 = df[metric].loc[cand1, task].to_numpy()
