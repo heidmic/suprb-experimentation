@@ -2,6 +2,7 @@ import json
 import os
 import mlflow
 import numpy as np
+import time
 
 from logging_output_scripts.violin_and_swarm_plots import create_plots
 from logging_output_scripts.summary_csv import create_summary_csv
@@ -219,6 +220,8 @@ if __name__ == '__main__':
 
         with open("logging_output_scripts/config.json", "w") as f:
             json.dump(config, f)
+
+        time.sleep(10)
 
         if config["data_directory"] == "mlruns":
             all_runs_df = mlflow.search_runs(search_all_experiments=True)

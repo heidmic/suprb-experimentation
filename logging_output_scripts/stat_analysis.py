@@ -30,7 +30,7 @@ import seaborn as sns
 from IPython import embed
 from logging_output_scripts.utils import get_csv_df, get_dataframe, check_and_create_dir, get_all_runs, get_df, get_normalized_df
 import json
-
+import math
 
 pd.options.display.max_rows = 2000
 # If this doesn't work, because you can't fine Time New Roman as a font do the following:
@@ -233,7 +233,9 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
         # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5), dpi=72)
         # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth, 5), dpi=72)
-        fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(textwidth, 5), dpi=72)
+        num_heuristics = len(config["heuristics"])
+        fig, ax = plt.subplots(nrows=math.ceil(len(config["datasets"])/2), ncols=2,
+                               figsize=(8, 0.75 * math.ceil(len(config["datasets"])/2) * 2), dpi=72)
         ax = ax.ravel()
         for i, task in enumerate(config["datasets"]):
             if metric not in df:
@@ -343,7 +345,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             xlabel = (f"MSE({cand2_name}) - MSE({cand1_name})"
                       if metrics[metric] == "MSE"
-                      else (f"COMP({cand2_name}) - COMP({cand1_name})\n"))
+                      else (f"COMP({cand2_name}) - COMP({cand1_name})"))
             ylabel = "Density"
             fig.text(0.5, -0.01, xlabel, ha='center')
             fig.text(0.01, 0.5, ylabel, ha='center', rotation=90)
