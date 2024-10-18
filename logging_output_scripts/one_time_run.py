@@ -176,8 +176,8 @@ mixing.append(mixing12)
 #     print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
 
 #     df[mse] *= -1
-#     df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
-#     df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
+#     # df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
+#     # df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
 #     df.to_csv(f"{dataset}_all.csv", index=False)
 # exit()
 
@@ -215,12 +215,15 @@ if __name__ == '__main__':
         config["normalize_datasets"] = setting[3]
 
         config["heuristics"] = setting[1]
+        config["data_directory"] = setting[4]
 
         with open("logging_output_scripts/config.json", "w") as f:
             json.dump(config, f)
 
-        if not config["normalize_datasets"]:
+        if config["data_directory"] == "mlruns":
+            all_runs_df = mlflow.search_runs(search_all_experiments=True)
             filter_runs(all_runs_df)
+
         # create_plots()
         # create_summary_csv()
 
@@ -237,87 +240,51 @@ if __name__ == '__main__':
 
         if setting[0] == "logging_output_scripts/outputs/RD":
             ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="NSLC-P", cand2_name="ES")
-            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1="NSLC False", cand2="ES Tuning", cand1_name="NSLC-G", cand2_name="ES")
-            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1="MCNS True", cand2="ES Tuning", cand1_name="MCNS-P", cand2_name="ES")
-            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1="MCNS False", cand2="ES Tuning", cand1_name="MCNS-G", cand2_name="ES")
-            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1=" NS True", cand2="ES Tuning", cand1_name="NS-P", cand2_name="ES")
-            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1=" NS False", cand2="ES Tuning", cand1_name="NS-G", cand2_name="ES")
 
         if setting[0] == "logging_output_scripts/outputs/SC":
             ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="RS", cand2_name="GA")
-            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
-
             ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2="GeneticAlgorithm", cand1_name="ABC", cand2_name="GA")
-            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
-
             ttest(latex=False, cand1="AntColonyOptimization", cand2="GeneticAlgorithm", cand1_name="ACO", cand2_name="GA")
-            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
-
             ttest(latex=False, cand1="GreyWolfOptimizer", cand2="GeneticAlgorithm", cand1_name="GWO", cand2_name="GA")
-            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
-
             ttest(latex=False, cand1="ParticleSwarmOptimization", cand2="GeneticAlgorithm", cand1_name="PSW", cand2_name="GA")
-            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="dummy", cand2_name="GA")
 
         if setting[0] == "logging_output_scripts/outputs/MIX":
-            # ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation", cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
-
             ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
                   cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
-            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
-
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
                   cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap", cand2_name="Base")
-            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
-
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
                   cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap (dim)", cand2_name="Base")
-            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
-
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
                   cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality", cand1_name="Experience Cap", cand2_name="Experience Cap (dim)")
-            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="dummy", cand2_name="Base")
 
         if setting[0] == "logging_output_scripts/outputs/SAGA":
             ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="SAGA1", cand2_name="GA")
-            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1="s:saga2", cand2="s:ga", cand1_name="SAGA2", cand2_name="GA")
-            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1="s:saga3", cand2="s:ga", cand1_name="SAGA3", cand2_name="GA")
-            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
-
             ttest(latex=False, cand1="s:sas", cand2="s:ga", cand1_name="SAGA4", cand2_name="GA")
-            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="dummy", cand2_name="dummy")
 
-    rd = ["logging_output_scripts/outputs/RD", rule_discovery, "Rule Discovery", False]
-    sc = ["logging_output_scripts/outputs/SC", solution_composition, "Solution Composition", False]
-    xcsf = ["logging_output_scripts/outputs/RBML", asoc, "Estimator", False]
-    adeles = ["logging_output_scripts/outputs/ADELES", adel, "Rule Discovery", False]
-    mix_calvo = ["logging_output_scripts/outputs/MIX", mixing_calvo, "Mixing Variant", True]
-    sagas = ["logging_output_scripts/outputs/SAGA", saga, "Solution Composition", False]
+    rd = ["logging_output_scripts/outputs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
+    sc = ["logging_output_scripts/outputs/SC", solution_composition, "Solution Composition", False, "mlruns_csv/SC"]
+    xcsf = ["logging_output_scripts/outputs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]
+    adeles = ["logging_output_scripts/outputs/ADELES", adel, "Rule Discovery", False, "mlruns"]
+    mix_calvo = ["logging_output_scripts/outputs/MIX", mixing_calvo, "Mixing Variant", True, "mlruns_csv/MIX"]
+    sagas = ["logging_output_scripts/outputs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
 
-    setting = sc
-
-    if not setting[3]:
-        all_runs_df = mlflow.search_runs(search_all_experiments=True)
-
+    setting = rd
     run_main()
+
+    setting = sagas
+    run_main()
+
+    setting = mix_calvo
+    run_main()
+
     exit()
 
     for mixing_num in mixing:
