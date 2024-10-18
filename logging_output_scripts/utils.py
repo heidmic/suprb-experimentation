@@ -40,30 +40,11 @@ def get_normalized_df(heuristic):
 
 
 def get_csv_df(heuristic, dataset):
-    datasets = ["combined_cycle_power_plant", "airfoil_self_noise", "concrete_strength", "energy_cool"]
-    df = pd.DataFrame()
-    for dataset in datasets:
-        df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
-
-    all_runs_df = df
-
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
-    for heuristic in config["heuristics"].keys():
-        for dataset in config["datasets"].keys():
-            filtered_df = all_runs_df[
-                all_runs_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False) &
-                all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False)
-                # (all_runs_df["tags.fold"] == 'True')
-            ]
-
-            if not filtered_df.empty:
-                print(f"Dataframe found for {heuristic} and {dataset}")
-            else:
-                print(f"No run found with {heuristic} and {dataset}")
-
-            results_dict[(heuristic, dataset)] = filtered_df
+    df = pd.read_csv(f"{config['data_directory']}/{dataset}_all.csv")
+    return df[df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
 
 
 def get_df(heuristic, dataset):

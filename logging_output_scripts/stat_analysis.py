@@ -79,57 +79,25 @@ chosen_sample_num = 10
 def load_data(config):
     dfs = []
     keys = []
-    # all_runs_list = get_all_runs()
 
     for heuristic in config['heuristics']:
-        if config["normalize_datasets"]:
-            df = get_normalized_df(heuristic)
-        # if df is not None:
-        #     df[mse] *= -1
-        #     dfs.append(df)
-        #     keys.append((heuristic))
+        # if config["normalize_datasets"]:
+        #     df = get_normalized_df(heuristic)
+
         for problem in config['datasets']:
-            # df = get_dataframe(all_runs_list, heuristic, problem)
-            if not config["normalize_datasets"]:
+            if config["data_directory"] == "mlruns":
                 df = get_df(heuristic, problem)
-            # df = get_csv_df(heuristic, problem)
-            if df is not None:
-                if not config["normalize_datasets"]:
-                    df[mse] *= -1
-                dfs.append(df)
-                keys.append((heuristic, problem))
+                df[mse] *= -1
+            else:
+                df = get_csv_df(heuristic, problem)
 
-    # datasets = ["combined_cycle_power_plant","airfoil_self_noise","concrete_strength","energy_cool"]
-    # df = pd.DataFrame()
-    # for dataset in datasets:
-    #     df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
-    #     # df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
-
-    # all_runs_df = df
-
-    # for heuristic in config["heuristics"].keys():
-    #     for dataset in config["datasets"].keys():
-    #         df = all_runs_df[
-    #             all_runs_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False) &
-    #             all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False)
-    #             # (all_runs_df["tags.fold"] == 'True')
-    #         ]
-
-    #         if not df.empty:
-    #             print(f"Dataframe found for {heuristic} and {dataset}")
-    #         else:
-    #             print(f"No run found with {heuristic} and {dataset}")
-
-    #         if df is not None:
-    #             # df[mse] *= -1
-    #             dfs.append(df)
-    #             keys.append((heuristic, dataset))
+            dfs.append(df)
+            keys.append((heuristic, problem))
 
     if config["normalize_datasets"]:
         dfs = [df.reset_index() for df in dfs]
 
     df = pd.concat(dfs, keys=keys, names=["algorithm", "task"], verify_integrity=True)
-    # df = pd.concat(dfs, keys=keys, verify_integrity=True)
     df = df[metrics.keys()]
 
     # Only for empty complexity otherwise comment out
@@ -252,7 +220,6 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
     final_output_dir = f"{config['output_directory']}"
 
-    check_and_create_dir(final_output_dir, "ttest")
     df = None
     df = load_data(config)
     pd.options.mode.chained_assignment = None
@@ -267,6 +234,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
         # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth if metrics[metric] == "MSE" else linewidth, 5), dpi=72)
         # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth, 5), dpi=72)
         fig, ax = plt.subplots(nrows=3, ncols=2, figsize=(textwidth, 5), dpi=72)
+        ax = ax.ravel()
         for i, task in enumerate(config["datasets"]):
             if metric not in df:
                 continue
@@ -324,7 +292,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
             #              bins=100,
             #              ax=ax[i],
             #              stat="density")
-            ax_val = ax[int(i/2)][i % 2]
+            ax_val = ax[i]
             sns.lineplot(data=data, x=xlabel, y=ylabel, ax=ax_val)
             ax_val.fill_between(x, 0, y, alpha=0.33)
             ax_val.set_xlabel("")
@@ -377,11 +345,14 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                       if metrics[metric] == "MSE"
                       else (f"COMP({cand2_name}) - COMP({cand1_name})\n"))
             ylabel = "Density"
-            fig.text(0.5, 0.001, xlabel, ha='center')
+            fig.text(0.5, -0.01, xlabel, ha='center')
             fig.text(0.01, 0.5, ylabel, ha='center', rotation=90)
 
+            if len(config["datasets"]) % 2 != 0:
+                ax[-1].set_visible(False)
+
             fig.align_ylabels()
-            fig.savefig(f"{final_output_dir}/ttest/ttest_{cand1_name}_{cand2_name}_{nname}.pdf", dpi=fig.dpi, bbox_inches="tight")
+            fig.savefig(f"{final_output_dir}/ttest_{cand1_name}_{cand2_name}_{nname}.pdf", dpi=fig.dpi, bbox_inches="tight")
 
     # https://stackoverflow.com/a/67575847/6936216
     hdis_ = hdis
