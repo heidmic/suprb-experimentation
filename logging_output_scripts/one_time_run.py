@@ -151,6 +151,18 @@ mixing_calvo = {
     "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "RouletteWheel & Experience Cap (dim)"
 }
 
+mixing_calvo_subset = {
+    "r:3; f:NBestFitness; -e:ExperienceCalculation": r"$l$ Best",
+    "r:3; f:NBestFitness; -e:CapExperience/": r"$l$ Best & Experience Cap",
+    "r:3; f:NBestFitness; -e:CapExperienceWithDimensionality": r"$l$ Best & Experience Cap (dim)",
+    "r:3; f:NRandom; -e:ExperienceCalculation": r"$l$ Random",
+    "r:3; f:NRandom; -e:CapExperience/": r"$l$ Random & Experience Cap",
+    "r:3; f:NRandom; -e:CapExperienceWithDimensionality": r"$l$ Random & Experience Cap (dim)",
+    "r:3; f:RouletteWheel; -e:ExperienceCalculation": "RouletteWheel",
+    "r:3; f:RouletteWheel; -e:CapExperience/": "RouletteWheel & Experience Cap",
+    "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "RouletteWheel & Experience Cap (dim)"
+}
+
 mixing = []
 mixing.append(mixing1)
 mixing.append(mixing2)
@@ -179,7 +191,7 @@ mixing.append(mixing12)
 #     df[mse] *= -1
 #     # df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
 #     # df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
-#     df.to_csv(f"{dataset}_all.csv", index=False)
+#     df.to_csv(f"mlruns_csv/RBML/{dataset}_all.csv", index=False)
 # exit()
 
 saga = {
@@ -249,6 +261,26 @@ if __name__ == '__main__':
             ttest(latex=False, cand1=" NS True", cand2="ES Tuning", cand1_name="NS-P", cand2_name="ES")
             ttest(latex=False, cand1=" NS False", cand2="ES Tuning", cand1_name="NS-G", cand2_name="ES")
 
+            ttest(latex=False, cand1="NSLC False", cand2="NSLC True", cand1_name="NSLC-G", cand2_name="NSLC-P")
+            ttest(latex=False, cand1="MCNS True", cand2="NSLC True", cand1_name="MCNS-P", cand2_name="NSLC-P")
+            ttest(latex=False, cand1="MCNS False", cand2="NSLC True", cand1_name="MCNS-G", cand2_name="NSLC-P")
+            ttest(latex=False, cand1=" NS True", cand2="NSLC True", cand1_name="NS-P", cand2_name="NSLC-P")
+            ttest(latex=False, cand1=" NS False", cand2="NSLC True", cand1_name="NS-G", cand2_name="NSLC-P")
+
+            ttest(latex=False, cand1="MCNS True", cand2="NSLC False", cand1_name="MCNS-P", cand2_name="NSLC-G")
+            ttest(latex=False, cand1="MCNS False", cand2="NSLC False", cand1_name="MCNS-G", cand2_name="NSLC-G")
+            ttest(latex=False, cand1=" NS True", cand2="NSLC False", cand1_name="NS-P", cand2_name="NSLC-G")
+            ttest(latex=False, cand1=" NS False", cand2="NSLC False", cand1_name="NS-G", cand2_name="NSLC-G")
+
+            ttest(latex=False, cand1="MCNS False", cand2="MCNS True", cand1_name="MCNS-G", cand2_name="MCNS-P")
+            ttest(latex=False, cand1=" NS True", cand2="MCNS True", cand1_name="NS-P", cand2_name="MCNS-P")
+            ttest(latex=False, cand1=" NS False", cand2="MCNS True", cand1_name="NS-G", cand2_name="MCNS-P")
+
+            ttest(latex=False, cand1=" NS True", cand2="MCNS False", cand1_name="NS-P", cand2_name="MCNS-G")
+            ttest(latex=False, cand1=" NS False", cand2="MCNS False", cand1_name="NS-G", cand2_name="MCNS-G")
+
+            ttest(latex=False, cand1=" NS False", cand2=" NS True", cand1_name="NS-G", cand2_name="NS-P")
+
         if setting[0] == "diss-graphs/graphs/SC":
             ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="RS", cand2_name="GA")
             ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2="GeneticAlgorithm", cand1_name="ABC", cand2_name="GA")
@@ -257,8 +289,10 @@ if __name__ == '__main__':
             ttest(latex=False, cand1="ParticleSwarmOptimization", cand2="GeneticAlgorithm", cand1_name="PSW", cand2_name="GA")
 
         if setting[0] == "diss-graphs/graphs/MIX":
-            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
+            if setting[4] != "mlruns_csv/MIX/subset_":
+                ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
+                    cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
+                
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
                   cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap", cand2_name="Base")
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
@@ -271,12 +305,20 @@ if __name__ == '__main__':
             ttest(latex=False, cand1="s:saga2", cand2="s:ga", cand1_name="SAGA2", cand2_name="GA")
             ttest(latex=False, cand1="s:saga3", cand2="s:ga", cand1_name="SAGA3", cand2_name="GA")
             ttest(latex=False, cand1="s:sas", cand2="s:ga", cand1_name="SAGA4", cand2_name="GA")
+            ttest(latex=False, cand1="s:saga1", cand2="s:saga2", cand1_name="SAGA1", cand2_name="SAGA2")
+            ttest(latex=False, cand1="s:saga1", cand2="s:saga3", cand1_name="SAGA1", cand2_name="SAGA3")
+            ttest(latex=False, cand1="s:saga1", cand2="s:sas", cand1_name="SAGA1", cand2_name="SAGA4")
+            ttest(latex=False, cand1="s:saga2", cand2="s:saga3", cand1_name="SAGA2", cand2_name="SAGA3")
+            ttest(latex=False, cand1="s:saga2", cand2="s:sas", cand1_name="SAGA2", cand2_name="SAGA4")
+            ttest(latex=False, cand1="s:saga3", cand2="s:sas", cand1_name="SAGA3", cand2_name="SAGA4")
+
 
     rd = ["diss-graphs/graphs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
     sc = ["diss-graphs/graphs/SC", solution_composition, "Solution Composition", False, "mlruns_csv/SC"]
     xcsf = ["diss-graphs/graphs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]
     adeles = ["diss-graphs/graphs/ADELES", adel, "Rule Discovery", False, "mlruns"]
     mix_calvo = ["diss-graphs/graphs/MIX", mixing_calvo, "Mixing Variant", True, "mlruns_csv/MIX"]
+    mix_calvo_sub = ["diss-graphs/graphs/MIX/subset", mixing_calvo_subset, "Mixing Variant", True, "mlruns_csv/MIX"]
     sagas = ["diss-graphs/graphs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
 
     # setting = rd
@@ -286,6 +328,9 @@ if __name__ == '__main__':
     # run_main()
 
     # setting = mix_calvo
+    # run_main()
+
+    # setting = mix_calvo_sub
     # run_main()
 
     setting = xcsf
