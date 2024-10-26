@@ -191,7 +191,7 @@ mixing.append(mixing12)
 #     df[mse] *= -1
 #     # df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
 #     # df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
-#     df.to_csv(f"mlruns_csv/RBML/{dataset}_all.csv", index=False)
+#     df.to_csv(f"mlruns_csv/SC/{dataset}_all.csv", index=False)
 # exit()
 
 saga = {
@@ -239,7 +239,8 @@ if __name__ == '__main__':
             all_runs_df = mlflow.search_runs(search_all_experiments=True)
             filter_runs(all_runs_df)
 
-        # create_plots()
+        create_plots()
+        # exit()
         # create_summary_csv()
 
         calvo(ylabel=setting[2])
@@ -291,8 +292,8 @@ if __name__ == '__main__':
         if setting[0] == "diss-graphs/graphs/MIX":
             if setting[4] != "mlruns_csv/MIX/subset_":
                 ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                    cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
-                
+                      cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
+
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
                   cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap", cand2_name="Base")
             ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
@@ -312,7 +313,6 @@ if __name__ == '__main__':
             ttest(latex=False, cand1="s:saga2", cand2="s:sas", cand1_name="SAGA2", cand2_name="SAGA4")
             ttest(latex=False, cand1="s:saga3", cand2="s:sas", cand1_name="SAGA3", cand2_name="SAGA4")
 
-
     rd = ["diss-graphs/graphs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
     sc = ["diss-graphs/graphs/SC", solution_composition, "Solution Composition", False, "mlruns_csv/SC"]
     xcsf = ["diss-graphs/graphs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]
@@ -324,6 +324,9 @@ if __name__ == '__main__':
     # setting = rd
     # run_main()
 
+    setting = sc
+    run_main()
+
     # setting = sagas
     # run_main()
 
@@ -333,8 +336,8 @@ if __name__ == '__main__':
     # setting = mix_calvo_sub
     # run_main()
 
-    setting = xcsf
-    run_main()
+    # setting = xcsf
+    # run_main()
 
     exit()
 

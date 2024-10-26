@@ -1,4 +1,4 @@
-from logging_output_scripts.utils import get_normalized_df, check_and_create_dir, get_dataframe, get_all_runs, get_df
+from logging_output_scripts.utils import get_csv_df, get_normalized_df, check_and_create_dir, get_dataframe, get_all_runs, get_df
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -44,10 +44,9 @@ def create_plots():
 
     final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
-    
-    
+
     for problem in config['datasets']:
-    # for yy in [0]:
+        # for yy in [0]:
         first = True
         res_var = 0
         counter = 0
@@ -55,7 +54,10 @@ def create_plots():
 
         for heuristic, renamed_heuristic in config['heuristics'].items():
             # fold_df = get_normalized_df(heuristic)
-            fold_df = get_df(heuristic, problem)
+            if config["data_directory"] == "mlruns":
+                fold_df = get_df(heuristic, problem)
+            else:
+                fold_df = get_csv_df(heuristic, problem)
             if fold_df is not None:
                 counter += 1
                 name = [renamed_heuristic] * fold_df.shape[0]
@@ -75,7 +77,7 @@ def create_plots():
             res_var[mse][-len(scaled_var):] = scaled_var
 
         # Invert values since they are stored as negatives
-        if not config["normalize_datasets"]:
+        if not config["normalize_datasets"] and config["data_directory"] == "mlruns":
             res_var[mse] *= -1
 
         def ax_config(axis, y_label):
@@ -91,19 +93,19 @@ def create_plots():
         # problem = "normalized"
 
         ################### MSE ###########################
-        plots = {#"violin": sns.violinplot,
-                 "swarm": sns.swarmplot,
-                #  "box": sns.boxplot
-                 }
-        
+        plots = {  # "violin": sns.violinplot,
+            "swarm": sns.swarmplot,
+            #  "box": sns.boxplot
+        }
+
         y_axis_label = {"MSE": mse,
                         "Complexity": complexity
                         }
-        
+
         # y_axis_label = {"Normalized MSE": mse,
         #                 "Normalized Complexity": complexity
         #                 }
-        
+
         f_index = heuristic.find('f:')
         result = heuristic[f_index+2:]
         # result = result.replace('; -e:', '')
