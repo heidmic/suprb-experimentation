@@ -72,18 +72,18 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.option('-i', '--n_iter', type=click.INT, default=32)
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
 def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: int, problem: str):
-    # X = pd.read_parquet('new_data/features_preselection.parq')
-    # y = pd.read_parquet('new_data/target.parq').iloc[:, 0]
+    X = pd.read_parquet('new_data/features_preselection.parq')
+    y = pd.read_parquet('new_data/target.parq').iloc[:, 0]
 
-    # X = X.values
-    # y = y.values.flatten()
+    X = X.values
+    y = y.values.flatten()
 
-    # if scaler_type:
-    #     scaler = MinMaxScaler(feature_range=(-1, 1))
-    #     X = scaler.fit_transform(X)
-    # else:
-    #     X, y = scale_X_y(X, y)
-    #     X, y = shuffle(X, y, random_state=random_state)
+    if scaler_type:
+        scaler = MinMaxScaler(feature_range=(-1, 1))
+        X = scaler.fit_transform(X)
+    else:
+        X, y = scale_X_y(X, y)
+        X, y = shuffle(X, y, random_state=random_state)
 
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
