@@ -7,7 +7,8 @@ for dset in ${datasets[@]}; do
 	############################ SOLUTION COMPOSITON ################################
 
 	export experiment="runs/solution_composition/solution_composition_tuning_updated.py"
-	optimizers=('GeneticAlgorithm' 'ArtificialBeeColonyAlgorithm' 'AntColonyOptimization' 'GreyWolfOptimizer' 'ParticleSwarmOptimization' "RandomSearch")
+	# optimizers=('GeneticAlgorithm' 'ArtificialBeeColonyAlgorithm' 'AntColonyOptimization' 'GreyWolfOptimizer' 'ParticleSwarmOptimization' "RandomSearch")
+	optimizers=('GeneticAlgorithm')
 
 	for opt in ${optimizers[@]}; do 
 		export optimizer=$opt

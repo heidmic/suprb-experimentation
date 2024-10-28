@@ -45,6 +45,16 @@ solution_composition = {
     "ParticleSwarmOptimization": "PSW"
 }
 
+sc_mix_rd = solution_composition = {
+    "ES Tuning": "GA",
+    "RandomSearch": "RS",
+    "ArtificialBeeColonyAlgorithm": "ABC",
+    "AntColonyOptimization": "ACO",
+    "GreyWolfOptimizer": "GWO",
+    "ParticleSwarmOptimization": "PSW"
+}
+
+
 rule_discovery = {
     "ES Tuning": "ES",
     "RS Tuning": "RS",
@@ -283,11 +293,12 @@ if __name__ == '__main__':
             ttest(latex=False, cand1=" NS False", cand2=" NS True", cand1_name="NS-G", cand2_name="NS-P")
 
         if setting[0] == "diss-graphs/graphs/SC":
-            ttest(latex=False, cand1="RandomSearch", cand2="GeneticAlgorithm", cand1_name="RS", cand2_name="GA")
-            ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2="GeneticAlgorithm", cand1_name="ABC", cand2_name="GA")
-            ttest(latex=False, cand1="AntColonyOptimization", cand2="GeneticAlgorithm", cand1_name="ACO", cand2_name="GA")
-            ttest(latex=False, cand1="GreyWolfOptimizer", cand2="GeneticAlgorithm", cand1_name="GWO", cand2_name="GA")
-            ttest(latex=False, cand1="ParticleSwarmOptimization", cand2="GeneticAlgorithm", cand1_name="PSW", cand2_name="GA")
+            ga_switch = "ES Tuning"  # "GeneticAlgorithm"
+            ttest(latex=False, cand1="RandomSearch", cand2=ga_switch, cand1_name="RS", cand2_name="GA")
+            ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2=ga_switch, cand1_name="ABC", cand2_name="GA")
+            ttest(latex=False, cand1="AntColonyOptimization", cand2=ga_switch, cand1_name="ACO", cand2_name="GA")
+            ttest(latex=False, cand1="GreyWolfOptimizer", cand2=ga_switch, cand1_name="GWO", cand2_name="GA")
+            ttest(latex=False, cand1="ParticleSwarmOptimization", cand2=ga_switch, cand1_name="PSW", cand2_name="GA")
 
         if setting[0] == "diss-graphs/graphs/MIX":
             if setting[4] != "mlruns_csv/MIX/subset_":
@@ -320,12 +331,13 @@ if __name__ == '__main__':
     mix_calvo = ["diss-graphs/graphs/MIX", mixing_calvo, "Mixing Variant", True, "mlruns_csv/MIX"]
     mix_calvo_sub = ["diss-graphs/graphs/MIX/subset", mixing_calvo_subset, "Mixing Variant", True, "mlruns_csv/MIX"]
     sagas = ["diss-graphs/graphs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
+    sc_rd = ["diss-graphs/graphs/SC", sc_mix_rd, "Solution Composition", False, "mlruns_csv/SC"]
 
     # setting = rd
     # run_main()
 
-    setting = sc
-    run_main()
+    # setting = sc
+    # run_main()
 
     # setting = sagas
     # run_main()
@@ -338,6 +350,9 @@ if __name__ == '__main__':
 
     # setting = xcsf
     # run_main()
+
+    setting = sc_rd
+    run_main()
 
     exit()
 
