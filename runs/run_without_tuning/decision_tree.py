@@ -35,23 +35,20 @@ def run():
     # X = scaler.fit_transform(X)
     # y = y.values.flatten()
 
-    
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    
     # estimator = DecisionTreeRegressor(random_state=random_state)
-    
 
-    estimator = DecisionTreeRegressor(random_state=random_state, 
-                                      criterion="friedman_mse", 
-                                      max_depth=5, 
-                                      min_samples_leaf=10, 
-                                    #   max_leaf_nodes=500,
+    estimator = DecisionTreeRegressor(random_state=random_state,
+                                      criterion="friedman_mse",
+                                      # max_depth=5,
+                                      min_samples_leaf=10,
+                                      #   max_leaf_nodes=500,
                                       )
 
     experiment_name = f'Decision Tree'
-    jobs = 1
+    jobs = 8
 
     print(experiment_name)
     experiment = Experiment(name=experiment_name, verbose=10)
@@ -62,8 +59,6 @@ def run():
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10,)
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs)
-
-    breakpoint()
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)

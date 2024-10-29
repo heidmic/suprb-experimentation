@@ -48,6 +48,7 @@ def try_log_dict(d: dict, name: str):
         warnings.warn(f"Logging of {name} as json has failed with Error (other than TypeErrors)")
         print(d)
 
+
 def log_experiment(experiment: Experiment):
     _log_experiment(experiment, parent_name='', depth=0)
 
@@ -86,9 +87,10 @@ def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dic
                                           nested=True) as cv_run:
                         log_run(estimator)
                         log_run_result(result)
+                        print("Depth:", estimator.get_depth())
 
                         mlflow.set_tag('fold', True)
-
+                print("--------------")
                 # Log cv average
                 with mlflow.start_run(run_name=f"{run_name}.averaged_cv", nested=True) as average_run:
                     average_results = {key: np.mean(value) for key, value in experiment.results_.items()}
