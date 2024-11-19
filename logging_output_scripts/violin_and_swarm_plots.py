@@ -124,6 +124,8 @@ def create_plots():
         for name, function in plots.items():
             for y_label, y_axis in y_axis_label.items():
                 fig, ax = plt.subplots(dpi=400)
+                print(res_var)
+                print(y_axis)
                 ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
                 ax_config(ax, y_label)
                 if problem == "normalized":

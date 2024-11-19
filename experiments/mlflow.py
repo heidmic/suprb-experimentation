@@ -88,6 +88,7 @@ def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dic
                         log_run(estimator)
                         log_run_result(result)
                         print("Depth:", estimator.get_depth())
+                        print("Leaves:", estimator.get_n_leaves())
 
                         mlflow.set_tag('fold', True)
                 print("--------------")

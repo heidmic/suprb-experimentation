@@ -103,15 +103,18 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
 
     estimator = SupRBWrapper(rule_generation__mutation__sigma=2.53261854608031, rule_generation__delay=134,
                              rule_generation__init__fitness__alpha=0.043582602456505595)
+
+    jobs = 8
+
     print(experiment_name)
     experiment = Experiment(name=experiment_name, verbose=10)
 
-    random_states = np.random.SeedSequence(random_state).generate_state(3)
-    experiment.with_random_states(random_states, n_jobs=3)
+    random_states = np.random.SeedSequence(random_state).generate_state(jobs)
+    experiment.with_random_states(random_states, n_jobs=jobs)
 
     evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10,)
 
-    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=10, test_size=0.25, random_state=random_state), n_jobs=10)
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)

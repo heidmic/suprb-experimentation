@@ -31,6 +31,10 @@ def run():
     X = pd.read_parquet('new_data/features_preselection.parq')
     y = pd.read_parquet('new_data/target.parq').iloc[:, 0].to_numpy()
 
+    print(X.columns)
+    print("Dimensions", len(X.columns))
+    # print(len(X.values))
+    # exit()
     # scaler = MinMaxScaler(feature_range=(-1, 1))
     # X = scaler.fit_transform(X)
     # y = y.values.flatten()
@@ -42,7 +46,7 @@ def run():
 
     estimator = DecisionTreeRegressor(random_state=random_state,
                                       criterion="friedman_mse",
-                                      # max_depth=5,
+                                      max_depth=5,
                                       min_samples_leaf=10,
                                       #   max_leaf_nodes=500,
                                       )
