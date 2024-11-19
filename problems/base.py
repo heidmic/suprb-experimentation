@@ -15,8 +15,6 @@ def scale_X_y(X: np.ndarray, y: np.ndarray, feature_range: tuple = (-1, 1), retu
     X = X_scaler.fit_transform(X)
     y = y_scaler.fit_transform(y.reshape((-1, 1))).reshape((-1,))
 
-    breakpoint()
-
     if return_X_y:
         return X, y
     else:
