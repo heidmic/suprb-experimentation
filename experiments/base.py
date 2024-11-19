@@ -86,12 +86,6 @@ class Experiment:
                 self.estimators_, result = evaluation(params=params, **kwargs)
                 self.results_ = Bunch(**result)
                 self.log(f"Evaluation results were {self.results_}", reason=f'{nested}eval', priority=5)
-                print(dir(self.results_))
-                print(self.estimators_[0].score)
-                try:
-                    print(self.estimators_[0].elitist_)
-                except Exception as e:
-                    print("This estimator doesn't contain an elitist!")
 
                 if not os.path.exists('output_json'):
                     os.makedirs('output_json')
