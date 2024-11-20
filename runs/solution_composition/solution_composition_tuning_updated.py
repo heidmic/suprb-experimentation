@@ -153,8 +153,6 @@ def run(problem: str, optimizer: str):
             # GA base
             params.solution_composition = getattr(suprb.optimizer.solution.ga, params.solution_composition)()
 
-            # params.solution_composition__n_iter = trial.suggest_int('solution_composition__n_iter', 16, 64)
-            # params.solution_composition__population_size = trial.suggest_int('solution_composition__population_size', 16, 64)
             params.solution_composition__elitist_ratio = trial.suggest_float('solution_composition__elitist_ratio', 0.0, 0.3)
 
             # GA init
@@ -163,29 +161,6 @@ def run(problem: str, optimizer: str):
 
             if isinstance(params.solution_composition__init, suprb.solution.initialization.RandomInit):
                 params.solution_composition__init__p = trial.suggest_float('solution_composition__init__p', 0.3, 0.8)
-
-            # params.solution_composition__init__fitness = trial.suggest_categorical('solution_composition__init__fitness', ['PseudoBIC', 'ComplexityEmary', 'ComplexityWu'])  # nopep8
-            # params.solution_composition__init__fitness = getattr(suprb.solution.fitness, params.solution_composition__init__fitness)()
-
-            # Don't do this. It will kill your fitness because complexity = 0
-            # if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
-            #     params.solution_composition__init__fitness__alpha = trial.suggest_float('solution_composition__init__fitness__alpha', 0.0, 1.0) # nopep8
-
-            # params.solution_composition__init__mixing__experience_weight = trial.suggest_float(
-            #     'solution_composition__init__mixing__experience_weight', 0.0, 1.0)
-
-            # params.solution_composition__init__mixing__experience_calculation = trial.suggest_categorical('solution_composition__init__mixing__experience_calculation', ['ExperienceCalculation', 'CapExperience', 'CapExperienceWithDimensionality'])  # nopep8
-            # params.solution_composition__init__mixing__experience_calculation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__experience_calculation)()  # nopep8
-
-            # if isinstance(params.solution_composition__init__mixing__experience_calculation, suprb.solution.mixing_model.CapExperienceWithDimensionality):
-            #     params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 2, 5)  # nopep8
-            # else:
-            #     params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float('solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)  # nopep8
-
-            # params.solution_composition__init__mixing__filter_subpopulation = trial.suggest_categorical('solution_composition__init__mixing__filter_subpopulation', ['FilterSubpopulation', 'NBestFitness', 'NRandom', 'RouletteWheel'])  # nopep8
-            # params.solution_composition__init__mixing__filter_subpopulation = getattr(suprb.solution.mixing_model, params.solution_composition__init__mixing__filter_subpopulation)()  # nopep8
-
-            # params.solution_composition__init__mixing__filter_subpopulation__rule_amount = trial.suggest_int('solution_composition__init__mixing__filter_subpopulation__rule_amount', 4, 10)  # nopep8
 
             # GA selection
             params.solution_composition__selection = trial.suggest_categorical('solution_composition__selection', ['Random', 'RouletteWheel', 'LinearRank', 'Tournament'])  # nopep8

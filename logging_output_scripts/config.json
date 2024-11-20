@@ -1,1 +1,22 @@
-{"data_directory": "mlruns_csv/SC_only_GA", "output_directory": "diss-graphs/graphs/SC_only_GA", "normalize_datasets": false, "heuristics": {"GeneticAlgorithm": "GA"}, "datasets": {"combined_cycle_power_plant": "Combined Cycle Power Plant", "airfoil_self_noise": "Airfoil Self-Noise", "concrete_strength": "Concrete Strength", "energy_cool": "Energy Efficiency Cooling", "protein_structure": "Physiochemical Properties of Protein Tertiary Structure", "parkinson_total": "Parkinson's Telemonitoring"}}
+{
+    "data_directory": "mlruns",
+    "output_directory": "logging_output_scripts/outputs",
+    "normalize_datasets": false,
+    "heuristics": {
+        "s:ga": "GA",
+        "s:saga1": "SAGA1",
+        "s:saga2": "SAGA2",
+        "s:saga3": "SAGA3"
+    },
+    "datasets": {
+        "concrete_strength": "Concrete Strength",
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "protein_structure": "Protein Structure",
+        "parkinson_total": "Parkinsons Telemonitoring"
+    },
+    "metrics": {
+        "elitist_complexity": "Komplexitaet",
+        "elitist_error": "MSE"
+    }
+}
