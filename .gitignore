@@ -5,6 +5,11 @@ mlruns*
 .7z
 *.csv
 logging_output_scripts/outputs/
+
+# SLURM
+output/**
+*/output/**
+
 # PyCharm
 .idea
 
