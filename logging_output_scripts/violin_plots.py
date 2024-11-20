@@ -2,9 +2,7 @@ from logging_output_scripts.utils import check_and_create_dir, get_dataframe, ge
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
-import json
-from sklearn.preprocessing import MinMaxScaler
+from logging_output_scripts.utils import get_dataframe, create_output_dir, config
 
 
 """
@@ -12,7 +10,6 @@ Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
 sns.set_style("whitegrid")
-sns.set(rc={"figure.dpi":300, 'savefig.dpi':300})
 sns.set_theme(style="whitegrid",
               font="Times New Roman",
               font_scale=1,
@@ -22,71 +19,63 @@ sns.set_theme(style="whitegrid",
                   "ps.fonttype": 42
               })
 
-plt.rcParams['font.family'] = 'serif'
-plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-plt.tight_layout()
+final_output_dir = f"{config['output_directory']}/violin_plots"
+create_output_dir(config['output_directory'])
+create_output_dir(final_output_dir)
 
 
-def create_plots(metricname = 'test_neg_mean_squared_error'):
-    metric = 'metrics.' + metricname
-    with open('logging_output_scripts/config.json') as f:
-        config = json.load(f)
-
-    final_output_dir = f"{config['output_directory']}"
-
-    output_dir = "violin_plots"
-    check_and_create_dir(final_output_dir, output_dir)
-
-    final_output_dir = f"{config['output_directory']}"
-    scaler = MinMaxScaler()
-    
+def create_violin_plots():
     for problem in config['datasets']:
-        first = True
         res_var = 0
-        counter = 0
-        for heuristic, renamed_heuristic in config['heuristics'].items():
-            fold_df = get_df(heuristic, problem)
+        first = True
+        for heuristic in config['heuristics']:
+            fold_df = get_dataframe(heuristic, problem)
             if fold_df is not None:
-                counter += 1
-                name = [renamed_heuristic] * fold_df.shape[0]
-                current_res = fold_df.assign(Used_Representation=name)
+                name = []
+                for x in range(fold_df.shape[0]):
+                    if heuristic == "NS" or heuristic == "MCNS" or heuristic == "NSLC":
+                        heuristic += "-G"
+                    if heuristic == "ES":
+                        heuristic = "SupRB"
+                    name.append(heuristic)
+                # Adds additional column for plotting
                 if first:
+                    res_var = fold_df.assign(Used_Representation=name)
+                    if "metrics.test_neg_mean_squared_error" in res_var.keys():
+                        res_var["test_neg_mean_squared_error"] = res_var.pop("metrics.test_neg_mean_squared_error")
                     first = False
-                    res_var = current_res
                 else:
-                    # Adds additional column for plotting
+                    current_res = fold_df.assign(Used_Representation=name)
+                    if "metrics.test_neg_mean_squared_error" in current_res.keys():
+                        current_res["test_neg_mean_squared_error"] = current_res.pop(
+                            "metrics.test_neg_mean_squared_error")
                     res_var = pd.concat([res_var, current_res])
 
-                print(f"Done for {problem} with {renamed_heuristic}")
-
-        if counter and config["normalize_datasets"]:
-            reshaped_var = np.array(res_var[metric])[-counter*64:].reshape(counter, -1) * -1
-            scaler.fit(reshaped_var)
-            scaled_var = scaler.transform(reshaped_var)
-            scaled_var = scaled_var.reshape(1, -1)[0]
-            res_var[metric][-len(scaled_var):] = scaled_var
+                print(f"Done for {problem} with {heuristic}")
 
         # Invert values since they are stored as negatives
-        if not config["normalize_datasets"]:
-            if metric == 'metrics.test_neg_mean_squared_error':
-                res_var[metric] *= -1
-
-        def ax_config(axis):
-            ax.set_xlabel('Optimierer')
-            if metric == 'metrics.test_neg_mean_squared_error':
-                ax.set_ylabel('MSE')
-            else:
-                ax.set_ylabel('Komplexitaet')
-            ax.set_box_aspect(1)
-
-        problem = problem if not config["normalize_datasets"] else "normalized"
+        res_var["test_neg_mean_squared_error"] *= -1
 
         # Store violin-plots of all models in one plot
         fig, ax = plt.subplots()
-        ax = sns.violinplot(x='Used_Representation', y=metric, data=res_var, density_norm="width", hue='Used_Representation')
-        ax_config(ax)
-        fig.savefig(f"{final_output_dir}/{output_dir}/{problem}_{metricname}.png")
+
+        # ax = sns.violinplot(x='Used_Representation', y="test_neg_mean_squared_error",
+        #                     data=res_var, scale="width", scale_hue=False)
+        ax = sns.swarmplot(x='Used_Representation', y="test_neg_mean_squared_error", data=res_var, size=2)
+
+        ax.set_xlabel('Estimator', weight="bold")
+        ax.set_ylabel('MSE', weight="bold")
+        title_dict = {"concrete_strength": "Concrete Strength",
+                      "combined_cycle_power_plant": "Combined Cycle Power Plant",
+                      "airfoil_self_noise": "Airfoil Self Noise",
+                      "energy_cool": "Energy Efficiency Cooling"}
+        ax.set_title(title_dict[problem], style="italic")
+
+        ax.set_box_aspect(1)
+
+        # fig.savefig(f"{final_output_dir}/{problem}_swarm.png", dpi=500)
+        fig.savefig(f"{final_output_dir}/{problem}_violin.png", dpi=500)
 
 
 if __name__ == '__main__':
-    create_plots()
+    create_violin_plots()

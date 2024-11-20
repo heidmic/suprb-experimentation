@@ -7,9 +7,12 @@ from typing import Union, Any, Optional, Callable
 from joblib import Parallel, delayed
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
+import os
 
 from experiments.evaluation import Evaluation
 from experiments.parameter_search import ParameterTuner
+
+import suprb.json as suprb_json
 
 
 def product_dict(**kwargs):
@@ -83,6 +86,17 @@ class Experiment:
                 self.estimators_, result = evaluation(params=params, **kwargs)
                 self.results_ = Bunch(**result)
                 self.log(f"Evaluation results were {self.results_}", reason=f'{nested}eval', priority=5)
+
+                if not os.path.exists('output_json'):
+                    os.makedirs('output_json')
+
+                try:
+                    i = 1
+                    for score in self.estimators_:
+                        suprb_json.dump(score, f"output_json/{self.name}_config_{i}.json")
+                        i += 1
+                except:
+                    print("JSON dump did not work! Continue eval!")
 
             end = datetime.now()
             delta = end - start
@@ -163,7 +177,7 @@ class Experiment:
             new_experiments = []
             for i, random_state in enumerate(random_states):
                 new_experiment = self._clone()
-                new_experiment.name = f'RandomState:{i}:{random_state}'
+                new_experiment.name = f'{self.name}:{i}:{random_state}'
                 new_experiment.params |= {'random_state': random_state}
                 new_experiments.append(new_experiment)
             self.experiments = new_experiments

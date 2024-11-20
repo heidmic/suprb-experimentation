@@ -19,8 +19,8 @@ def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: 
     target = frame[target_column]
 
     if not as_frame:
-        data = data.to_numpy(dtype=np.float)
-        target = target.to_numpy(dtype=np.float)
+        data = data.to_numpy(dtype=float)
+        target = target.to_numpy(dtype=float)
 
     if return_X_y:
         return data, target

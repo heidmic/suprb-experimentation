@@ -4,6 +4,7 @@ import numpy as np
 import optuna
 from sklearn.base import BaseEstimator
 from sklearn.utils import Bunch
+from datetime import datetime
 
 from .base import ParameterTuner
 
@@ -22,6 +23,7 @@ class OptunaTuner(ParameterTuner):
             callback: Union[Callable, list[Callable]] = None,
             tuner: str = 'tpe',
             timeout: float = None,
+            study_name: str = "NoName",
             **kwargs
     ):
         super().__init__(
@@ -35,6 +37,7 @@ class OptunaTuner(ParameterTuner):
         self.callback = callback
         self.tuner = tuner
         self.timeout = timeout
+        self.study_name = study_name
 
     def get_params(self):
         return super().get_params() | self._get_params(['timeout'])
@@ -55,7 +58,11 @@ class OptunaTuner(ParameterTuner):
 
         sampler = self._get_optimizer(self.tuner)(seed=self.random_state)
 
-        study = optuna.create_study(sampler=sampler)
+        storage_name = f'sqlite:///suprb_optuna_{datetime.now().strftime("%Y-%m-%d")}.db'
+        study = optuna.create_study(sampler=sampler,
+                                    study_name=self.study_name,
+                                    # storage=storage_name,
+                                    load_if_exists=True)
 
         study.optimize(
             func=objective,

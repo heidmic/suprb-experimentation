@@ -1,14 +1,14 @@
 # MlFlow
 **/mlruns/**
 mlruns/**
-mlruns_pt/**
+mlruns*
+.7z
+*.csv
+logging_output_scripts/outputs/
 
-# Output
-**/output/**
-**/outputs/**
-
-# Profiling Output
-/profiling_data
+# SLURM
+output/**
+*/output/**
 
 # PyCharm
 .idea

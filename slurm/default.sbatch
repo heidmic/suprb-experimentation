@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
-#SBATCH --time=48:00:00
-#SBATCH --partition=cpu
-#SBATCH --output=output/output-%j.txt
-#SBATCH --cpus-per-task=5
-#SBATCH --mem=30G
 
-JOB_DIR=/data/oc-compute03/$USER/suprb-experimentation
-srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
-python $JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID -r $rules_amount -f $filter_subpopulation -e $experience_calculation"
+#SBATCH --job-name="suprb"
+#SBATCH --partition=epyc
+#SBATCH --time=120:00:00
+#SBATCH --output=output/output-%j.txt
+#SBATCH --cpus-per-task=8 
+#SBATCH --mem-per-cpu=5G
+
+module purge
+module load anaconda
+conda activate venv
+
+JOB_DIR=/hpc/gpfs2/home/u/sraroman/suprb-experimentation 
+export PYTHONPATH=${PYTHONPATH}:${JOB_DIR}
+srun python $JOB_DIR/$experiment -p $dataset -o $optimizer
