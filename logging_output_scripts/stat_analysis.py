@@ -118,6 +118,16 @@ def cli():
 
 
 def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, ylabel=None):
+
+    sns.set_theme(style="whitegrid",
+                  font="Times New Roman",
+                  font_scale=1.6,
+                  rc={
+                      "lines.linewidth": 1,
+                      "pdf.fonttype": 42,
+                      "ps.fonttype": 42
+                  })
+
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
