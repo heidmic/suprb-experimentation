@@ -6,6 +6,7 @@
 #SBATCH --mem=20G
 #SBATCH --nodelist=oc-compute02
 
+# Example assumes that we exported a variable for the dataset and which solution composition optimizer to use
 JOB_DIR=/data/oc-compute02/$USER/suprb-experimentation
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
 python $JOB_DIR/$experiment -p $dataset -s $solution_comp -j $SLURM_JOB_ID"
