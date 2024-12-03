@@ -7,4 +7,4 @@
 
 JOB_DIR=/data/oc-compute03/wehrfabi/suprb-experimentation
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
-python $JOB_DIR/$experiment"
+python $JOB_DIR/runs/examples/minimal.py"
