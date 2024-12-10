@@ -117,121 +117,18 @@ def create_plots():
                 ax.set_xticks(tick_positions)
                 ax.set_xticklabels(new_labels)
 
-            if config["data_directory"] == "mlruns_csv/SC" or config["data_directory"] == "mlruns_csv/SAGA":
-                x_lab = "SC method"
-
-            if config["data_directory"] == "mlruns_csv/MIX":
-                f_index = heuristic.find('f:')
-                result = heuristic[f_index+2:]
-                result = result.replace('; -e:', '')
-                result = result.replace('/', '')
-                result = result.replace('CapExperienceWithDimensionality', ' & Experience Cap (dim)')
-                result = result.replace('CapExperience', ' & Experience Cap')
-                result = result.replace('FilterSubpopulation', '')
-                result = result.replace('ExperienceCalculation', '')
-                result = result.replace('NBestFitness', r"l Best")
-                result = result.replace('NRandom', r"l Random")
-                if result == "":
-                    result = "Base"
-                if result[1] == "&":
-                    result = result[2:]
-
-                x_lab = "Number of rules participating"
-                ax.set_title(result, style="italic", fontsize=14)
-
             ax.set_xlabel(x_lab, weight="bold", labelpad=10)
 
             if y_label != "Complexity":
                 y_min = max(0, min(ax.get_yticks()))
                 y_max = min(1, max(ax.get_yticks()))
-                num_ticks = 7
-                if config["data_directory"] == "mlruns_csv/MIX":
 
-                    if result in ["Experience Cap"]:
-                        num_ticks = 5
-                    elif result == "dummy":
-                        num_ticks = 6
-                    elif result in ["Experience Cap", "Base", "l Best", "l Best & Experience Cap (dim)"]:
-                        num_ticks = 7
-                        if result == "Base":
-                            y_max = 0.24
-                        elif result in ["l Best", "l Best & Experience Cap (dim)"]:
-                            y_max = 0.6
-                    elif result in ["Experience Cap (dim)", "l Best & Experience Cap"]:
-                        num_ticks = 8
-                        if result == "l Best & Experience Cap":
-                            y_max = 0.7
-                    elif result in []:
-                        num_ticks = 9
-                        if result == "dummy":
-                            y_max = 0.8
-                    elif result in ["l Random", "l Random & Experience Cap"]:
-                        num_ticks = 10
-                        if result in ["l Random", "l Random & Experience Cap"]:
-                            y_max = 0.9
-                    elif result in ["dummy"]:
-                        num_ticks = 11
-                    elif result in ["RouletteWheel & Experience Cap", "l Best", "RouletteWheel & Experience Cap (dim)", "RouletteWheel", "l Random & Experience Cap (dim)"]:
-                        num_ticks = 11
-                        if result in ["RouletteWheel & Experience Cap (dim)", "RouletteWheel", "l Random & Experience Cap (dim)"]:
-                            y_max = 1
-                    else:
-                        num_ticks = 7
-                elif config["data_directory"] == "mlruns_csv/RBML":
-                    if config['datasets'][problem] in ["Combined Cycle Power Plant", "Airfoil Self-Noise", "Concrete Strength"]:
-                        num_ticks = 6
-                    elif config['datasets'][problem] in ["Energy Efficiency Cooling"]:
-                        num_ticks = 6
-                elif config["data_directory"] == "mlruns_csv/RD":
-                    if config['datasets'][problem] in ["Combined Cycle Power Plant"]:
-                        num_ticks = 5
-                        if config['datasets'][problem] == "Combined Cycle Power Plant":
-                            y_min = 0.055
-                            y_max = 0.075
-                    elif config['datasets'][problem] in ["Airfoil Self-Noise", "Concrete Strength"]:
-                        num_ticks = 6
-                        if config['datasets'][problem] == "Airfoil Self-Noise":
-                            y_min = 0.1
-                    elif config['datasets'][problem] in ["Energy Efficiency Cooling"]:
-                        num_ticks = 7
-                        y_max = 0.18
-                    elif config['datasets'][problem] in ["Parkinson's Telemonitoring"]:
-                        num_ticks = 5
-                    elif config['datasets'][problem] in ["Physiochemical Properties of Protein Tertiary Structure"]:
-                        num_ticks = 7
-                        if config['datasets'][problem] == "Physiochemical Properties of Protein Tertiary Structure":
-                            y_min = 0.55
-                            y_max = 0.85
-                elif config["data_directory"] == "mlruns_csv/SAGA":
-                    if config['datasets'][problem] in ["Airfoil Self-Noise", "Physiochemical Properties of Protein Tertiary Structure", "Parkinson's Telemonitoring"]:
-                        num_ticks = 6
-                        if config["datasets"][problem] == "Physiochemical Properties of Protein Tertiary Structure":
-                            y_min = 0.6
-                    if config['datasets'][problem] in ["Combined Cycle Power Plant"]:
-                        num_ticks = 7
-                        if config['datasets'][problem] == "Combined Cycle Power Plant":
-                            y_min = 0.06
-                elif config["data_directory"] == "mlruns_csv/SC":
-                    if config['datasets'][problem] in ["Airfoil Self-Noise"]:
-                        num_ticks = 6
-                        if config['datasets'][problem] == "Airfoil Self-Noise":
-                            y_min = 0.05
-                            y_max = 0.3
-                    elif config['datasets'][problem] in ["Physiochemical Properties of Protein Tertiary Structure"]:
-                        num_ticks = 9
-                        if config['datasets'][problem] == "Physiochemical Properties of Protein Tertiary Structure":
-                            y_min = 0.55
-                            y_max = 0.95
-                    elif config['datasets'][problem] in ["Combined Cycle Power Plant"]:
-                        num_ticks = 5
-                        if config['datasets'][problem] == "Combined Cycle Power Plant":
-                            y_min = 0.055
+                # Change this to adjust the tick size
+                num_ticks = 7
 
                 ax.set_ylim(y_min, y_max)
                 y_tick_positions = np.linspace(y_min, y_max, num_ticks)
                 y_tick_positions = np.round(y_tick_positions, 3)
-
-                print(y_min, y_max, y_tick_positions, config['datasets'][problem])
 
                 plt.yticks(y_tick_positions, [f'{x:.3g}' for x in y_tick_positions])
 
@@ -254,29 +151,8 @@ def create_plots():
                 plt.subplots_adjust(left=0.2, right=0.95, top=0.92, bottom=0.22)
                 ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
                 ax_config(ax, y_label)
-                if config["data_directory"] == "mlruns_csv/MIX":
-                    f_index = heuristic.find('f:')
-                    result = heuristic[f_index+2:]
-                    result = result.replace('; -e:', '')
-                    result = result.replace('/', '')
-                    result = result.replace('CapExperienceWithDimensionality', ' & Experience Cap (dim)')
-                    result = result.replace('CapExperience', ' & Experience Cap')
-                    result = result.replace('FilterSubpopulation', '')
-                    result = result.replace('ExperienceCalculation', '')
-                    result = result.replace('NBestFitness', r"l Best")
-                    result = result.replace('NRandom', r"l Random")
-                    if result == "":
-                        result = "Base"
-                    if result[1] == "&":
-                        result = result[2:]
 
-                    y_label = "Normalized " + y_label
-                    ax.set_xlabel("Number of rules participating", weight="bold", labelpad=10)
-                    # ax.set_xlabel(r"l", weight="bold", labelpad=10)
-                    ax.set_ylabel(y_label, weight="bold", labelpad=10)
-                    fig.savefig(f"{final_output_dir}/{name}_{result}_{y_label}.png")
-                else:
-                    fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
+                fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
                 plt.close(fig)
 
         if config["data_directory"] == "mlruns_csv/MIX":
