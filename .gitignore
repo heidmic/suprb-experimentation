@@ -8,7 +8,8 @@ logging_output_scripts/outputs/
 # SLURM
 output/**
 */output/**
-
+diss-graphs/
+logging_output_scripts/config.json
 # PyCharm
 .idea
 

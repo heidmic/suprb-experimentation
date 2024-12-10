@@ -38,11 +38,11 @@ mix_datasets = {
 
 solution_composition = {
     "GeneticAlgorithm": "GA",
-    # "RandomSearch": "RS",
-    # "ArtificialBeeColonyAlgorithm": "ABC",
-    # "AntColonyOptimization": "ACO",
-    # "GreyWolfOptimizer": "GWO",
-    # "ParticleSwarmOptimization": "PSO"
+    "RandomSearch": "RS",
+    "ArtificialBeeColonyAlgorithm": "ABC",
+    "AntColonyOptimization": "ACO",
+    "GreyWolfOptimizer": "GWO",
+    "ParticleSwarmOptimization": "PSO"
 }
 
 sc_mix_rd = {
@@ -70,8 +70,8 @@ rule_discovery = {
 asoc = {
     "ES Tuning": "SupRB",
     "XCSF": "XCSF",
-    "Decision Tree": "Decision Tree",
-    "Random Forest": "Random Forest",
+    "Decision Tree": "DT",
+    "Random Forest": "RF",
 }
 
 mixing1 = {"r:1; f:FilterSubpopulation; -e:ExperienceCalculation": "1",
@@ -187,22 +187,24 @@ mixing.append(mixing10)
 mixing.append(mixing11)
 mixing.append(mixing12)
 
-# all_runs_df = mlflow.search_runs(search_all_experiments=True)
 
+def mlruns_to_csv(datasets, subdir):
+    all_runs_df = mlflow.search_runs(search_all_experiments=True)
 
-# for dataset in datasets:
-#     mse = "metrics.test_neg_mean_squared_error"
-#     complexity = "metrics.elitist_complexity"
+    for dataset in datasets:
+        mse = "metrics.test_neg_mean_squared_error"
+        complexity = "metrics.elitist_complexity"
 
-#     df = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) & (all_runs_df["tags.fold"] == 'True')]
-#     df = df[["tags.mlflow.runName", mse, complexity]]
-#     print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
+        df = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(
+            dataset, case=False, na=False) & (all_runs_df["tags.fold"] == 'True')]
+        df = df[["tags.mlflow.runName", mse, complexity]]
+        print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
 
-#     df[mse] *= -1
-#     # df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
-#     # df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
-#     df.to_csv(f"mlruns_csv/SC/{dataset}_all.csv", index=False)
-# exit()
+        df[mse] *= -1
+        df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
+        df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
+        df.to_csv(f"mlruns_csv/{subdir}/{dataset}_all.csv", index=False)
+
 
 saga = {
     "s:ga": "GA",
@@ -250,79 +252,81 @@ if __name__ == '__main__':
             filter_runs(all_runs_df)
 
         create_plots()
-        exit()
+        # exit()
         # create_summary_csv()
 
-        calvo(ylabel=setting[2])
+        # calvo(ylabel=setting[2])
+        # exit()
         # final_output_dir = f"{config['output_directory']}"
         # latex_tabulars.check_and_create_dir(final_output_dir, 'latex_tabular')
         # latex_tabulars.single_table_all_mse({-1: ' ', 0: 'CCPP', 1: 'ASN', 2: 'CS', 3: 'PPPT', 4: 'PT'})
         # latex_tabulars.single_table_all_complexity()
 
-        if setting[0] == "diss-graphs/graphs/RBML":
-            ttest(latex=False, cand1="XCSF", cand2="ES Tuning", cand1_name="XCSF", cand2_name="SupRB")
-            ttest(latex=False, cand1="Decision Tree", cand2="ES Tuning", cand1_name="Decision Tree", cand2_name="SupRB")
-            ttest(latex=False, cand1="Random Forest", cand2="ES Tuning", cand1_name="Random Forest", cand2_name="SupRB")
+        if False:
+            if setting[0] == "diss-graphs/graphs/RBML":
+                ttest(latex=False, cand1="XCSF", cand2="ES Tuning", cand1_name="XCSF", cand2_name="SupRB")
+                ttest(latex=False, cand1="Decision Tree", cand2="ES Tuning", cand1_name="Decision Tree", cand2_name="SupRB")
+                ttest(latex=False, cand1="Random Forest", cand2="ES Tuning", cand1_name="Random Forest", cand2_name="SupRB")
 
-        if setting[0] == "diss-graphs/graphs/RD":
-            ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="NSLC-P", cand2_name="ES")
-            ttest(latex=False, cand1="NSLC False", cand2="ES Tuning", cand1_name="NSLC-G", cand2_name="ES")
-            ttest(latex=False, cand1="MCNS True", cand2="ES Tuning", cand1_name="MCNS-P", cand2_name="ES")
-            ttest(latex=False, cand1="MCNS False", cand2="ES Tuning", cand1_name="MCNS-G", cand2_name="ES")
-            ttest(latex=False, cand1=" NS True", cand2="ES Tuning", cand1_name="NS-P", cand2_name="ES")
-            ttest(latex=False, cand1=" NS False", cand2="ES Tuning", cand1_name="NS-G", cand2_name="ES")
+            if setting[0] == "diss-graphs/graphs/RD":
+                ttest(latex=False, cand1="NSLC True", cand2="ES Tuning", cand1_name="NSLC-P", cand2_name="ES")
+                ttest(latex=False, cand1="NSLC False", cand2="ES Tuning", cand1_name="NSLC-G", cand2_name="ES")
+                ttest(latex=False, cand1="MCNS True", cand2="ES Tuning", cand1_name="MCNS-P", cand2_name="ES")
+                ttest(latex=False, cand1="MCNS False", cand2="ES Tuning", cand1_name="MCNS-G", cand2_name="ES")
+                ttest(latex=False, cand1=" NS True", cand2="ES Tuning", cand1_name="NS-P", cand2_name="ES")
+                ttest(latex=False, cand1=" NS False", cand2="ES Tuning", cand1_name="NS-G", cand2_name="ES")
 
-            ttest(latex=False, cand1="NSLC False", cand2="NSLC True", cand1_name="NSLC-G", cand2_name="NSLC-P")
-            ttest(latex=False, cand1="MCNS True", cand2="NSLC True", cand1_name="MCNS-P", cand2_name="NSLC-P")
-            ttest(latex=False, cand1="MCNS False", cand2="NSLC True", cand1_name="MCNS-G", cand2_name="NSLC-P")
-            ttest(latex=False, cand1=" NS True", cand2="NSLC True", cand1_name="NS-P", cand2_name="NSLC-P")
-            ttest(latex=False, cand1=" NS False", cand2="NSLC True", cand1_name="NS-G", cand2_name="NSLC-P")
+                ttest(latex=False, cand1="NSLC False", cand2="NSLC True", cand1_name="NSLC-G", cand2_name="NSLC-P")
+                ttest(latex=False, cand1="MCNS True", cand2="NSLC True", cand1_name="MCNS-P", cand2_name="NSLC-P")
+                ttest(latex=False, cand1="MCNS False", cand2="NSLC True", cand1_name="MCNS-G", cand2_name="NSLC-P")
+                ttest(latex=False, cand1=" NS True", cand2="NSLC True", cand1_name="NS-P", cand2_name="NSLC-P")
+                ttest(latex=False, cand1=" NS False", cand2="NSLC True", cand1_name="NS-G", cand2_name="NSLC-P")
 
-            ttest(latex=False, cand1="MCNS True", cand2="NSLC False", cand1_name="MCNS-P", cand2_name="NSLC-G")
-            ttest(latex=False, cand1="MCNS False", cand2="NSLC False", cand1_name="MCNS-G", cand2_name="NSLC-G")
-            ttest(latex=False, cand1=" NS True", cand2="NSLC False", cand1_name="NS-P", cand2_name="NSLC-G")
-            ttest(latex=False, cand1=" NS False", cand2="NSLC False", cand1_name="NS-G", cand2_name="NSLC-G")
+                ttest(latex=False, cand1="MCNS True", cand2="NSLC False", cand1_name="MCNS-P", cand2_name="NSLC-G")
+                ttest(latex=False, cand1="MCNS False", cand2="NSLC False", cand1_name="MCNS-G", cand2_name="NSLC-G")
+                ttest(latex=False, cand1=" NS True", cand2="NSLC False", cand1_name="NS-P", cand2_name="NSLC-G")
+                ttest(latex=False, cand1=" NS False", cand2="NSLC False", cand1_name="NS-G", cand2_name="NSLC-G")
 
-            ttest(latex=False, cand1="MCNS False", cand2="MCNS True", cand1_name="MCNS-G", cand2_name="MCNS-P")
-            ttest(latex=False, cand1=" NS True", cand2="MCNS True", cand1_name="NS-P", cand2_name="MCNS-P")
-            ttest(latex=False, cand1=" NS False", cand2="MCNS True", cand1_name="NS-G", cand2_name="MCNS-P")
+                ttest(latex=False, cand1="MCNS False", cand2="MCNS True", cand1_name="MCNS-G", cand2_name="MCNS-P")
+                ttest(latex=False, cand1=" NS True", cand2="MCNS True", cand1_name="NS-P", cand2_name="MCNS-P")
+                ttest(latex=False, cand1=" NS False", cand2="MCNS True", cand1_name="NS-G", cand2_name="MCNS-P")
 
-            ttest(latex=False, cand1=" NS True", cand2="MCNS False", cand1_name="NS-P", cand2_name="MCNS-G")
-            ttest(latex=False, cand1=" NS False", cand2="MCNS False", cand1_name="NS-G", cand2_name="MCNS-G")
+                ttest(latex=False, cand1=" NS True", cand2="MCNS False", cand1_name="NS-P", cand2_name="MCNS-G")
+                ttest(latex=False, cand1=" NS False", cand2="MCNS False", cand1_name="NS-G", cand2_name="MCNS-G")
 
-            ttest(latex=False, cand1=" NS False", cand2=" NS True", cand1_name="NS-G", cand2_name="NS-P")
+                ttest(latex=False, cand1=" NS False", cand2=" NS True", cand1_name="NS-G", cand2_name="NS-P")
 
-        if setting[0] == "diss-graphs/graphs/SC":
-            ga_switch = "ES Tuning"  # "GeneticAlgorithm"
-            ttest(latex=False, cand1="RandomSearch", cand2=ga_switch, cand1_name="RS", cand2_name="GA")
-            ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2=ga_switch, cand1_name="ABC", cand2_name="GA")
-            ttest(latex=False, cand1="AntColonyOptimization", cand2=ga_switch, cand1_name="ACO", cand2_name="GA")
-            ttest(latex=False, cand1="GreyWolfOptimizer", cand2=ga_switch, cand1_name="GWO", cand2_name="GA")
-            ttest(latex=False, cand1="ParticleSwarmOptimization", cand2=ga_switch, cand1_name="PSO", cand2_name="GA")
+            if setting[0] == "diss-graphs/graphs/SC":
+                ga_switch = "ES Tuning"  # "GeneticAlgorithm"
+                ttest(latex=False, cand1="RandomSearch", cand2=ga_switch, cand1_name="RS", cand2_name="GA")
+                ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2=ga_switch, cand1_name="ABC", cand2_name="GA")
+                ttest(latex=False, cand1="AntColonyOptimization", cand2=ga_switch, cand1_name="ACO", cand2_name="GA")
+                ttest(latex=False, cand1="GreyWolfOptimizer", cand2=ga_switch, cand1_name="GWO", cand2_name="GA")
+                ttest(latex=False, cand1="ParticleSwarmOptimization", cand2=ga_switch, cand1_name="PSO", cand2_name="GA")
 
-        if setting[0] == "diss-graphs/graphs/MIX":
-            if setting[4] != "mlruns_csv/MIX/subset_":
-                ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                      cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
+            if setting[0] == "diss-graphs/graphs/MIX":
+                if setting[4] != "mlruns_csv/MIX/subset_":
+                    ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
+                          cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
 
-            ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap", cand2_name="Base")
-            ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap (dim)", cand2_name="Base")
-            ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
-                  cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality", cand1_name="Experience Cap", cand2_name="Experience Cap (dim)")
+                ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
+                      cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap", cand2_name="Base")
+                ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
+                      cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap (dim)", cand2_name="Base")
+                ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
+                      cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality", cand1_name="Experience Cap", cand2_name="Experience Cap (dim)")
 
-        if setting[0] == "diss-graphs/graphs/SAGA":
-            ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="SAGA1", cand2_name="GA")
-            ttest(latex=False, cand1="s:saga2", cand2="s:ga", cand1_name="SAGA2", cand2_name="GA")
-            ttest(latex=False, cand1="s:saga3", cand2="s:ga", cand1_name="SAGA3", cand2_name="GA")
-            ttest(latex=False, cand1="s:sas", cand2="s:ga", cand1_name="SAGA4", cand2_name="GA")
-            ttest(latex=False, cand1="s:saga1", cand2="s:saga2", cand1_name="SAGA1", cand2_name="SAGA2")
-            ttest(latex=False, cand1="s:saga1", cand2="s:saga3", cand1_name="SAGA1", cand2_name="SAGA3")
-            ttest(latex=False, cand1="s:saga1", cand2="s:sas", cand1_name="SAGA1", cand2_name="SAGA4")
-            ttest(latex=False, cand1="s:saga2", cand2="s:saga3", cand1_name="SAGA2", cand2_name="SAGA3")
-            ttest(latex=False, cand1="s:saga2", cand2="s:sas", cand1_name="SAGA2", cand2_name="SAGA4")
-            ttest(latex=False, cand1="s:saga3", cand2="s:sas", cand1_name="SAGA3", cand2_name="SAGA4")
+            if setting[0] == "diss-graphs/graphs/SAGA":
+                ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="SAGA1", cand2_name="GA")
+                ttest(latex=False, cand1="s:saga2", cand2="s:ga", cand1_name="SAGA2", cand2_name="GA")
+                ttest(latex=False, cand1="s:saga3", cand2="s:ga", cand1_name="SAGA3", cand2_name="GA")
+                ttest(latex=False, cand1="s:sas", cand2="s:ga", cand1_name="SAGA4", cand2_name="GA")
+                ttest(latex=False, cand1="s:saga1", cand2="s:saga2", cand1_name="SAGA1", cand2_name="SAGA2")
+                ttest(latex=False, cand1="s:saga1", cand2="s:saga3", cand1_name="SAGA1", cand2_name="SAGA3")
+                ttest(latex=False, cand1="s:saga1", cand2="s:sas", cand1_name="SAGA1", cand2_name="SAGA4")
+                ttest(latex=False, cand1="s:saga2", cand2="s:saga3", cand1_name="SAGA2", cand2_name="SAGA3")
+                ttest(latex=False, cand1="s:saga2", cand2="s:sas", cand1_name="SAGA2", cand2_name="SAGA4")
+                ttest(latex=False, cand1="s:saga3", cand2="s:sas", cand1_name="SAGA3", cand2_name="SAGA4")
 
     rd = ["diss-graphs/graphs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
     sc = ["diss-graphs/graphs/SC_only_GA", solution_composition, "Solution Composition", False, "mlruns_csv/SC_only_GA"]
@@ -333,11 +337,13 @@ if __name__ == '__main__':
     sagas = ["diss-graphs/graphs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
     sc_rd = ["diss-graphs/graphs/SC", sc_mix_rd, "Solution Composition", False, "mlruns_csv/SC"]
 
+    # mlruns_to_csv(datasets, "MIX")
+
     # setting = rd
     # run_main()
 
-    setting = sc
-    run_main()
+    # setting = sc
+    # run_main()
 
     # setting = sagas
     # run_main()
@@ -351,11 +357,11 @@ if __name__ == '__main__':
     # setting = xcsf
     # run_main()
 
-    # setting = sc_rd
-    # run_main()
+    setting = sc_rd
+    run_main()
 
     exit()
 
     for mixing_num in mixing:
-        setting = ["diss-graphs/graphs/MIX", mixing_num, "Number of rules participating", False]
+        setting = ["diss-graphs/graphs/MIX", mixing_num, "Number of rules participating", True, "mlruns_csv/MIX"]
         run_main()

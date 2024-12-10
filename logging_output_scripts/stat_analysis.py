@@ -121,7 +121,7 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
 
     sns.set_theme(style="whitegrid",
                   font="Times New Roman",
-                  font_scale=1.6,
+                  font_scale=1,
                   rc={
                       "lines.linewidth": 1,
                       "pdf.fonttype": 42,

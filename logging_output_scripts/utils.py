@@ -29,12 +29,12 @@ def filter_runs(all_runs_df=None):
             results_dict[(heuristic, dataset)] = filtered_df
 
 
-def get_normalized_df(heuristic):
+def get_normalized_df(heuristic, filepath):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
     df = pd.DataFrame()
     for dataset in config["datasets"]:
-        df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
+        df = pd.concat([df, pd.read_csv(f"{filepath}/{dataset}_all.csv")])
 
     return df[df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
 
