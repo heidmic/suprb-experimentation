@@ -9,7 +9,7 @@ logging_output_scripts/outputs/
 # SLURM
 output/**
 */output/**
-
+diss-graphs/
 # PyCharm
 .idea
 
