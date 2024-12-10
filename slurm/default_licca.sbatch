@@ -11,6 +11,10 @@ module purge
 module load anaconda
 conda activate venv
 
-JOB_DIR=/hpc/gpfs2/home/u/sraroman/suprb-experimentation 
+JOB_DIR=/hpc/gpfs2/home/u/$USER/suprb-experimentation 
 export PYTHONPATH=${PYTHONPATH}:${JOB_DIR}
-srun python $JOB_DIR/$experiment -p $dataset -o $optimizer
+experiment="runs/comparisons/suprb_all_tuning.py"
+dataset="airfoil_self_noise"
+study_name="SupRB - Airfoil"
+
+srun python $JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID -n $study_name
