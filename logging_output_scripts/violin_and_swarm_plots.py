@@ -98,39 +98,20 @@ def create_plots():
             x_lab = ""
             ax.set_ylabel(y_label, weight="bold")
             ax.set_title(config['datasets'][problem], style="italic", fontsize=14)
-
-            if config["data_directory"] == "mlruns_csv/RBML":
-                x_lab = "Estimator"
-            if config["data_directory"] == "mlruns_csv/RD":
-                x_lab = "RD method"
-
-                new_labels = []
-                label_temp = config['heuristics'].values()
-
-                for i, label in enumerate(label_temp):
-                    if i % 2 == 0:
-                        new_labels.append(label + "\n")  # Nach unten verschieben mit Zeilenumbruch
-                    else:
-                        new_labels.append("\n" + label)  # Nach oben verschieben
-
-                tick_positions = np.arange(len(label_temp))
-                ax.set_xticks(tick_positions)
-                ax.set_xticklabels(new_labels)
-
             ax.set_xlabel(x_lab, weight="bold", labelpad=10)
 
-            if y_label != "Complexity":
-                y_min = max(0, min(ax.get_yticks()))
-                y_max = min(1, max(ax.get_yticks()))
+            # Change this to adjust y_axis ticks
+            y_min = max(0, min(ax.get_yticks()))
+            y_max = min(1, max(ax.get_yticks()))
 
-                # Change this to adjust the tick size
-                num_ticks = 7
+            # Change this to adjust the tick size
+            num_ticks = 7
 
-                ax.set_ylim(y_min, y_max)
-                y_tick_positions = np.linspace(y_min, y_max, num_ticks)
-                y_tick_positions = np.round(y_tick_positions, 3)
+            ax.set_ylim(y_min, y_max)
+            y_tick_positions = np.linspace(y_min, y_max, num_ticks)
+            y_tick_positions = np.round(y_tick_positions, 3)
 
-                plt.yticks(y_tick_positions, [f'{x:.3g}' for x in y_tick_positions])
+            plt.yticks(y_tick_positions, [f'{x:.3g}' for x in y_tick_positions])
 
         ################### MSE ###########################
         plots = {  # "violin": sns.violinplot,
