@@ -6,36 +6,9 @@ import numpy as np
 import json
 from utils import datasets_map
 from sklearn.preprocessing import MinMaxScaler
-from matplotlib.ticker import FuncFormatter
-import math
-from matplotlib.ticker import MaxNLocator
 
 mse = "metrics.test_neg_mean_squared_error"
 complexity = "metrics.elitist_complexity"
-
-
-def get_exponent(problem):
-    if problem == "combined_cycle_power_plant":
-        exponent = 4
-    if problem == "airfoil_self_noise":
-        exponent = 2
-    if problem == "concrete_strength":
-        exponent = 2
-    if problem == "energy_cool":
-        exponent = 2
-    if problem == "protein_structure":
-        exponent = 2
-    if problem == "parkinson_total":
-        exponent = 2
-
-    return exponent
-
-
-def create_formatter(exponent):
-    def format_yaxis(value, _):
-        return int(value * math.pow(10, exponent))
-
-    return format_yaxis
 
 
 def create_plots():
