@@ -9,6 +9,7 @@ from ..base import ProblemRepr
 from sklearn.datasets import load_diabetes
 
 DATASETS_PATH = (pathlib.Path(__file__).parent / 'data').resolve()
+CLASS_DATASETS_PATH = (pathlib.Path(__file__).parent / 'class_data').resolve()
 
 
 def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool,
@@ -28,6 +29,59 @@ def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: 
         return Bunch(frame=frame, data=data, target=target)
     else:
         return Bunch(X=data, y=target)
+    
+
+def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool,
+                 remove_columns: list = None, label_to_num: bool = True) -> ProblemRepr:
+    frame = pd.read_csv(CLASS_DATASETS_PATH / filename, sep=',')
+
+    data = frame.drop(columns=[target_column] + (remove_columns if remove_columns is not None else []))
+    target = frame[target_column]
+
+    if not as_frame:
+        data = data.to_numpy(dtype=float)
+        target = target.to_numpy()
+    
+    if label_to_num:
+        labels = np.unique(y)
+        toNum = dict(zip(labels, range(len(labels))))
+        y = [toNum[x[0]] for x in y]
+    
+    if return_X_y:
+        return data, target
+    elif as_frame:
+        return Bunch(frame=frame, data=data, target=target)
+    else:
+        return Bunch(X=data, y=target)
+
+
+def load_iris(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Combined Cycle Power Plant dataset.
+
+    ==============   ==================
+    Samples total    150
+    Dimensionality   4
+    Features         real, TODO: ranges
+    Targets          real, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/dataset/53/iris.
+    """
+    return load_class_dataset(filename='iris.csv', target_column='y', return_X_y=return_X_y, as_frame=as_frame)
+
+def load_breastcancer(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the Combined Cycle Power Plant dataset.
+
+    ==============   ==================
+    Samples total    569
+    Dimensionality   30
+    Features         real, TODO: ranges
+    Targets          real, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic.
+    """
+    return load_class_dataset(filename='breastcancer.csv', target_column='Y', return_X_y=return_X_y, as_frame=as_frame)
 
 
 def load_combined_cycle_power_plant(return_X_y: bool = True, as_frame: bool = False):

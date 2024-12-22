@@ -1,6 +1,8 @@
 from .base import *
 
 __all__ = [
+    'load_iris'
+    'load_breastcancer'
     'load_forest_fires',
     'load_energy_heat',
     'load_energy_cool',
