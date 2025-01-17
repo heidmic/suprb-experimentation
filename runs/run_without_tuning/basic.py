@@ -101,7 +101,7 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
                                                             init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight))),
                       logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
 
-    estimator = SupRBWrapper(rule_generation__mutation__sigma=2.53261854608031, rule_generation__delay=134,
+    estimator = SupRBWrapper(estimator, rule_generation__mutation__sigma=2.53261854608031, rule_generation__delay=134,
                              rule_generation__init__fitness__alpha=0.043582602456505595)
 
     jobs = 8
