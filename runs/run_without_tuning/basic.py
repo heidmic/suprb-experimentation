@@ -85,10 +85,6 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
         X, y = scale_X_y(X, y)
         X, y = shuffle(X, y, random_state=random_state)
 
-    X, y = load_dataset(name=problem, return_X_y=True)
-    X, y = scale_X_y(X, y)
-    X, y = shuffle(X, y, random_state=random_state)
-
     estimator = SupRB(n_iter=n_iter,
                       n_rules=16,
                       n_jobs=1,
