@@ -3,6 +3,8 @@ import pathlib
 import numpy as np
 import pandas as pd
 from sklearn.utils import Bunch
+from sklearn.compose import make_column_transformer
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, OneHotEncoder
 
 from ..base import ProblemRepr
 
@@ -11,6 +13,10 @@ from sklearn.datasets import load_diabetes
 DATASETS_PATH = (pathlib.Path(__file__).parent / 'data').resolve()
 CLASS_DATASETS_PATH = (pathlib.Path(__file__).parent / 'class_data').resolve()
 
+CLASSIFICATION_TASKS = ["iris", "breastcancer", "dry_bean"]
+
+def is_classification(taskname: str) -> bool:
+    return taskname in CLASSIFICATION_TASKS
 
 def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool,
                  remove_columns: list = None) -> ProblemRepr:
@@ -32,7 +38,7 @@ def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: 
     
 
 def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool,
-                 remove_columns: list = None, label_to_num: bool = True) -> ProblemRepr:
+                 remove_columns: list = None, label_to_num: bool = True, oneHotEncoding: list = None) -> ProblemRepr:
     frame = pd.read_csv(CLASS_DATASETS_PATH / filename, sep=',')
 
     data = frame.drop(columns=[target_column] + (remove_columns if remove_columns is not None else []))
@@ -43,10 +49,17 @@ def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_f
         target = target.to_numpy()
     
     if label_to_num:
-        labels = np.unique(y)
-        toNum = dict(zip(labels, range(len(labels))))
-        y = [toNum[x[0]] for x in y]
+        labels = np.unique(target)
+        toNum = dict(zip(labels, range(1, len(labels)+1)))
+        target = [toNum[x] for x in target]
     
+    if oneHotEncoding is not None:
+        transformer = make_column_transformer(
+            ((OneHotEncoder(sparse=False)), oneHotEncoding),
+            remainder='passthrough')
+        # transforming
+        X = transformer.fit_transform(X)
+
     if return_X_y:
         return data, target
     elif as_frame:
@@ -56,32 +69,46 @@ def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_f
 
 
 def load_iris(return_X_y: bool = True, as_frame: bool = False):
-    """ Load and return the Combined Cycle Power Plant dataset.
+    """ Load and return the dataset.
 
     ==============   ==================
     Samples total    150
     Dimensionality   4
     Features         real, TODO: ranges
-    Targets          real, TODO: ranges
+    Targets          string, TODO: ranges
     ==============   ==================
 
     Downloaded from https://archive.ics.uci.edu/dataset/53/iris.
     """
     return load_class_dataset(filename='iris.csv', target_column='y', return_X_y=return_X_y, as_frame=as_frame)
 
+def load_dry_bean(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the dataset.
+
+    ==============   ==================
+    Samples total    13611
+    Dimensionality   16
+    Features         real, TODO: ranges
+    Targets          string, TODO: ranges
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/dataset/602/dry+bean+dataset.
+    """
+    return load_class_dataset(filename='dry_bean.csv', target_column='y', return_X_y=return_X_y, as_frame=as_frame)
+
 def load_breastcancer(return_X_y: bool = True, as_frame: bool = False):
-    """ Load and return the Combined Cycle Power Plant dataset.
+    """ Load and return the dataset.
 
     ==============   ==================
     Samples total    569
     Dimensionality   30
     Features         real, TODO: ranges
-    Targets          real, TODO: ranges
+    Targets          binary, TODO: ranges
     ==============   ==================
 
     Downloaded from https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic.
     """
-    return load_class_dataset(filename='breastcancer.csv', target_column='Y', return_X_y=return_X_y, as_frame=as_frame)
+    return load_class_dataset(filename='breastcancer.csv', target_column='Y', return_X_y=return_X_y, as_frame=as_frame, remove_columns=['ID'])
 
 
 def load_combined_cycle_power_plant(return_X_y: bool = True, as_frame: bool = False):

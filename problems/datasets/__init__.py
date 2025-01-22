@@ -1,4 +1,5 @@
 from .base import *
+is_classification
 
 __all__ = [
     'load_iris'
