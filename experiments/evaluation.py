@@ -19,7 +19,7 @@ def check_scoring(scoring):
         scoring = set(scoring)
     else:
         scoring = {scoring}
-    scoring.update({'r2', 'neg_mean_squared_error'})
+    scoring.update({'r2', 'neg_mean_squared_error', 'neg_mean_absolute_error'})
 
     return list(scoring)
 
