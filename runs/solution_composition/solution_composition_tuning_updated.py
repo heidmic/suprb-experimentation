@@ -176,7 +176,7 @@ def run(problem: str, optimizer: str):
             params.solution_composition__crossover = getattr(suprb.optimizer.solution.ga.crossover, params.solution_composition__crossover)()  # nopep8
 
             if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
-                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)
+                params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10) # nopep8
 
             params.solution_composition__crossover__crossover_rate = trial.suggest_float('solution_composition__crossover__crossover_rate', 0.7, 1.0)  # nopep8
 
