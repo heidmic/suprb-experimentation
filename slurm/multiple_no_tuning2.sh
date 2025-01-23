@@ -11,82 +11,51 @@ export filename="basic.py"
 echo $filename
 
 
+for i in {1..64}
+do
+
 export fitness_weight=0.3
 export experiment_name="DefaultSingleScaler10"
 export scaler_type=true
-export n_iter=10
+export random_state=$i
 echo $fitness_weight
 echo $experiment_name
 echo $scaler_type
+echo $random_state
 sbatch slurm/no_tuning.sbatch
-sleep 10
+sleep 2
 
 export fitness_weight=0.1
 export experiment_name="FitnessWeightSingleScaler10"
 export scaler_type=true
-export n_iter=10
+export random_state=$i
 echo $fitness_weight
 echo $experiment_name
 echo $scaler_type
+echo $random_state
 sbatch slurm/no_tuning.sbatch
-sleep 10
+sleep 2
 
 export fitness_weight=0.3
 export experiment_name="DefaultDoubleScaler10"
 export scaler_type=false
-export n_iter=10
+export random_state=$i
 echo $fitness_weight
 echo $experiment_name
 echo $scaler_type
+echo $random_state
 sbatch slurm/no_tuning.sbatch
-sleep 10
+sleep 2
 
 export fitness_weight=0.1
 export experiment_name="FitnessWeightDoubleScaler10"
 export scaler_type=false
-export n_iter=10
+export random_state=$i
 echo $fitness_weight
 echo $experiment_name
 echo $scaler_type
+echo $random_state
 sbatch slurm/no_tuning.sbatch
+sleep 2
 
-
-
-export fitness_weight=0.3
-export experiment_name="DefaultSingleScaler64"
-export scaler_type=true
-export n_iter=64
-echo $fitness_weight
-echo $experiment_name
-echo $scaler_type
-sbatch slurm/no_tuning.sbatch
-sleep 10
-
-export fitness_weight=0.1
-export experiment_name="FitnessWeightSingleScaler64"
-export scaler_type=true
-export n_iter=64
-echo $fitness_weight
-echo $experiment_name
-echo $scaler_type
-sbatch slurm/no_tuning.sbatch
-sleep 10
-
-export fitness_weight=0.3
-export experiment_name="DefaultDoubleScaler64"
-export scaler_type=false
-export n_iter=64
-echo $fitness_weight
-echo $experiment_name
-echo $scaler_type
-sbatch slurm/no_tuning.sbatch
-sleep 10
-
-export fitness_weight=0.1
-export experiment_name="FitnessWeightDoubleScaler64"
-export scaler_type=false
-export n_iter=64
-echo $fitness_weight
-echo $experiment_name
-echo $scaler_type
-sbatch slurm/no_tuning.sbatch
+done

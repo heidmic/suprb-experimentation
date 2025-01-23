@@ -55,7 +55,6 @@ from sklearn.datasets import fetch_openml
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 
-random_state = 42
 
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
@@ -69,9 +68,9 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.option('-n', '--experiment_name', type=click.STRING, default='SupRB')
 @click.option('-w', '--fitness_weight', type=click.FLOAT, default=0.3)
 @click.option('-s', '--scaler_type', type=click.BOOL, default=True)
-@click.option('-i', '--n_iter', type=click.INT, default=32)
+@click.option('-i', '--random_state', type=click.INT, default=32)
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
-def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: int, problem: str):
+def run(experiment_name: str, fitness_weight: float, scaler_type: bool, random_state: int, problem: str):
     X = pd.read_parquet('new_data/features_preselection.parq')
     y = pd.read_parquet('new_data/target.parq').iloc[:, 0]
 
@@ -85,7 +84,7 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
         X, y = scale_X_y(X, y)
         X, y = shuffle(X, y, random_state=random_state)
 
-    estimator = SupRB(n_iter=n_iter,
+    estimator = SupRB(n_iter=32,
                       n_rules=16,
                       n_jobs=1,
                       rule_generation=ES1xLambda(n_jobs=1,
@@ -100,8 +99,9 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
     estimator = SupRBWrapper(estimator, rule_generation__mutation__sigma=2.53261854608031, rule_generation__delay=134,
                              rule_generation__init__fitness__alpha=0.043582602456505595)
 
-    jobs = 8
+    jobs = 1
 
+    experiment_name = f"{experiment_name}_{random_state}"
     print(experiment_name)
     experiment = Experiment(name=experiment_name, verbose=10)
 
