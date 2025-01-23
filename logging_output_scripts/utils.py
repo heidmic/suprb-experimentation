@@ -171,5 +171,6 @@ datasets_map = {
     "s:saga1": "SAGA1",
     "s:saga2": "SAGA2",
     "s:saga3": "SAGA3",
-    "s:sas": "SAGA4"
+    "s:sas": "SAGA4",
+    "":""
 }

@@ -19,7 +19,7 @@ def create_plots():
     sns.set_style("whitegrid")
     sns.set_theme(style="whitegrid",
                   font="Times New Roman",
-                  font_scale=1.7,
+                  font_scale=1,
                   rc={
                       "lines.linewidth": 1,
                       "pdf.fonttype": 42,
@@ -77,14 +77,14 @@ def create_plots():
             y_min = max(0, min(ax.get_yticks()))
             y_max = min(1, max(ax.get_yticks()))
 
-            # Change this to adjust the tick size
-            num_ticks = 7
+            # # Change this to adjust the tick size
+            # num_ticks = 7
 
-            ax.set_ylim(y_min, y_max)
-            y_tick_positions = np.linspace(y_min, y_max, num_ticks)
-            y_tick_positions = np.round(y_tick_positions, 3)
+            # ax.set_ylim(y_min, y_max)
+            # y_tick_positions = np.linspace(y_min, y_max, num_ticks)
+            # y_tick_positions = np.round(y_tick_positions, 3)
 
-            plt.yticks(y_tick_positions, [f'{x:.3g}' for x in y_tick_positions])
+            # plt.yticks(y_tick_positions, [f'{x:.3g}' for x in y_tick_positions])
 
         ################### MSE ###########################
         plots = {  # "violin": sns.violinplot,

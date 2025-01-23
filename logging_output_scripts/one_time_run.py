@@ -215,17 +215,23 @@ saga = {
     "s:sas": "SAGA4"
 }
 
-adel = {"SupRB": "SupRB",
-        "Random Forest": "RF",
-        "Decision Tree": "DT", }
-
+adel = {
+    "DefaultSingleScaler10":"DSS10",
+    "FitnessWeightSingleScaler10":"FWSS10",
+    "DefaultDoubleScaler10":"DDS10",
+    "FitnessWeightDoubleScaler10":"FWDS10",
+    "DefaultSingleScaler64":"DSS64",
+    "FitnessWeightSingleScaler64":"FWSS64",
+    "DefaultDoubleScaler64":"DDS64",
+    "FitnessWeightDoubleScaler64":"FWDS64"
+}
 
 def run_main():
     with open("logging_output_scripts/config.json", "r") as f:
         config = json.load(f)
 
-    # config["datasets"] = {"":""}
-    config["datasets"] = datasets
+    config["datasets"] = {"":""}
+    # config["datasets"] = datasets
     if setting[0] == "diss-graphs/graphs/SAGA":
         config["datasets"] = saga_datasets
     if setting[0] == "diss-graphs/graphs/MIX" or setting[0] == "diss-graphs/graphs/RBML":
@@ -252,7 +258,9 @@ def run_main():
         all_runs_df = mlflow.search_runs(search_all_experiments=True)
         filter_runs(all_runs_df)
 
+    create_summary_csv()
     create_plots()
+    exit()
     calvo(ylabel=setting[2])
 
     if setting[0] == "diss-graphs/graphs/RBML":
@@ -339,7 +347,7 @@ if __name__ == '__main__':
     # setting = mix_calvo
     # setting = mix_calvo_sub
     # setting = xcsf
-    setting = sc_rd
+    setting = adeles
 
     run_main()
     exit()
