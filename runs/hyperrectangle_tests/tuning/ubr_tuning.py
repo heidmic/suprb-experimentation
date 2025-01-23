@@ -25,27 +25,27 @@ def ubr_space(trial: Trial, params: Bunch):
     # Evolution Strategy - Mutation, Mutation_sigma, Initialization, Init_sigma, Delay (delta) and fitness_alpha
     sigma_space = [0, 3]
 
-    params.rule_generation__mutation = \
+    params.rule_discovery__mutation = \
         trial.suggest_categorical('mutation', ['Normal'])
-    params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
-    params.rule_generation__mutation__sigma = trial.suggest_float('sigma_mutate', *sigma_space)
+    params.rule_discovery__mutation = getattr(mutation, params.rule_discovery__mutation)()
+    params.rule_discovery__mutation__sigma = trial.suggest_float('sigma_mutate', *sigma_space)
 
-    params.rule_generation__init = \
+    params.rule_discovery__init = \
         trial.suggest_categorical('initialization', ['MeanInit', 'NormalInit'])
-    params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
-    if isinstance(params.rule_generation__init, rule.initialization.NormalInit):
-        params.rule_generation__init__sigma = trial.suggest_float('sigma_init', *sigma_space)
+    params.rule_discovery__init = getattr(rule.initialization, params.rule_discovery__init)()
+    if isinstance(params.rule_discovery__init, rule.initialization.NormalInit):
+        params.rule_discovery__init__sigma = trial.suggest_float('sigma_init', *sigma_space)
 
     alpha_space = [0, 0.1]
-    params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
+    params.rule_discovery__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
 
-    params.rule_generation__operator = \
+    params.rule_discovery__operator = \
         trial.suggest_categorical('operator', ['&', ',', '+'])
 
-    if params.rule_generation__operator in ('+', ','):
-        params.rule_generation__n_iter = trial.suggest_int('n_iter_es', low=1, high=50)
+    if params.rule_discovery__operator in ('+', ','):
+        params.rule_discovery__n_iter = trial.suggest_int('n_iter_es', low=1, high=50)
     else:
-        params.rule_generation__delay = trial.suggest_int('delay', low=1, high=25)
+        params.rule_discovery__delay = trial.suggest_int('delay', low=1, high=25)
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
     params.solution_composition__selection = \
         trial.suggest_categorical('selection', ['RouletteWheel', 'Tournament', 'LinearRank', 'Random'])

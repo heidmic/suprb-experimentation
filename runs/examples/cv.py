@@ -22,7 +22,7 @@ if __name__ == '__main__':
     estimator = suprb.SupRB(
         n_iter=4,
         n_jobs=2,
-        rule_generation=es.ES1xLambda(
+        rule_discovery=es.ES1xLambda(
             init=rule.initialization.HalfnormInit(sigma=0.8),
             mutation=Normal(sigma=0.4),
         ),

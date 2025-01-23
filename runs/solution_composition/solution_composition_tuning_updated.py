@@ -107,7 +107,7 @@ def run(problem: str, optimizer: str):
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
-        rule_generation=es.ES1xLambda(
+        rule_discovery=es.ES1xLambda(
             operator='&',
             n_iter=10_000,
             init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
@@ -141,11 +141,11 @@ def run(problem: str, optimizer: str):
         # ES
         sigma_space = [0, np.sqrt(X.shape[1])]
 
-        params.rule_generation__mutation__sigma = trial.suggest_float(
-            'rule_generation__mutation__sigma', *sigma_space)
-        params.rule_generation__delay = trial.suggest_int('rule_generation__delay', 10, 200)
-        params.rule_generation__init__fitness__alpha = trial.suggest_float(
-            'rule_generation__init__fitness__alpha', 0.01, 0.2)
+        params.rule_discovery__mutation__sigma = trial.suggest_float(
+            'rule_discovery__mutation__sigma', *sigma_space)
+        params.rule_discovery__delay = trial.suggest_int('rule_discovery__delay', 10, 200)
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
+            'rule_discovery__init__fitness__alpha', 0.01, 0.2)
 
         params.solution_composition = optimizer  # trial.suggest_categorical('solution_composition', ['GeneticAlgorithm', 'ArtificialBeeColonyAlgorithm', 'AntColonyOptimization', 'GreyWolfOptimizer', 'ParticleSwarmOptimization', "RandomSearch"])  # nopep8
 

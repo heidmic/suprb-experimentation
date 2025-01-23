@@ -47,12 +47,12 @@ def run(problem: str = 'airfoil_self_noise', sigma_choice: int = 0):
     sigma = sigma_representations[representation]
 
     # USE ADAPTIVE HEURISTIC IN ES
-    estimator.rule_generation.adaptive_sigma = True
+    estimator.rule_discovery.adaptive_sigma = True
 
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
     # Replace the current sigma
-    params['rule_generation__mutation__sigma'] = sigma[sigma_choice]
+    params['rule_discovery__mutation__sigma'] = sigma[sigma_choice]
     experiment = Experiment(name=f'{problem}Ada Evaluation', params=params, verbose=10)
 
     # Repeat evaluations with several random states

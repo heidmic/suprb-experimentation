@@ -25,7 +25,7 @@ def get_optimizer(name: str) -> type:
 random_state = 42
 
 estimator = SupRB(
-    rule_generation=es.ES1xLambda(
+    rule_discovery=es.ES1xLambda(
         init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                           model=Ridge(alpha=0.01, random_state=random_state)),
         mutation=mutation.HalfnormIncrease(),

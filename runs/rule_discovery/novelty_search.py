@@ -81,7 +81,7 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
-        rule_generation=ns.NoveltySearch(
+        rule_discovery=ns.NoveltySearch(
             init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                               model=Ridge(alpha=0.01,
                                                           random_state=random_state)),
@@ -113,80 +113,80 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
         # NS
         # sigma_space = [0, 2]
         sigma_space = [0, np.sqrt(X.shape[1])]
-        params.rule_generation__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
+        params.rule_discovery__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
 
-        params.rule_generation__n_iter = trial.suggest_int('n_iter', 0, 20)
-        params.rule_generation__mu = trial.suggest_int('mu', 7, 20)
-        params.rule_generation__lmbda = trial.suggest_int('lmbda', 28, 200)
-        params.rule_generation__roh = trial.suggest_int('roh', 10, 75)
+        params.rule_discovery__n_iter = trial.suggest_int('n_iter', 0, 20)
+        params.rule_discovery__mu = trial.suggest_int('mu', 7, 20)
+        params.rule_discovery__lmbda = trial.suggest_int('lmbda', 28, 200)
+        params.rule_discovery__roh = trial.suggest_int('roh', 10, 75)
 
-        params.rule_generation__origin_generation = trial.suggest_categorical('origin_generation',
+        params.rule_discovery__origin_generation = trial.suggest_categorical('origin_generation',
                                                                               ['UniformSamplesOrigin',
                                                                                'Matching',
                                                                                'SquaredError'])
-        params.rule_generation__origin_generation = getattr(suprb.optimizer.rule.origin,
-                                                            params.rule_generation__origin_generation)()
+        params.rule_discovery__origin_generation = getattr(suprb.optimizer.rule.origin,
+                                                            params.rule_discovery__origin_generation)()
 
-        params.rule_generation__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
-        params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
+        params.rule_discovery__init = trial.suggest_categorical('init', ['MeanInit', 'NormalInit', 'HalfnormInit'])
+        params.rule_discovery__init = getattr(rule.initialization, params.rule_discovery__init)()
 
-        params.rule_generation__selection = trial.suggest_categorical('selection',
+        params.rule_discovery__selection = trial.suggest_categorical('selection',
                                                                       ['RouletteWheel', 'Random'])
-        params.rule_generation__selection = getattr(suprb.optimizer.rule.selection, params.rule_generation__selection)()
+        params.rule_discovery__selection = getattr(suprb.optimizer.rule.selection, params.rule_discovery__selection)()
 
-        params.rule_generation__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
-        params.rule_generation__mutation = trial.suggest_categorical('mutation',
+        params.rule_discovery__mutation__sigma = trial.suggest_float('mutation_sigma', *sigma_space)
+        params.rule_discovery__mutation = trial.suggest_categorical('mutation',
                                                                      ['Normal', 'Halfnorm',
                                                                       'HalfnormIncrease', 'Uniform',
                                                                       'UniformIncrease', ])
-        params.rule_generation__mutation = getattr(
-            suprb.optimizer.rule.mutation, params.rule_generation__mutation)()
+        params.rule_discovery__mutation = getattr(
+            suprb.optimizer.rule.mutation, params.rule_discovery__mutation)()
 
         if ns_type is None:
-            params.rule_generation__novelty_calculation__novelty_search_type = trial.suggest_categorical(
+            params.rule_discovery__novelty_calculation__novelty_search_type = trial.suggest_categorical(
                 'novelty_search_type', ["NoveltySearchType", "MinimalCriteria", "LocalCompetition"])
         elif ns_type.upper() == 'NS':
-            params.rule_generation__novelty_calculation__novelty_search_type = "NoveltySearchType"
+            params.rule_discovery__novelty_calculation__novelty_search_type = "NoveltySearchType"
         elif ns_type.upper() == 'MCNS':
-            params.rule_generation__novelty_calculation__novelty_search_type = "MinimalCriteria"
+            params.rule_discovery__novelty_calculation__novelty_search_type = "MinimalCriteria"
         elif ns_type.upper() == 'NSLC':
-            params.rule_generation__novelty_calculation__novelty_search_type = "LocalCompetition"
+            params.rule_discovery__novelty_calculation__novelty_search_type = "LocalCompetition"
 
-        params.rule_generation__novelty_calculation__novelty_search_type = getattr(
-            suprb.optimizer.rule.ns.novelty_search_type, params.rule_generation__novelty_calculation__novelty_search_type)()
+        params.rule_discovery__novelty_calculation__novelty_search_type = getattr(
+            suprb.optimizer.rule.ns.novelty_search_type, params.rule_discovery__novelty_calculation__novelty_search_type)()
 
-        if isinstance(params.rule_generation__novelty_calculation__novelty_search_type,
+        if isinstance(params.rule_discovery__novelty_calculation__novelty_search_type,
                       suprb.optimizer.rule.ns.novelty_search_type.MinimalCriteria):
-            params.rule_generation__novelty_calculation__novelty_search_type__min_examples_matched = \
+            params.rule_discovery__novelty_calculation__novelty_search_type__min_examples_matched = \
                 trial.suggest_int('min_examples_matched', 5, 15)
-        elif isinstance(params.rule_generation__novelty_calculation__novelty_search_type, suprb.optimizer.rule.ns.novelty_search_type.LocalCompetition):
-            params.rule_generation__novelty_calculation__novelty_search_type__max_neighborhood_range = \
+        elif isinstance(params.rule_discovery__novelty_calculation__novelty_search_type, suprb.optimizer.rule.ns.novelty_search_type.LocalCompetition):
+            params.rule_discovery__novelty_calculation__novelty_search_type__max_neighborhood_range = \
                 trial.suggest_int('max_neighborhood_range', 10, 20)
 
-        params.rule_generation__novelty_calculation__archive = trial.suggest_categorical(
+        params.rule_discovery__novelty_calculation__archive = trial.suggest_categorical(
             'archive', ["ArchiveNovel", "ArchiveRandom", "ArchiveNone"])
-        params.rule_generation__novelty_calculation__archive = getattr(
-            suprb.optimizer.rule.ns.archive, params.rule_generation__novelty_calculation__archive)()
+        params.rule_discovery__novelty_calculation__archive = getattr(
+            suprb.optimizer.rule.ns.archive, params.rule_discovery__novelty_calculation__archive)()
 
-        params.rule_generation__novelty_calculation = trial.suggest_categorical('novelty_calculation',
+        params.rule_discovery__novelty_calculation = trial.suggest_categorical('novelty_calculation',
                                                                                 ["NoveltyCalculation",
                                                                                  "ProgressiveMinimalCriteria",
                                                                                  "NoveltyFitnessPareto",
                                                                                  "NoveltyFitnessBiased"])
 
-        params.rule_generation__novelty_calculation = getattr(
-            suprb.optimizer.rule.ns.novelty_calculation, params.rule_generation__novelty_calculation)()
+        params.rule_discovery__novelty_calculation = getattr(
+            suprb.optimizer.rule.ns.novelty_calculation, params.rule_discovery__novelty_calculation)()
 
-        if not isinstance(params.rule_generation__novelty_calculation,
+        if not isinstance(params.rule_discovery__novelty_calculation,
                           suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
-            params.rule_generation__novelty_calculation__k_neighbor = trial.suggest_int('k_neighbor', 10, 20)
+            params.rule_discovery__novelty_calculation__k_neighbor = trial.suggest_int('k_neighbor', 10, 20)
 
-        if isinstance(params.rule_generation__novelty_calculation,
+        if isinstance(params.rule_discovery__novelty_calculation,
                       suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
-            params.rule_generation__novelty_calculation__novelty_bias = \
+            params.rule_discovery__novelty_calculation__novelty_bias = \
                 trial.suggest_float('novelty_bias', 0.3, 0.7)
             
-        params.rule_generation__use_population_for_archive = use_current_population
+        params.rule_discovery__use_population_for_archive = use_current_population
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(

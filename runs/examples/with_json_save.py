@@ -36,7 +36,7 @@ def run(problem: str, job_id: str):
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    estimator = SupRB(rule_generation=ES1xLambda(n_iter=2,
+    estimator = SupRB(rule_discovery=ES1xLambda(n_iter=2,
                                              lmbda=2,
                                              operator='+',
                                              delay=150,

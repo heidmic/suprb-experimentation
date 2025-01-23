@@ -18,37 +18,37 @@ from runs.hyperrectangle_tests.configurations.shared_config import shared_tuning
 
 
 @param_space()
-def rule_generation_space(trial: Trial, params: Bunch):
+def rule_discovery_space(trial: Trial, params: Bunch):
     # Matching type
     params.matching_type = MinPercentage(np.array([]))
     # Evolution Strategy - Mutation, Mutation_sigma, Initialization, Init_sigma, Delay (delta) and fitness_alpha
     sigma_space = [0, 3]
 
-    params.rule_generation__mutation = \
+    params.rule_discovery__mutation = \
         trial.suggest_categorical('mutation', ['Normal', 'HalfnormIncrease', 'UniformIncrease'])
-    params.rule_generation__mutation = getattr(mutation, params.rule_generation__mutation)()
+    params.rule_discovery__mutation = getattr(mutation, params.rule_discovery__mutation)()
     # Unique to MPR
-    params.rule_generation__mutation__sigma = np.array([trial.suggest_float('sigma_mutate_low', *sigma_space),
+    params.rule_discovery__mutation__sigma = np.array([trial.suggest_float('sigma_mutate_low', *sigma_space),
                                                         trial.suggest_float('sigma_mutate_prop', *sigma_space)])
 
-    params.rule_generation__init = \
+    params.rule_discovery__init = \
         trial.suggest_categorical('initialization', ['MeanInit', 'NormalInit'])
-    params.rule_generation__init = getattr(rule.initialization, params.rule_generation__init)()
-    if isinstance(params.rule_generation__init, rule.initialization.NormalInit):
+    params.rule_discovery__init = getattr(rule.initialization, params.rule_discovery__init)()
+    if isinstance(params.rule_discovery__init, rule.initialization.NormalInit):
         # Unique to MPR
-        params.rule_generation__init__sigma = np.array([trial.suggest_float('sigma_init_low', *sigma_space),
+        params.rule_discovery__init__sigma = np.array([trial.suggest_float('sigma_init_low', *sigma_space),
                                                         trial.suggest_float('sigma_init_prop', *sigma_space)])
 
     alpha_space = [0, 0.1]
-    params.rule_generation__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
+    params.rule_discovery__init__fitness__alpha = trial.suggest_float('alpha', *alpha_space)
 
-    params.rule_generation__operator = \
+    params.rule_discovery__operator = \
         trial.suggest_categorical('operator', ['&', ',', '+'])
 
-    if params.rule_generation__operator in ('+', ','):
-        params.rule_generation__n_iter = trial.suggest_int('n_iter_es', low=1, high=50)
+    if params.rule_discovery__operator in ('+', ','):
+        params.rule_discovery__n_iter = trial.suggest_int('n_iter_es', low=1, high=50)
     else:
-        params.rule_generation__delay = trial.suggest_int('delay', low=1, high=25)
+        params.rule_discovery__delay = trial.suggest_int('delay', low=1, high=25)
 
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
     params.solution_composition__selection = \
@@ -83,7 +83,7 @@ def run(problem: str):
 
     tuner = OptunaTuner(X_train=X, y_train=y, **shared_tuning_params,
                         scoring='fitness')
-    experiment.with_tuning(rule_generation_space, tuner=tuner)
+    experiment.with_tuning(rule_discovery_space, tuner=tuner)
 
     experiment.perform(evaluation=None)
 
