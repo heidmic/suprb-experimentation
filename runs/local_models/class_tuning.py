@@ -151,7 +151,11 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
 
     experiment.perform(evaluation, cv=ShuffleSplit(
         n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+    
+    trained_estimator = experiment.estimators_[0]
 
+    trained_estimator.swap_models(Ridge())
+    
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
 
