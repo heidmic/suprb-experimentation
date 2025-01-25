@@ -27,7 +27,7 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.tight_layout()
 
-def get_histogram(heuristic_name, dataset_name, metric_name, steps):
+def get_histogram(experiment_name, dataset_name, metric_name, steps):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
@@ -35,7 +35,7 @@ def get_histogram(heuristic_name, dataset_name, metric_name, steps):
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
     for run in all_runs:
         exp = client.get_experiment(run)
-        if dataset_name in exp.name and heuristic_name in exp.name:
+        if dataset_name in exp.name and experiment_name in exp.name:
 
             run_ids = [item for item in next(os.walk(config['data_directory']+ '/' + str(run)))[1] if item != '.trash']
             exp_res = []
@@ -61,24 +61,24 @@ def create_plots(metric_name='elitist_complexity', steps=32):
     for dataset_name in config['datasets']:
         results = [[],[],[]]
         legend_labels = []
-        for heuristic_name in config['heuristics']:
-            result = get_histogram(heuristic_name, dataset_name, metric_name, steps)
+        for model_name in config['model_names']:
+            result = get_histogram(model_name, dataset_name, metric_name, steps)
             for i, res in enumerate(result):
                 results[0].append(res)
                 results[1].append(i)
-                results[2].append(heuristic_name)
-            legend_labels.append(config['heuristics'][heuristic_name])
+                results[2].append(model_name)
+            legend_labels.append(config['model_names'][model_name])
 
-        results = {metric_name: results[0], 'step': results[1], 'optimizer_name': results[2]}
+        results = {metric_name: results[0], 'step': results[1], 'model_name': results[2]}
         res_data = pd.DataFrame(results)
 
         def ax_config(axis):
             axis.set_xlabel('Iteration')
             axis.set_ylabel(config['metrics'][metric_name])
-            axis.legend(title='Optimierer', labels=legend_labels)
+            axis.legend(title='Local models', labels=legend_labels)
 
         fig, ax = plt.subplots()
-        ax = sns.lineplot(x='step', y=metric_name, data=res_data, style='optimizer_name', hue='optimizer_name')
+        ax = sns.lineplot(x='step', y=metric_name, data=res_data, style='model_name', hue='model_name')
         ax_config(ax)
         fig.savefig(f"{final_output_dir}/{output_dir}/{dataset_name}_{metric_name}.png")
     

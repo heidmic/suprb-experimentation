@@ -4,7 +4,7 @@ import mlflow
 from optuna import Trial
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.linear_model import Lasso, Ridge, LogisticRegression
+from sklearn.linear_model import ElasticNet, Lasso, Ridge, LogisticRegression
 from sklearn.utils import Bunch, shuffle
 from sklearn.model_selection import ShuffleSplit
 
@@ -27,6 +27,12 @@ import suprb.solution.mixing_model as mixing_model
 
 random_state = 42
 
+Regressors = {'lasso': Lasso(alpha=0.01, random_state=random_state, tol=1e-3),
+                  'elasticNet': ElasticNet(alpha=0.01, l1_ratio=0.5, random_state=random_state, fit_intercept=True,),
+                   'ridge': Ridge(alpha=0.01, random_state=random_state)}
+Classifiers = {'l1': LogisticRegression(penalty='l1', C=1.0, random_state=random_state, solver='saga'),
+               'l2': LogisticRegression(penalty='l2', C=1.0, random_state=random_state, solver='saga'),
+               'elasticnet': LogisticRegression(penalty='elasticnet', C=1.0, l1_ratio=0.5, random_state=random_state, solver='saga')}
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
@@ -42,15 +48,9 @@ def is_class(name: str) -> bool:
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
-@click.option('-l', '--local_model', type=click.STRING, default='Ridge')
-@click.option('-j', '--job_id', type=click.STRING, default='NA')
-@click.option('-r', '--rule_amount', type=click.INT, default=1)
-@click.option('-f', '--filter_subpopulation', type=click.STRING, default='FilterSubpopulation')
-@click.option('-e', '--experience_calculation', type=click.STRING, default='ExperienceCalculation')
-@click.option('-w', '--experience_weight', type=click.INT, default=1)
-def run(problem: str, local_model: str, job_id: str, rule_amount: int, filter_subpopulation: str,
-        experience_calculation: str, experience_weight: int):
-    print(f"Problem is {problem}, with job id {job_id}")
+@click.option('-l', '--local_model', type=click.STRING, default='ridge')
+def run(problem: str, local_model: str):
+    print(f"Problem is {problem}, with local model {local_model}")
     isClass = is_class(name=problem)
     X, y = load_dataset(name=problem, return_X_y=True)
     if not isClass:
@@ -60,15 +60,19 @@ def run(problem: str, local_model: str, job_id: str, rule_amount: int, filter_su
     X, y = shuffle(X, y, random_state=random_state)
 
     model = Ridge(alpha=0.01,random_state=random_state)
+    models = Regressors
     scoring = 'neg_mean_squared_error'
     if isClass:
+        models = Classifiers
         model = LogisticRegression(random_state=random_state)
         scoring='accuracy'
     
     if local_model == 'Lasso':
-        model = Lasso(random_state=random_state)
+        model = Lasso(alpha=0.01, random_state=random_state, tol=1e-3)
     elif local_model == 'Ridge':
         model = Ridge(alpha=0.01, random_state=random_state)
+
+    model = models[local_model]
 
     estimator = SupRB(
             rule_generation=es.ES1xLambda(
@@ -81,7 +85,7 @@ def run(problem: str, local_model: str, job_id: str, rule_amount: int, filter_su
                 origin_generation=origin.SquaredError(),
             ),
             solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
-            n_iter=32,
+            n_iter=64,
             n_rules=4,
             verbose=10,
             logger=CombinedLogger(
@@ -94,7 +98,7 @@ def run(problem: str, local_model: str, job_id: str, rule_amount: int, filter_su
             cv=4,
             n_jobs_cv=4,
             n_jobs=4,
-            n_calls=100,
+            n_calls=200,
             timeout=60*60*24,  # 24 hours
             scoring=scoring,
             verbose=10
@@ -123,12 +127,12 @@ def run(problem: str, local_model: str, job_id: str, rule_amount: int, filter_su
             'solution_composition__mutation_rate', 0, 0.1)
 
         # Mixing
-        params.solution_composition__init__mixing__filter_subpopulation__rule_amount = rule_amount
-        params.solution_composition__init__mixing__experience_weight = experience_weight
+        #params.solution_composition__init__mixing__filter_subpopulation__rule_amount = 4
+        #params.solution_composition__init__mixing__experience_weight = 1.0
 
-        params.solution_composition__init__mixing__filter_subpopulation = getattr(mixing_model, filter_subpopulation)()
+        params.solution_composition__init__mixing__filter_subpopulation = getattr(mixing_model, "FilterSubpopulation")()
         params.solution_composition__init__mixing__experience_calculation = getattr(
-            mixing_model, experience_calculation)()
+            mixing_model, "ExperienceCalculation")()
 
         # Upper and lower bound clip the experience into a given range
         # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
@@ -160,21 +164,24 @@ def run(problem: str, local_model: str, job_id: str, rule_amount: int, filter_su
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
     
-    trained_estimator = experiment.estimators_[0]
-    new_model = Ridge(alpha=0.01, random_state=random_state)
-    swapped_elitist = trained_estimator.swap_models(new_model)
+    models.pop(local_model)
+    for model in models:
+        trained_estimator = experiment.estimators_[0]
+        new_model = model
+        swapped_elitist = trained_estimator.swap_models(new_model)
 
-    experimentSwapped = Experiment(name=f'{experiment_name} Swapped n:{new_model}', verbose=10)
-    experimentSwapped.with_random_states(random_states, n_jobs=8)
+        experimentSwapped = Experiment(name=f'{experiment_name} Swapped n:{new_model}', verbose=10)
+        experimentSwapped.with_random_states(random_states, n_jobs=8)
 
-    evaluation = CrossValidate(
-        estimator=swapped_elitist, X=X, y=y, random_state=random_state, verbose=10)
+        evaluation = CrossValidate(
+            estimator=swapped_elitist, X=X, y=y, random_state=random_state, verbose=10)
 
-    experimentSwapped.perform(evaluation, cv=ShuffleSplit(
-        n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
-    
-    mlflow.set_experiment(name=f'{experiment_name} Swapped n:{new_model}')
-    log_experiment(experimentSwapped)
+        experimentSwapped.perform(evaluation, cv=ShuffleSplit(
+            n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+        
+        mlflow.set_experiment(name=f'{experiment_name} Swapped n:{new_model}')
+        log_experiment(experimentSwapped)
+    print("Number of trained estimators: ", experiment.estimators_.__len__)
 
 
 if __name__ == '__main__':

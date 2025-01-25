@@ -98,23 +98,23 @@ def get_all_runs(problem):
         config = json.load(f)
 
     all_runs_list = []
-    heuristics = [key for key in config['heuristics']]
+    models = [key for key in config['model_names']]
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
 
     for run in all_runs:
         for run_name in mlflow.search_runs([run])['tags.mlflow.runName']:
             if problem in run_name:
-                if any(substring in run_name for substring in heuristics):
+                if any(substring in run_name for substring in models):
                     all_runs_list.append(mlflow.search_runs([run]))
                     print(run_name)
 
     return all_runs_list
 
 
-def get_dataframe(all_runs_list, heuristic, dataset):
+def get_dataframe(all_runs_list, model, dataset):
     df = None
     for run in all_runs_list:
-        df = run[run['tags.mlflow.runName'].str.contains(f"{heuristic}")]
+        df = run[run['tags.mlflow.runName'].str.contains(f"{model}")]
 
         if not df.empty:
             df = df[df['tags.mlflow.runName'].str.contains(f"{dataset}")]
