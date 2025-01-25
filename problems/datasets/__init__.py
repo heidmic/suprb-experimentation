@@ -4,6 +4,7 @@ is_classification
 __all__ = [
     'load_iris'
     'load_breastcancer'
+    'load_dry_bean'
     'load_forest_fires',
     'load_energy_heat',
     'load_energy_cool',

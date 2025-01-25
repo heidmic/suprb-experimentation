@@ -4,7 +4,7 @@ import mlflow
 from optuna import Trial
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.linear_model import Ridge, LogisticRegression
+from sklearn.linear_model import Lasso, Ridge, LogisticRegression
 from sklearn.utils import Bunch, shuffle
 from sklearn.model_selection import ShuffleSplit
 
@@ -42,12 +42,13 @@ def is_class(name: str) -> bool:
 
 @click.command()
 @click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-l', '--local_model', type=click.STRING, default='Ridge')
 @click.option('-j', '--job_id', type=click.STRING, default='NA')
 @click.option('-r', '--rule_amount', type=click.INT, default=1)
 @click.option('-f', '--filter_subpopulation', type=click.STRING, default='FilterSubpopulation')
 @click.option('-e', '--experience_calculation', type=click.STRING, default='ExperienceCalculation')
 @click.option('-w', '--experience_weight', type=click.INT, default=1)
-def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
+def run(problem: str, local_model: str, job_id: str, rule_amount: int, filter_subpopulation: str,
         experience_calculation: str, experience_weight: int):
     print(f"Problem is {problem}, with job id {job_id}")
     isClass = is_class(name=problem)
@@ -58,19 +59,24 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
         X = MinMaxScaler(feature_range=(-1, 1)).fit_transform(X) 
     X, y = shuffle(X, y, random_state=random_state)
 
-    local_model = Ridge(alpha=0.01,random_state=random_state)
+    model = Ridge(alpha=0.01,random_state=random_state)
     scoring = 'neg_mean_squared_error'
     if isClass:
-        local_model = LogisticRegression(random_state=random_state)
+        model = LogisticRegression(random_state=random_state)
         scoring='accuracy'
     
+    if local_model == 'Lasso':
+        model = Lasso(random_state=random_state)
+    elif local_model == 'Ridge':
+        model = Ridge(alpha=0.01, random_state=random_state)
+
     estimator = SupRB(
             rule_generation=es.ES1xLambda(
                 operator='&',
                 n_iter=1000,
                 delay=30,
                 init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
-                                                model=local_model),
+                                                model=model),
                 mutation=mutation.HalfnormIncrease(),
                 origin_generation=origin.SquaredError(),
             ),
@@ -81,7 +87,6 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
             logger=CombinedLogger(
                 [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
-
     
     tuning_params = dict(
             estimator=estimator,
@@ -89,7 +94,7 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
             cv=4,
             n_jobs_cv=4,
             n_jobs=4,
-            n_calls=1000,
+            n_calls=100,
             timeout=60*60*24,  # 24 hours
             scoring=scoring,
             verbose=10
@@ -136,7 +141,7 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
             params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
 
-    experiment_name = f'SupRB Tuning j:{job_id} p:{problem}; r:{rule_amount}; f:{filter_subpopulation}; -e:{experience_calculation}'
+    experiment_name = f'SupRB Tuning p:{problem}; l:{local_model}'
     print(experiment_name)
     experiment = Experiment(name=experiment_name,  verbose=10)
 
@@ -152,12 +157,24 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
     experiment.perform(evaluation, cv=ShuffleSplit(
         n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
     
-    trained_estimator = experiment.estimators_[0]
-
-    trained_estimator.swap_models(Ridge())
-    
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
+    
+    trained_estimator = experiment.estimators_[0]
+    new_model = Ridge(alpha=0.01, random_state=random_state)
+    swapped_elitist = trained_estimator.swap_models(new_model)
+
+    experimentSwapped = Experiment(name=f'{experiment_name} Swapped n:{new_model}', verbose=10)
+    experimentSwapped.with_random_states(random_states, n_jobs=8)
+
+    evaluation = CrossValidate(
+        estimator=swapped_elitist, X=X, y=y, random_state=random_state, verbose=10)
+
+    experimentSwapped.perform(evaluation, cv=ShuffleSplit(
+        n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+    
+    mlflow.set_experiment(name=f'{experiment_name} Swapped n:{new_model}')
+    log_experiment(experimentSwapped)
 
 
 if __name__ == '__main__':
