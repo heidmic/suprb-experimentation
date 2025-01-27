@@ -23,8 +23,8 @@ def run(problem: str):
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    @param_space('rule_generation')
-    def rule_generation_space(trial: Trial, params: Bunch):
+    @param_space('rule_discovery')
+    def rule_discovery_space(trial: Trial, params: Bunch):
         sigma_space = [0, math.sqrt(X.shape[1])]
 
         # params.mutation = trial.suggest_categorical('mutation', ['HalfnormIncrease', 'Normal'])
@@ -44,7 +44,7 @@ def run(problem: str):
     experiment = Experiment(name=f'{problem} RG Tuning', params=params, verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **shared_tuning_params)
-    experiment.with_tuning(rule_generation_space, tuner=tuner)
+    experiment.with_tuning(rule_discovery_space, tuner=tuner)
 
     experiment.perform(evaluation=None)
 

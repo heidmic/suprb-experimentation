@@ -74,7 +74,7 @@ def run(problem: str):
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
-        rule_generation=rs.RandomSearch(
+        rule_discovery=rs.RandomSearch(
             init=rule.initialization.HalfnormInit(fitness=rule.fitness.VolumeWu(),
                                                   model=Ridge(alpha=0.01,
                                                   random_state=random_state)),
@@ -103,10 +103,10 @@ def run(problem: str):
     @param_space()
     def suprb_RS_GA_space(trial: Trial, params: Bunch):
         # RS
-        params.rule_generation__rules_generated = trial.suggest_int(
-            'rule_generation__rules_generated', 5, 500)
-        params.rule_generation__init__sigma = trial.suggest_float(
-                 'rule_generation__init__sigma', 0.01, 1)
+        params.rule_discovery__rules_generated = trial.suggest_int(
+            'rule_discovery__rules_generated', 5, 500)
+        params.rule_discovery__init__sigma = trial.suggest_float(
+                 'rule_discovery__init__sigma', 0.01, 1)
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(

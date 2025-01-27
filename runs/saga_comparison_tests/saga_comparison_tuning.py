@@ -57,7 +57,7 @@ def run(problem: str, solution_composition: str, job_id: str):
         X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
-        rule_generation=es.ES1xLambda(),
+        rule_discovery=es.ES1xLambda(),
         n_iter=32, n_rules=4, verbose=10,
         logger=CombinedLogger([('stdout', StdoutLogger()),
                                ('default', DefaultLogger())]),)
@@ -80,9 +80,9 @@ def run(problem: str, solution_composition: str, job_id: str):
         # ES
         sigma_space = [0, np.sqrt(X.shape[1])]
 
-        params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', *sigma_space)
-        params.rule_generation__init__fitness__alpha = trial.suggest_float(
-            'rule_generation__init__fitness__alpha', 0.01, 0.2)
+        params.rule_discovery__mutation__sigma = trial.suggest_float('rule_discovery__mutation__sigma', *sigma_space)
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
+            'rule_discovery__init__fitness__alpha', 0.01, 0.2)
 
        # Solution Composition
         if solution_composition == 'ga':

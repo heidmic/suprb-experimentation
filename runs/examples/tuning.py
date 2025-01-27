@@ -28,7 +28,7 @@ if __name__ == '__main__':
     model = suprb.SupRB(
         n_iter=4,
         n_jobs=2,
-        rule_generation=ES1xLambda(
+        rule_discovery=ES1xLambda(
             init=suprb.rule.initialization.HalfnormInit(),
             mutation=Normal(),
         ),
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     )
 
     param_space = {
-        'rule_generation__init__sigma': Real(0.01, 2),
-        'rule_generation__mutation__sigma': Real(0.01, 2),
+        'rule_discovery__init__sigma': Real(0.01, 2),
+        'rule_discovery__mutation__sigma': Real(0.01, 2),
     }
 
     tuner = SkoptTuner(model, X_train, y_train, scoring='r2', n_calls=10, cv=2,

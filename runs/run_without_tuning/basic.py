@@ -92,7 +92,7 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
     estimator = SupRB(n_iter=n_iter,
                       n_rules=16,
                       n_jobs=1,
-                      rule_generation=ES1xLambda(n_jobs=1,
+                      rule_discovery=ES1xLambda(n_jobs=1,
                                                  origin_generation=origin.SquaredError(),
                                                  init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
                                                                                    model=Ridge(alpha=0.01, random_state=random_state))),
@@ -101,8 +101,8 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
                                                             init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight))),
                       logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
 
-    estimator = SupRBWrapper(rule_generation__mutation__sigma=2.53261854608031, rule_generation__delay=134,
-                             rule_generation__init__fitness__alpha=0.043582602456505595)
+    estimator = SupRBWrapper(rule_discovery__mutation__sigma=2.53261854608031, rule_discovery__delay=134,
+                             rule_discovery__init__fitness__alpha=0.043582602456505595)
 
     jobs = 8
 
