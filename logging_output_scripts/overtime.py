@@ -35,7 +35,7 @@ def get_histogram(experiment_name, dataset_name, metric_name, steps):
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
     for run in all_runs:
         exp = client.get_experiment(run)
-        if dataset_name in exp.name and experiment_name in exp.name:
+        if dataset_name in exp.name and experiment_name in exp.name and "n:" not in exp.name:
 
             run_ids = [item for item in next(os.walk(config['data_directory']+ '/' + str(run)))[1] if item != '.trash']
             exp_res = []
@@ -51,7 +51,7 @@ def get_histogram(experiment_name, dataset_name, metric_name, steps):
             return exp_res[:steps]
 
 
-def create_plots(metric_name='elitist_complexity', steps=32):
+def create_plots(metric_name='elitist_complexity', steps=64):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
     final_output_dir = f"{config['output_directory']}"

@@ -3,6 +3,7 @@ import click
 import mlflow
 from optuna import Trial
 
+from sklearn import metrics, base
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.linear_model import ElasticNet, Lasso, Ridge, LogisticRegression
 from sklearn.utils import Bunch, shuffle
@@ -10,7 +11,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
-from experiments.mlflow import log_experiment
+from experiments.mlflow import log_experiment, log_run, log_run_result
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
@@ -62,10 +63,12 @@ def run(problem: str, local_model: str):
     model = Ridge(alpha=0.01,random_state=random_state)
     models = Regressors
     scoring = 'neg_mean_squared_error'
+    mixing = mixing_model.ErrorExperienceHeuristic()
     if isClass:
         models = Classifiers
         model = LogisticRegression(random_state=random_state)
         scoring='accuracy'
+        mixing = mixing_model.ErrorExperienceClassification()
     
     if local_model == 'Lasso':
         model = Lasso(alpha=0.01, random_state=random_state, tol=1e-3)
@@ -87,7 +90,7 @@ def run(problem: str, local_model: str):
             solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
             n_iter=64,
             n_rules=4,
-            verbose=10,
+            verbose=0,
             logger=CombinedLogger(
                 [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
@@ -98,7 +101,7 @@ def run(problem: str, local_model: str):
             cv=4,
             n_jobs_cv=4,
             n_jobs=4,
-            n_calls=200,
+            n_calls=1,
             timeout=60*60*24,  # 24 hours
             scoring=scoring,
             verbose=10
@@ -129,7 +132,7 @@ def run(problem: str, local_model: str):
         # Mixing
         #params.solution_composition__init__mixing__filter_subpopulation__rule_amount = 4
         #params.solution_composition__init__mixing__experience_weight = 1.0
-
+        params.solution_composition__init__mixing = mixing
         params.solution_composition__init__mixing__filter_subpopulation = getattr(mixing_model, "FilterSubpopulation")()
         params.solution_composition__init__mixing__experience_calculation = getattr(
             mixing_model, "ExperienceCalculation")()
@@ -147,7 +150,7 @@ def run(problem: str, local_model: str):
 
     experiment_name = f'SupRB Tuning p:{problem}; l:{local_model}'
     print(experiment_name)
-    experiment = Experiment(name=experiment_name,  verbose=10)
+    experiment = Experiment(name=experiment_name,  verbose=0)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
@@ -156,32 +159,39 @@ def run(problem: str, local_model: str):
     experiment.with_random_states(random_states, n_jobs=8)
 
     evaluation = CrossValidate(
-        estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
+        estimator=estimator, X=X, y=y, random_state=random_state, verbose=5)
 
     experiment.perform(evaluation, cv=ShuffleSplit(
-        n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
+        n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)#, scoring=scoring
     
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
-    
+
     models.pop(local_model)
     for model in models:
-        trained_estimator = experiment.estimators_[0]
-        new_model = model
-        swapped_elitist = trained_estimator.swap_models(new_model)
+        trained_estimator = experiment.experiments[0].estimators_[0]
+        swapped_elitist = trained_estimator.model_swap(model)
+        swapped_name = f'{experiment_name} Swapped n:{model}'
 
-        experimentSwapped = Experiment(name=f'{experiment_name} Swapped n:{new_model}', verbose=10)
-        experimentSwapped.with_random_states(random_states, n_jobs=8)
-
-        evaluation = CrossValidate(
-            estimator=swapped_elitist, X=X, y=y, random_state=random_state, verbose=10)
-
-        experimentSwapped.perform(evaluation, cv=ShuffleSplit(
-            n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
-        
-        mlflow.set_experiment(name=f'{experiment_name} Swapped n:{new_model}')
-        log_experiment(experimentSwapped)
-    print("Number of trained estimators: ", experiment.estimators_.__len__)
+        splitter = ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state)
+        for i, (train_index, test_index) in enumerate(splitter.split(X)):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            swapped_elitist.fit(X_train, y_train)
+            estimator = trained_estimator
+            estimator.elitist_ = swapped_elitist
+            estimator.is_fitted = True
+            prediction = estimator.predict(X_test)
+            scoring = "mean_squared_error" if not isClass else "accuracy"
+            scorer = getattr(metrics, scoring)
+            score = scorer(y_test, prediction)
+            name = f'{swapped_name} fold-{i}'
+            swapped_experiment = Experiment(name=name,  verbose=0)
+            swapped_experiment.estimators_ = [estimator]
+            result_dict = {'test_score': [score]}
+            swapped_experiment.results_ = result_dict
+            mlflow.set_experiment(name)
+            log_experiment(swapped_experiment)
 
 
 if __name__ == '__main__':
