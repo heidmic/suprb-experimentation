@@ -69,11 +69,6 @@ def run(problem: str, local_model: str):
         model = LogisticRegression(random_state=random_state)
         scoring='accuracy'
         mixing = mixing_model.ErrorExperienceClassification()
-    
-    if local_model == 'Lasso':
-        model = Lasso(alpha=0.01, random_state=random_state, tol=1e-3)
-    elif local_model == 'Ridge':
-        model = Ridge(alpha=0.01, random_state=random_state)
 
     model = models[local_model]
 
@@ -101,7 +96,7 @@ def run(problem: str, local_model: str):
             cv=4,
             n_jobs_cv=4,
             n_jobs=4,
-            n_calls=1,
+            n_calls=200,
             timeout=60*60*24,  # 24 hours
             scoring=scoring,
             verbose=10
