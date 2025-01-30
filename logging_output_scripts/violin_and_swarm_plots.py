@@ -8,6 +8,7 @@ from utils import datasets_map
 from sklearn.preprocessing import MinMaxScaler
 
 mse = "metrics.test_neg_mean_squared_error"
+mae = "metrics.test_neg_mean_absolute_error"
 complexity = "metrics.elitist_complexity"
 
 
@@ -66,6 +67,7 @@ def create_plots():
         # Invert values since they are stored as negatives
         if not config["normalize_datasets"] and config["data_directory"] == "mlruns":
             res_var[mse] *= -1
+            res_var[mae] *= -1
 
         def ax_config(axis, y_label):
             x_lab = ""
@@ -93,6 +95,7 @@ def create_plots():
         }
 
         y_axis_label = {"MSE": mse,
+                        "MAE": mae,
                         "Complexity": complexity
                         }
 

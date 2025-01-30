@@ -56,7 +56,6 @@ from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 
 
-
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
     from problems import datasets
@@ -76,6 +75,9 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, random_s
 
     X = X.values
     y = y.values.flatten()
+
+    X, y = scale_X_y(X, y)
+    X, y = shuffle(X, y, random_state=random_state)
 
     if scaler_type:
         scaler = MinMaxScaler(feature_range=(-1, 1))
