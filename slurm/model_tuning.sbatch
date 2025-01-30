@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --time=124:00:00
+#SBATCH --time=96:00:00
 #SBATCH --partition=cpu
 #SBATCH --output=output/models-%j.txt
 #SBATCH --cpus-per-task=5
