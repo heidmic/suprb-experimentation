@@ -13,7 +13,7 @@ from sklearn.datasets import load_diabetes
 DATASETS_PATH = (pathlib.Path(__file__).parent / 'data').resolve()
 CLASS_DATASETS_PATH = (pathlib.Path(__file__).parent / 'class_data').resolve()
 
-CLASSIFICATION_TASKS = ["iris", "breastcancer", "dry_bean"]
+CLASSIFICATION_TASKS = ["iris", "breastcancer", "dry_bean", "abalone", "car", "cirrhosis", "raisin", "balance-scale"]
 
 def is_classification(taskname: str) -> bool:
     return taskname in CLASSIFICATION_TASKS
@@ -40,12 +40,12 @@ def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: 
 def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool,
                  remove_columns: list = None, label_to_num: bool = True, oneHotEncoding: list = None) -> ProblemRepr:
     frame = pd.read_csv(CLASS_DATASETS_PATH / filename, sep=',')
-
+    frame = frame.dropna()
     data = frame.drop(columns=[target_column] + (remove_columns if remove_columns is not None else []))
     target = frame[target_column]
 
     if not as_frame:
-        data = data.to_numpy(dtype=float)
+        data = data.to_numpy()
         target = target.to_numpy()
     
     if label_to_num:
@@ -58,7 +58,7 @@ def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_f
             ((OneHotEncoder(sparse=False)), oneHotEncoding),
             remainder='passthrough')
         # transforming
-        X = transformer.fit_transform(X)
+        data = transformer.fit_transform(data)
 
     if return_X_y:
         return data, target
@@ -67,6 +67,61 @@ def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_f
     else:
         return Bunch(X=data, y=target)
 
+def load_raisin(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the dataset.
+
+    ==============   ==================
+    Samples total    900
+    Dimensionality   7
+    Features         real, TODO: ranges
+    Targets          strings, binary,
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/ml/datasets/raisin.
+    """
+    return load_class_dataset(filename='raisin.csv', target_column='Class', return_X_y=return_X_y, as_frame=as_frame)
+
+def load_cirrhosis(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the dataset.
+
+    ==============   ==================
+    Samples total    345
+    Dimensionality   19
+    Features         real, TODO: ranges
+    Targets          string, 3 classes
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/dataset/878/cirrhosis+patient+survival+prediction+dataset-1.
+    """
+    return load_class_dataset(filename='cirrhosis.csv', target_column='Status', return_X_y=return_X_y, as_frame=as_frame, oneHotEncoding=[1,3,4,5,6,7,8])
+
+def load_car(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the dataset.
+
+    ==============   ==================
+    Samples total    1728
+    Dimensionality   6
+    Features         categorical, TODO: ranges
+    Targets          string, 4 classes
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/dataset/19/car+evaluation.
+    """
+    return load_class_dataset(filename='car.csv', target_column='class', return_X_y=return_X_y, as_frame=as_frame, oneHotEncoding=[0, 1, 2, 3, 4, 5])
+
+def load_abalone(return_X_y: bool = True, as_frame: bool = False):
+    """ Load and return the dataset.
+
+    ==============   ==================
+    Samples total    4177
+    Dimensionality   8
+    Features         real, TODO: ranges
+    Targets          integer,  25 classes
+    ==============   ==================
+
+    Downloaded from https://archive.ics.uci.edu/dataset/1/abalone.
+    """
+    return load_class_dataset(filename='abalone.csv', target_column='Rings', return_X_y=return_X_y, as_frame=as_frame, oneHotEncoding=[0])
 
 def load_iris(return_X_y: bool = True, as_frame: bool = False):
     """ Load and return the dataset.
@@ -75,7 +130,7 @@ def load_iris(return_X_y: bool = True, as_frame: bool = False):
     Samples total    150
     Dimensionality   4
     Features         real, TODO: ranges
-    Targets          string, TODO: ranges
+    Targets          string, 3 classes
     ==============   ==================
 
     Downloaded from https://archive.ics.uci.edu/dataset/53/iris.
@@ -89,7 +144,7 @@ def load_dry_bean(return_X_y: bool = True, as_frame: bool = False):
     Samples total    13611
     Dimensionality   16
     Features         real, TODO: ranges
-    Targets          string, TODO: ranges
+    Targets          string, multi-class, TODO: ranges
     ==============   ==================
 
     Downloaded from https://archive.ics.uci.edu/dataset/602/dry+bean+dataset.
@@ -108,7 +163,7 @@ def load_breastcancer(return_X_y: bool = True, as_frame: bool = False):
 
     Downloaded from https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic.
     """
-    return load_class_dataset(filename='breastcancer.csv', target_column='Y', return_X_y=return_X_y, as_frame=as_frame, remove_columns=['ID'])
+    return load_class_dataset(filename='breastcancer.csv', target_column='Y', return_X_y=return_X_y, as_frame=as_frame)
 
 
 def load_combined_cycle_power_plant(return_X_y: bool = True, as_frame: bool = False):

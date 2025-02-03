@@ -17,6 +17,7 @@ from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
 
 from suprb import rule, SupRB
+from suprb.wrapper import SupRBWrapper
 from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
 from suprb.logging.stdout import StdoutLogger
@@ -24,6 +25,7 @@ from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import es, origin, mutation
 from suprb.solution.initialization import RandomInit
 import suprb.solution.mixing_model as mixing_model
+from suprb.rule.initialization import MeanInit
 
 
 random_state = 42
@@ -31,9 +33,9 @@ random_state = 42
 Regressors = {'lasso': Lasso(alpha=0.01, random_state=random_state, tol=1e-3),
                   'elasticNet': ElasticNet(alpha=0.01, l1_ratio=0.5, random_state=random_state, fit_intercept=True,),
                    'ridge': Ridge(alpha=0.01, random_state=random_state)}
-Classifiers = {'l1': LogisticRegression(penalty='l1', C=1.0, random_state=random_state, solver='saga'),
-               'l2': LogisticRegression(penalty='l2', C=1.0, random_state=random_state, solver='saga'),
-               'elasticnet': LogisticRegression(penalty='elasticnet', C=1.0, l1_ratio=0.5, random_state=random_state, solver='saga')}
+Classifiers = {'l1': LogisticRegression(penalty='l1', random_state=random_state, solver='saga'),
+               'l2': LogisticRegression(penalty='l2', random_state=random_state, solver='saga'),
+               'elasticnet': LogisticRegression(penalty='elasticnet', l1_ratio=0.5, random_state=random_state, solver='saga')}
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
@@ -48,8 +50,8 @@ def is_class(name: str) -> bool:
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
-@click.option('-l', '--local_model', type=click.STRING, default='ridge')
+@click.option('-p', '--problem', type=click.STRING, default='raisin')
+@click.option('-l', '--local_model', type=click.STRING, default='l1')
 def run(problem: str, local_model: str):
     print(f"Problem is {problem}, with local model {local_model}")
     isClass = is_class(name=problem)
@@ -59,33 +61,38 @@ def run(problem: str, local_model: str):
     elif isClass:
         X = MinMaxScaler(feature_range=(-1, 1)).fit_transform(X) 
     X, y = shuffle(X, y, random_state=random_state)
-
-    model = Ridge(alpha=0.01,random_state=random_state)
+    
     models = Regressors
     scoring = 'neg_mean_squared_error'
     mixing = mixing_model.ErrorExperienceHeuristic()
+    matching_type = rule.matching.OrderedBound()
+    fitness = rule.fitness.VolumeWu()
     if isClass:
         models = Classifiers
-        model = LogisticRegression(random_state=random_state)
         scoring='accuracy'
         mixing = mixing_model.ErrorExperienceClassification()
+        matching_type=rule.matching.BinaryBound()
+        fitness = rule.fitness.PseudoAccuracy()
+
 
     model = models[local_model]
 
-    estimator = SupRB(
-            rule_generation=es.ES1xLambda(
+    estimator = SupRBWrapper(
+            
+                rule_generation=es.ES1xLambda(
                 operator='&',
                 n_iter=1000,
                 delay=30,
-                init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
-                                                model=model),
+                init=rule.initialization.MeanInit(fitness=fitness,
+                                                model=model, matching_type=matching_type),
                 mutation=mutation.HalfnormIncrease(),
                 origin_generation=origin.SquaredError(),
             ),
             solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
+            solution_composition__init__mixing = mixing,
             n_iter=64,
             n_rules=4,
-            verbose=0,
+            verbose=-1,
             logger=CombinedLogger(
                 [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
@@ -99,7 +106,7 @@ def run(problem: str, local_model: str):
             n_calls=200,
             timeout=60*60*24,  # 24 hours
             scoring=scoring,
-            verbose=10
+            verbose=-1
     )
         
     @param_space()
@@ -108,8 +115,10 @@ def run(problem: str, local_model: str):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_generation__mutation__sigma = trial.suggest_float('rule_generation__mutation__sigma', *sigma_space)
-        params.rule_generation__init__fitness__alpha = trial.suggest_float(
-            'rule_generation__init__fitness__alpha', 0.01, 0.2)
+        #params.rule_generation__init__fitness = getattr(MeanInit, "fitness")()
+        #if isinstance(params.rule_generation__init__fitness, rule.fitness.VolumeWu):
+        #    params.rule_generation__init__fitness__alpha = trial.suggest_float(
+        #        'rule_generation__init__fitness__alpha', 0.01, 0.2)
 
         # GA
         params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)
@@ -127,7 +136,7 @@ def run(problem: str, local_model: str):
         # Mixing
         #params.solution_composition__init__mixing__filter_subpopulation__rule_amount = 4
         #params.solution_composition__init__mixing__experience_weight = 1.0
-        params.solution_composition__init__mixing = mixing
+        #params.solution_composition__init__mixing = mixing
         params.solution_composition__init__mixing__filter_subpopulation = getattr(mixing_model, "FilterSubpopulation")()
         params.solution_composition__init__mixing__experience_calculation = getattr(
             mixing_model, "ExperienceCalculation")()
@@ -142,10 +151,16 @@ def run(problem: str, local_model: str):
         else:
             params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
+        
+        # Local_model
+        if isClass:#isinstance(params.rule_generation__init__model, base.ClassifierMixin):
+            params.rule_generation__init__model__C = trial.suggest_float('rule_generation__init__model__C', 0.01, 2)
+            params.rule_generation__init__model__max_iter = trial.suggest_int('rule_generation__init__model__max_iter', 100, 1000)
+            params.rule_generation__init__model__tol = trial.suggest_float('rule_generation__init__model__tol', 1e-4, 1e-1)
 
     experiment_name = f'SupRB Tuning p:{problem}; l:{local_model}'
     print(experiment_name)
-    experiment = Experiment(name=experiment_name,  verbose=0)
+    experiment = Experiment(name=experiment_name,  verbose=1)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
@@ -154,7 +169,7 @@ def run(problem: str, local_model: str):
     experiment.with_random_states(random_states, n_jobs=8)
 
     evaluation = CrossValidate(
-        estimator=estimator, X=X, y=y, random_state=random_state, verbose=5)
+        estimator=estimator, X=X, y=y, random_state=random_state, verbose=3)
 
     experiment.perform(evaluation, cv=ShuffleSplit(
         n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)#, scoring=scoring
