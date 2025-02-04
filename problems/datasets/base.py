@@ -77,7 +77,7 @@ def load_raisin(return_X_y: bool = True, as_frame: bool = False):
     Targets          strings, binary,
     ==============   ==================
 
-    Downloaded from https://archive.ics.uci.edu/ml/datasets/raisin.
+    Downloaded from https://archive.ics.uci.edu/ml/datasets/850/raisin.
     """
     return load_class_dataset(filename='raisin.csv', target_column='Class', return_X_y=return_X_y, as_frame=as_frame)
 

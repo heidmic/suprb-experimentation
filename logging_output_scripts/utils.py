@@ -13,7 +13,7 @@ def filter_runs(all_runs_df=None):
     if all_runs_df is not None:
         all_runs_df = mlflow.search_runs(search_all_experiments=True)
 
-    for heuristic in config["heuristics"].keys():
+    for heuristic in config["model_names"].keys():
         for dataset in config["datasets"].keys():
             filtered_df = all_runs_df[
                 all_runs_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False) &
@@ -48,7 +48,7 @@ def get_csv_df(heuristic, dataset):
 
 
 def get_df(heuristic, dataset):
-    return results_dict[(heuristic, dataset)]
+    #return results_dict[(heuristic, dataset)]
 
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)

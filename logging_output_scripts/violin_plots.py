@@ -33,7 +33,8 @@ def create_violin_plots():
         res_var = 0
         first = True
         for model in config['model_names']:
-            fold_df = get_dataframe(all_runs_list=get_all_runs(problem=problem),model=model, dataset=problem)
+            model_name = f"l:{model}"
+            fold_df = get_dataframe(all_runs_list=get_all_runs(problem=problem),model=model_name, dataset=problem)
             if fold_df is not None:
                 name = []
                 for x in range(fold_df.shape[0]):
@@ -68,7 +69,7 @@ def create_violin_plots():
         title_dict = {"concrete_strength": "Concrete Strength",
                       "combined_cycle_power_plant": "Combined Cycle Power Plant",
                       "airfoil_self_noise": "Airfoil Self Noise",
-                      "energy_cool": "Energy Efficiency Cooling"}
+                      "energy_heat": "Energy Efficiency Heating"}
         ax.set_title(title_dict[problem], style="italic")
 
         ax.set_box_aspect(1)

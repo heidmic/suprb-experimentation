@@ -61,13 +61,14 @@ def create_plots(metric_name='elitist_complexity', steps=64):
     for dataset_name in config['datasets']:
         results = [[],[],[]]
         legend_labels = []
-        for model_name in config['model_names']:
+        for model in config['model_names']:
+            model_name = f"l:{model}"
             result = get_histogram(model_name, dataset_name, metric_name, steps)
             for i, res in enumerate(result):
                 results[0].append(res)
                 results[1].append(i)
                 results[2].append(model_name)
-            legend_labels.append(config['model_names'][model_name])
+            legend_labels.append(config['model_names'][model])
 
         results = {metric_name: results[0], 'step': results[1], 'model_name': results[2]}
         res_data = pd.DataFrame(results)
