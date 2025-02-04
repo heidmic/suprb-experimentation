@@ -6,7 +6,7 @@
 #SBATCH --mem=30G
 
 JOB_DIR=/data/oc-compute03/wehrfabi/my-experimentation
-MODELS=("l1" "l2" "elasticnet")
+MODELS=("elasticnet")
 PROBLEMS=("breastcancer" "abalone" "raisin")
 
 for model in "${MODELS[@]}"; do
