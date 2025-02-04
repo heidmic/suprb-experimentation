@@ -1,0 +1,17 @@
+{
+    "data_directory": "mlruns",
+    "output_directory": "logging_output_scripts/outputs",
+    "normalize_datasets": false,
+    "model_names": {
+        "l1": "Logistic Regression with L1 Regularization"
+    },
+    "datasets": {
+        "raisin": "Raisin Dataset",
+        "cirrhosis": "Cirrhosis Dataset",
+        "breast_cancer": "Breast Cancer Dataset"
+    },
+    "metrics": {
+        "elitist_complexity": "Komplexitaet",
+        "elitist_error": "MSE"
+    }
+}

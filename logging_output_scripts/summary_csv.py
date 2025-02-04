@@ -53,4 +53,4 @@ def create_summary_csv(swaps=False):
 
 
 if __name__ == '__main__':
-    create_summary_csv(swaps = True)
+    create_summary_csv(swaps = False)

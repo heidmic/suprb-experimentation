@@ -3,6 +3,7 @@ import click
 import mlflow
 from optuna import Trial
 
+from sklearn.metrics import mean_squared_error, accuracy_score
 from sklearn import metrics, base
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.linear_model import ElasticNet, Lasso, Ridge, LogisticRegression
@@ -11,7 +12,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
-from experiments.mlflow import log_experiment, log_run, log_run_result
+from experiments.mlflow import log_experiment, _log_experiment, log_run, log_run_result
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
@@ -59,7 +60,7 @@ def run(problem: str, local_model: str):
     if not isClass:
         X, y = scale_X_y(X, y)
     elif isClass:
-        X = MinMaxScaler(feature_range=(-1, 1)).fit_transform(X) 
+        X = MinMaxScaler(feature_range=(-1, 1)).fit_transform(X)
     X, y = shuffle(X, y, random_state=random_state)
     
     models = Regressors
@@ -92,7 +93,7 @@ def run(problem: str, local_model: str):
             solution_composition__init__mixing = mixing,
             n_iter=64,
             n_rules=4,
-            verbose=-1,
+            verbose=0,
             logger=CombinedLogger(
                 [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
     )
@@ -103,10 +104,10 @@ def run(problem: str, local_model: str):
             cv=4,
             n_jobs_cv=4,
             n_jobs=4,
-            n_calls=200,
+            n_calls=100,
             timeout=60*60*24,  # 24 hours
             scoring=scoring,
-            verbose=-1
+            verbose=1
     )
         
     @param_space()
@@ -158,42 +159,48 @@ def run(problem: str, local_model: str):
             params.rule_generation__init__model__max_iter = trial.suggest_int('rule_generation__init__model__max_iter', 100, 1000)
             params.rule_generation__init__model__tol = trial.suggest_float('rule_generation__init__model__tol', 1e-4, 1e-1)
 
+    fold_amount = 8
+    random_amount = fold_amount
+
     experiment_name = f'SupRB Tuning p:{problem}; l:{local_model}'
     print(experiment_name)
-    experiment = Experiment(name=experiment_name,  verbose=1)
+    experiment = Experiment(name=experiment_name,  verbose=0)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
 
-    random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=8)
+    random_states = np.random.SeedSequence(random_state).generate_state(random_amount)
+    experiment.with_random_states(random_states, n_jobs=random_amount)
 
     evaluation = CrossValidate(
-        estimator=estimator, X=X, y=y, random_state=random_state, verbose=3)
+        estimator=estimator, X=X, y=y, random_state=random_state, verbose=5)
 
     experiment.perform(evaluation, cv=ShuffleSplit(
-        n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)#, scoring=scoring
+        n_splits=fold_amount, test_size=0.25, random_state=random_state), n_jobs=fold_amount)#, scoring=scoring
     
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
 
-    models.pop(local_model)
+    base_model = models.pop(local_model)
     for model in models:
-        trained_estimator = experiment.experiments[0].estimators_[0]
-        swapped_elitist = trained_estimator.model_swap(model)
         swapped_name = f'{experiment_name} Swapped n:{model}'
+        print(f"Swapping {model}")
 
-        splitter = ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state)
+        trained_estimators = []
+        for exp in experiment.experiments:
+            trained_estimators.extend(exp.estimators_)
+
+        splitter = ShuffleSplit(n_splits=fold_amount, test_size=0.25, random_state=random_states[0])
         for i, (train_index, test_index) in enumerate(splitter.split(X)):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
+            estimator = trained_estimators[i]
+            swapped_elitist = estimator.model_swap(model)
             swapped_elitist.fit(X_train, y_train)
-            estimator = trained_estimator
             estimator.elitist_ = swapped_elitist
             estimator.is_fitted = True
             prediction = estimator.predict(X_test)
-            scoring = "mean_squared_error" if not isClass else "accuracy"
-            scorer = getattr(metrics, scoring)
+            scorer = mean_squared_error if not isClass else accuracy_score
             score = scorer(y_test, prediction)
             name = f'{swapped_name} fold-{i}'
             swapped_experiment = Experiment(name=name,  verbose=0)
@@ -201,7 +208,7 @@ def run(problem: str, local_model: str):
             result_dict = {'test_score': [score]}
             swapped_experiment.results_ = result_dict
             mlflow.set_experiment(name)
-            log_experiment(swapped_experiment)
+            _log_experiment(swapped_experiment, parent_name=f'Swaps of {base_model}', depth=0)
 
 
 if __name__ == '__main__':

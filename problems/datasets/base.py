@@ -52,6 +52,7 @@ def load_class_dataset(filename: str, target_column: str, return_X_y: bool, as_f
         labels = np.unique(target)
         toNum = dict(zip(labels, range(1, len(labels)+1)))
         target = [toNum[x] for x in target]
+        target = np.array(target)
     
     if oneHotEncoding is not None:
         transformer = make_column_transformer(

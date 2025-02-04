@@ -13,42 +13,43 @@ def filter_runs(all_runs_df=None):
     if all_runs_df is not None:
         all_runs_df = mlflow.search_runs(search_all_experiments=True)
 
-    for heuristic in config["model_names"].keys():
+    for model in config["model_names"].keys():
+        model_name = f'l:{model}'
         for dataset in config["datasets"].keys():
             filtered_df = all_runs_df[
-                all_runs_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False) &
+                all_runs_df["tags.mlflow.runName"].str.contains(model_name, case=False, na=False) &
                 all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) &
                 (all_runs_df["tags.fold"] == 'True')
             ]
 
             if not filtered_df.empty:
-                print(f"Dataframe found for {heuristic} and {dataset}")
+                print(f"Dataframe found for {model} and {dataset}")
             else:
-                print(f"No run found with {heuristic} and {dataset}")
+                print(f"No run found with {model} and {dataset}")
 
-            results_dict[(heuristic, dataset)] = filtered_df
+            results_dict[(model, dataset)] = filtered_df
 
 
-def get_normalized_df(heuristic):
+def get_normalized_df(exp_name):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
     df = pd.DataFrame()
     for dataset in config["datasets"]:
         df = pd.concat([df, pd.read_csv(f"{dataset}_all.csv")])
 
-    return df[df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
+    return df[df["tags.mlflow.runName"].str.contains(exp_name, case=False, na=False)]
 
 
-def get_csv_df(heuristic, dataset):
+def get_csv_df(exp_name, dataset):
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
 
     df = pd.read_csv(f"{config['data_directory']}/{dataset}_all.csv")
-    return df[df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
+    return df[df["tags.mlflow.runName"].str.contains(exp_name, case=False, na=False)]
 
 
-def get_df(heuristic, dataset):
-    #return results_dict[(heuristic, dataset)]
+def get_df(exp_name, dataset):
+    #return results_dict[(exp_name, dataset)]
 
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
@@ -56,15 +57,15 @@ def get_df(heuristic, dataset):
     # all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
 
     df = mlflow.search_runs(
-        filter_string=f"tags.mlflow.runName ILIKE '%{heuristic}%' AND tags.mlflow.runName ILIKE '%{dataset}%' AND tags.fold = 'True'",
+        filter_string=f"tags.mlflow.runName ILIKE '%{exp_name}%' AND tags.mlflow.runName ILIKE '%{dataset}%' AND tags.fold = 'True'",
         search_all_experiments=True
     )
 
     if not df.empty:
-        print(f"Dataframe found for {heuristic} and {dataset}")
+        print(f"Dataframe found for {exp_name} and {dataset}")
         return df
     else:
-        print(f"No run found with {heuristic} and {dataset}")
+        print(f"No run found with {exp_name} and {dataset}")
         exit()
 
     for run in all_runs:
@@ -78,9 +79,9 @@ def get_df(heuristic, dataset):
         dataset_mask = df['tags.mlflow.runName'].str.contains(f"{dataset}")
         fold_mask = df['tags.fold'].str.contains("True", na=False)
 
-        if heuristic:
-            heuristic_mask = df['tags.mlflow.runName'].str.contains(f"{heuristic}")
-            df = df[heuristic_mask & dataset_mask & fold_mask]
+        if exp_name:
+            exp_name_mask = df['tags.mlflow.runName'].str.contains(f"{exp_name}")
+            df = df[exp_name_mask & dataset_mask & fold_mask]
         else:
             df = df[dataset_mask & fold_mask]
 
@@ -88,7 +89,7 @@ def get_df(heuristic, dataset):
             print("found!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n\n\n\n")
             return df
 
-    print(f"No run found with {heuristic} and {dataset}")
+    print(f"No run found with {exp_name} and {dataset}")
 
 
 def get_all_runs(problem):
@@ -111,10 +112,10 @@ def get_all_runs(problem):
     return all_runs_list
 
 
-def get_dataframe(all_runs_list, model, dataset):
+def get_dataframe(all_runs_list, exp_name, dataset):
     df = None
     for run in all_runs_list:
-        df = run[run['tags.mlflow.runName'].str.contains(f"{model}")]
+        df = run[run['tags.mlflow.runName'].str.contains(f"{exp_name}")]
 
         if not df.empty:
             df = df[df['tags.mlflow.runName'].str.contains(f"{dataset}")]

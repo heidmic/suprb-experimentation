@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #SBATCH --time=96:00:00
 #SBATCH --partition=cpu
-#SBATCH --output=output/models_elasticnet-%j.txt
+#SBATCH --output=output/models_l2-%j.txt
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=30G
 
 JOB_DIR=/data/oc-compute03/wehrfabi/my-experimentation
-MODELS=("elasticnet")
+MODELS=("l2")
 PROBLEMS=("breastcancer" "abalone" "raisin")
 
 for model in "${MODELS[@]}"; do

@@ -34,7 +34,7 @@ def create_violin_plots():
         first = True
         for model in config['model_names']:
             model_name = f"l:{model}"
-            fold_df = get_dataframe(all_runs_list=get_all_runs(problem=problem),model=model_name, dataset=problem)
+            fold_df = get_dataframe(all_runs_list=get_all_runs(problem=problem), exp_name=model_name, dataset=problem)
             if fold_df is not None:
                 name = []
                 for x in range(fold_df.shape[0]):
