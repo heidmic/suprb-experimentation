@@ -72,7 +72,7 @@ def run(problem: str, local_model: str):
         models = Classifiers
         scoring='accuracy'
         mixing = mixing_model.ErrorExperienceClassification()
-        matching_type=rule.matching.BinaryBound()
+        #matching_type=rule.matching.BinaryBound()
         fitness = rule.fitness.PseudoAccuracy()
 
 
