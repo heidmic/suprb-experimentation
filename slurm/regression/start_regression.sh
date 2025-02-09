@@ -6,6 +6,6 @@ PROBLEMS=("concrete_strength" "airfoil_self_noise" "combined_cycle_power_plant" 
 
 for model in "${MODELS[@]}"; do
     for problem in "${PROBLEMS[@]}"; do
-        sbatch $JOB_DIR/slurm/regression/regress_tuning_${model}_${problem}.sh
+        sbatch $JOB_DIR/slurm/regression/regress_tuning_${model}_${problem}.sbatch
     done
 done
