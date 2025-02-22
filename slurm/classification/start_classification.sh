@@ -2,7 +2,7 @@
 
 JOB_DIR=/data/oc-compute03/wehrfabi/my-experimentation
 MODELS=("l1" "l2" "elasticnet")
-PROBLEMS=("breastcancer" "abalone" "raisin")
+PROBLEMS=("abalone" "raisin", "breastcancer")
 
 for model in "${MODELS[@]}"; do
     for problem in "${PROBLEMS[@]}"; do
