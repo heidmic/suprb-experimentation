@@ -3,15 +3,17 @@
     "output_directory": "logging_output_scripts/outputs",
     "normalize_datasets": false,
     "model_names": {
-        "l1": "Logistic Regression with L1 Regularization"
+        "l1": "Logit with L1",
+        "l2": "Logit with L2",
+        "elasticnet": "Logit with Elastic Net"
     },
     "datasets": {
-        "raisin": "Raisin Dataset",
-        "cirrhosis": "Cirrhosis Dataset",
-        "breast_cancer": "Breast Cancer Dataset"
+        "breastcancer": "Breast Cancer Dataset",
+        "abalone": "Abalone Dataset",
+        "raisins": "Raisins Dataset"
     },
     "metrics": {
-        "elitist_complexity": "Komplexitaet",
-        "elitist_error": "MSE"
+        "elitist_complexity": "Complexity",
+        "elitist_error": "Error"
     }
 }

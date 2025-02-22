@@ -3,7 +3,9 @@
     "output_directory": "logging_output_scripts/outputs",
     "normalize_datasets": false,
     "model_names": {
-        "lasso": "Lasso"
+        "lasso": "Lasso",
+        "ridge": "Ridge",
+        "elasticNet": "Elastic Net"
     },
     "datasets": {
         "concrete_strength": "Concrete Strength",
@@ -12,7 +14,7 @@
         "energy_heat": "Energy Efficiency target Heat Load"
     },
     "metrics": {
-        "elitist_complexity": "Komplexitaet",
+        "elitist_complexity": "Complexity",
         "elitist_error": "MSE"
     }
 }
