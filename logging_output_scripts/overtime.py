@@ -12,6 +12,8 @@ from sklearn.preprocessing import MinMaxScaler
 Uses seaborn-package to create MSE-Time and Complexity-Time Plots comparing model performances
 on multiple datasets
 """
+CONFIG_PATH = 'logging_output_scripts/config.json'
+CLASS_CONFIG_PATH = 'logging_output_scripts/config_class.json'
 sns.set_style("whitegrid")
 sns.set(rc={"figure.dpi":300, 'savefig.dpi':300})
 sns.set_theme(style="whitegrid",
@@ -27,8 +29,11 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.tight_layout()
 
-def get_histogram(experiment_name, dataset_name, metric_name, steps):
-    with open('logging_output_scripts/config.json') as f:
+def get_histogram(experiment_name, dataset_name, metric_name, steps, isClass = False):
+    config_path = CONFIG_PATH
+    if isClass:
+        config_path = CLASS_CONFIG_PATH
+    with open(config_path) as f:
         config = json.load(f)
 
     client = mlflow.tracking.MlflowClient()
@@ -49,10 +54,15 @@ def get_histogram(experiment_name, dataset_name, metric_name, steps):
                     exp_res.append(run_res)
             exp_res = np.average(np.array(exp_res), axis=0)
             return exp_res[:steps]
+    print(f"Could not find {experiment_name} for {dataset_name}")
+    pass
 
 
-def create_plots(metric_name='elitist_complexity', steps=64):
-    with open('logging_output_scripts/config.json') as f:
+def create_plots(metric_name='elitist_complexity', steps=64, isClass=False):
+    config_path = CONFIG_PATH
+    if isClass:
+        config_path = CLASS_CONFIG_PATH
+    with open(config_path) as f:
         config = json.load(f)
     final_output_dir = f"{config['output_directory']}"
     output_dir = "time_plots"
@@ -63,7 +73,7 @@ def create_plots(metric_name='elitist_complexity', steps=64):
         legend_labels = []
         for model in config['model_names']:
             model_name = f"l:{model}"
-            result = get_histogram(model_name, dataset_name, metric_name, steps)
+            result = get_histogram(model_name, dataset_name, metric_name, steps, isClass=isClass)
             for i, res in enumerate(result):
                 results[0].append(res)
                 results[1].append(i)
@@ -74,11 +84,20 @@ def create_plots(metric_name='elitist_complexity', steps=64):
         res_data = pd.DataFrame(results)
 
         def ax_config(axis):
-            axis.set_xlabel('Iteration')
-            axis.set_ylabel(config['metrics'][metric_name])
+            axis.set_xlabel('Iteration', weight="bold")
+            axis.set_ylabel(config['metrics'][metric_name], weight="bold")
             axis.legend(title='Local models', labels=legend_labels)
+  
+        title_dict = {"concrete_strength": "Concrete Strength",
+                      "combined_cycle_power_plant": "Combined Cycle Power Plant",
+                      "airfoil_self_noise": "Airfoil Self Noise",
+                      "energy_heat": "Energy Efficiency Heating",
+                      "breastcancer": "Breast Cancer",
+                      "raisin": "Raisin",
+                      "abalone": "Abalone"}
 
         fig, ax = plt.subplots()
+        ax.set_title(title_dict[dataset_name], style="italic")
         ax = sns.lineplot(x='step', y=metric_name, data=res_data, style='model_name', hue='model_name')
         ax_config(ax)
         fig.savefig(f"{final_output_dir}/{output_dir}/{dataset_name}_{metric_name}.png")
@@ -87,4 +106,4 @@ def create_plots(metric_name='elitist_complexity', steps=64):
 
 
 if __name__ == '__main__':
-    create_plots(metric_name="elitist_error")
+    create_plots()#metric_name="elitist_error")
