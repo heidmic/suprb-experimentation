@@ -90,10 +90,26 @@ def get_df(exp_name, dataset):
             return df
 
     print(f"No run found with {exp_name} and {dataset}")
+    return None
+
+
+def get_all():
+    print("Get all mlflow runs...")
+    
+    with open('logging_output_scripts/config.json') as f:
+        config = json.load(f)
+    client = mlflow.tracking.MlflowClient()
+    all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
+    all_runs_list = []
+    for run in all_runs:
+        exp = client.get_experiment(run)
+        all_runs_list.append(mlflow.search_runs([run]))
+
+    return all_runs_list
 
 
 def get_all_runs(problem):
-    print("Get all mlflow runs...")
+    print(f"Get all mlflow runs of {problem}...")
 
     with open('logging_output_scripts/config.json') as f:
         config = json.load(f)
@@ -109,6 +125,23 @@ def get_all_runs(problem):
                     all_runs_list.append(mlflow.search_runs([run]))
                     print(run_name)
 
+    return all_runs_list
+
+def get_by_config(config, search_string, filter_swapped=True):
+    print(f"Get all mlflow runs of {search_string}...")
+
+    all_runs_list = []
+    models = [key for key in config['model_names']]
+    all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
+
+    for run in all_runs:
+        for run_name in mlflow.search_runs([run])['tags.mlflow.runName']:
+            if search_string in run_name:
+                if filter_swapped:
+                    if 'n:' in run_name:
+                        continue
+                if any(string in run_name for string in models):
+                    all_runs_list.append(mlflow.search_runs([run]))
     return all_runs_list
 
 
@@ -128,6 +161,7 @@ def get_dataframe(all_runs_list, exp_name, dataset):
             return df
         else:
             continue
+
 
     return None
 
