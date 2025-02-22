@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #SBATCH --time=96:00:00
 #SBATCH --partition=cpu
-#SBATCH --output=output/models_class-elasticnet_breastcancer-%j.txt
+#SBATCH --output=output/elasticnet_breastcancer-%j.txt
 #SBATCH --cpus-per-task=5
 #SBATCH --mem=30G
 
