@@ -50,7 +50,7 @@ def try_log_dict(d: dict, name: str):
 
 
 def log_experiment(experiment: Experiment):
-    _log_experiment(experiment, parent_name='', depth=0)
+    return _log_experiment(experiment, parent_name='', depth=0)
 
 
 def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dict:

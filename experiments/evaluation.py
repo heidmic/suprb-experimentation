@@ -6,9 +6,10 @@ from typing import Iterable
 
 import numpy as np
 from sklearn.base import BaseEstimator, clone
-from sklearn.metrics import get_scorer
+from sklearn.metrics import get_scorer, mean_squared_error, accuracy_score
 from sklearn.model_selection import cross_validate, KFold
 
+from suprb.logging.default import DefaultLogger
 
 def check_scoring(scoring):
     """Always use R^2 and MSE for evaluation."""
@@ -42,6 +43,47 @@ class Evaluation(metaclass=ABCMeta):
     def __call__(self, params: dict, **kwargs) -> tuple[list[BaseEstimator], dict]:
         pass
 
+class CustomUnfitEvaluation(Evaluation, metaclass=ABCMeta):
+    
+    def __init__(
+            self,
+            dummy_estimator: BaseEstimator,
+            X: np.ndarray,
+            y: np.ndarray,
+            random_state: int = None,
+            verbose: int = 0,
+            local_model: BaseEstimator = None,
+            trained_estimators: list[BaseEstimator] = None,
+            isClass: bool = False
+    ):
+        super().__init__(estimator=dummy_estimator, random_state=random_state, verbose=verbose)
+        self.X = X
+        self.y = y
+        self.local_model = local_model
+        self.trained_estimators = trained_estimators
+        self.isClass = isClass
+    
+    def __call__(self, **kwargs) -> tuple[list[BaseEstimator], dict]:
+        scoring = check_scoring(kwargs.pop('scoring', None))
+        cv = check_cv(kwargs.pop('cv', None), random_state=self.random_state)
+        scores = []
+        estimators = []
+        for i, (train_index, test_index) in enumerate(cv.split(self.X)):
+            X_train, X_test = self.X[train_index], self.X[test_index]
+            y_train, y_test = self.y[train_index], self.y[test_index]
+            estimator = self.trained_estimators[i]
+            swapped_elitist = estimator.model_swap(self.local_model)
+            swapped_elitist.fit(X_train, y_train)
+            estimator.elitist_ = swapped_elitist
+            estimator.is_fitted = True
+            estimator.logger_ = DefaultLogger()
+            estimator.logger_.log_init(X_train, y_train, estimator)
+            estimator.logger_.log_final(X_train, y_train, estimator)
+            prediction = estimator.predict(X_test)
+            scorer = mean_squared_error if not self.isClass else accuracy_score
+            scores.append(scorer(y_test, prediction))
+            estimators.append(estimator)
+        return estimators, {'test_score': [scores]}
 
 class BaseCrossValidate(Evaluation, metaclass=ABCMeta):
     estimators_: list[BaseEstimator]
