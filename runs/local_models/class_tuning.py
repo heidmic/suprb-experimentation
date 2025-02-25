@@ -31,12 +31,12 @@ from suprb.rule.initialization import MeanInit
 
 random_state = 42
 
-Regressors = {'lasso': Lasso(alpha=0.01, random_state=random_state, tol=1e-3),
+Regressors = {'lasso': Lasso(alpha=0.01, random_state=random_state),
                   'elasticNet': ElasticNet(alpha=0.01, l1_ratio=0.5, random_state=random_state, fit_intercept=True,),
                    'ridge': Ridge(alpha=0.01, random_state=random_state)}
-Classifiers = {'l1': LogisticRegression(penalty='l1', random_state=random_state, solver='saga'),
-               'l2': LogisticRegression(penalty='l2', random_state=random_state, solver='saga'),
-               'elasticnet': LogisticRegression(penalty='elasticnet', l1_ratio=0.5, random_state=random_state, solver='saga')}
+Classifiers = {'l1': LogisticRegression(penalty='l1', random_state=random_state),#, solver='saga'),
+               'l2': LogisticRegression(penalty='l2', random_state=random_state),#, solver='saga'),
+               'elasticnet': LogisticRegression(penalty='elasticnet', l1_ratio=0.5, random_state=random_state)}
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
@@ -91,7 +91,7 @@ def run(problem: str, local_model: str):
             ),
             solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
             solution_composition__init__mixing = mixing,
-            n_iter=2,
+            n_iter=64,
             n_rules=4,
             verbose=0,
             logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
@@ -103,7 +103,7 @@ def run(problem: str, local_model: str):
             cv=4,
             n_jobs_cv=4,
             n_jobs=4,
-            n_calls=1,
+            n_calls=200,
             timeout=60*60*24,  # 24 hours
             scoring=scoring,
             verbose=1
@@ -152,11 +152,13 @@ def run(problem: str, local_model: str):
             params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
                 'solution_composition__init__mixing__experience_calculation__upper_bound', 20, 50)
         
+        params.rule_generation__init__model__tol = trial.suggest_float('rule_generation__init__model__tol', 1e-4, 1e-1)
         # Local_model
         if isClass:#isinstance(params.rule_generation__init__model, base.ClassifierMixin):
+            params.rule_generation__init__model__solver = trial.suggest_categorical(
+                'rule_generation__init__model__solver', ['saga', 'liblinear'])
             params.rule_generation__init__model__C = trial.suggest_float('rule_generation__init__model__C', 0.01, 2)
             params.rule_generation__init__model__max_iter = trial.suggest_int('rule_generation__init__model__max_iter', 100, 1000)
-            params.rule_generation__init__model__tol = trial.suggest_float('rule_generation__init__model__tol', 1e-4, 1e-1)
 
     fold_amount = 2
     random_amount = fold_amount
@@ -199,8 +201,6 @@ def run(problem: str, local_model: str):
         print("log_experiment: " + str(log_experiment(swapped_experiment)))
         print("Results: " + str(getattr(swapped_experiment, 'results_', None)))
         print("Estimators: " + str(getattr(swapped_experiment, 'estimators_', None)))
-        #print("Results:" + str(swapped_experiment.results_))
-        #print("Estimators:" + str(swapped_experiment.estimators_))
 
 
 

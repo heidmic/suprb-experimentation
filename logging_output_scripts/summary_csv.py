@@ -44,7 +44,7 @@ def create_summary_csv(isClass=False, base_model = None):
         values = "\n"
         for problem in config['datasets']:
             if swapped:
-                values += f"{problem}" + model_str
+                values += f"{problem} " + model_str
             else:
                 values += problem
             #fold_df = get_df(model, problem)
