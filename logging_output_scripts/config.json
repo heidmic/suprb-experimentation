@@ -3,18 +3,18 @@
     "output_directory": "logging_output_scripts/outputs",
     "normalize_datasets": false,
     "model_names": {
-        "lasso": "Lasso",
         "ridge": "Ridge",
-        "elasticNet": "Elastic Net"
+        "elasticNet": "Elastic Net",
+        "lasso": "Lasso"
     },
     "datasets": {
-        "concrete_strength": "Concrete Strength",
         "airfoil_self_noise": "Airfoil Self Noise",
+        "concrete_strength": "Concrete Strength",
         "combined_cycle_power_plant": "Combined Cycle Power Plant",
         "energy_heat": "Energy Efficiency target Heat Load"
     },
     "metrics": {
         "elitist_complexity": "Complexity",
-        "elitist_error": "MSE"
+        "elitist_error": "Error"
     }
 }

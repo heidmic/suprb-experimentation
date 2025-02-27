@@ -206,5 +206,16 @@ datasets_map = {
     "s:saga1": "SAGA1",
     "s:saga2": "SAGA2",
     "s:saga3": "SAGA3",
-    "s:sas": "SAGA4"
+    "s:sas": "SAGA4",
+    "lasso": "Lasso",
+    "ridge": "Ridge",
+    "elasticnet": "Elastic Net",
+    "elasticNet": "Elastic Net",
+        "breastcancer": "Breast Cancer",
+        "abalone": "Abalone",
+        "raisins": "Raisins",
+        "concrete_strength": "Concrete Strength",
+        "airfoil_self_noise": "Airfoil Self Noise",
+        "combined_cycle_power_plant": "Combined Cycle Power Plant",
+        "energy_heat": "Energy Efficiency target Heat Load"
 }

@@ -26,7 +26,8 @@ def create_summary_csv(isClass=False, base_model = None):
     swapped = False
     if base_model is not None:
         swapped = True
-        all_runs_list = get_by_config(config, base_model, filter_swapped=False)
+        base_str = f"l:{base_model}"
+        all_runs_list = get_by_config(config, base_str, filter_swapped=False)
         
     check_and_create_dir(final_output_dir, "csv_summary")
     for model, model_name in config['model_names'].items():
@@ -41,8 +42,10 @@ def create_summary_csv(isClass=False, base_model = None):
             all_runs_list = get_by_config(config, model_str, filter_swapped=True)
 
         fold_df = None
-        values = "\n"
         for problem in config['datasets']:
+            print("Problem: ", problem)
+            print("Model: ", model_name)
+            values = "\n"
             if swapped:
                 values += f"{problem} " + model_str
             else:
@@ -68,15 +71,15 @@ def create_summary_csv(isClass=False, base_model = None):
                 values += "," + str(round(error.mean(), 4))
                 values += "," + str(round(error.std(), 4))
 
-                values += '\n'
+                #values += '\n'
 
                 print(f"Done for {problem} with {model_name}")
         if not swapped:
             with open(f"{final_output_dir}/csv_summary/{model_name}_summary.csv", "w") as file:
                 file.write(header + values)
     if swapped:
-        with open(f"{final_output_dir}/csv_summary/{base_model}_swaps_summary.csv", "w") as file:
+        with open(f"{final_output_dir}/csv_summary/{config['model_names'][base_model]}_swaps_summary.csv", "w") as file:
             file.write(header + values)
 
 if __name__ == '__main__':
-    create_summary_csv(base_model="l1")
+    create_summary_csv(base_model="ridge")

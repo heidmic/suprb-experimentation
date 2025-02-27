@@ -3,14 +3,14 @@
     "output_directory": "logging_output_scripts/outputs",
     "normalize_datasets": false,
     "model_names": {
-        "l1": "Logit with L1",
         "l2": "Logit with L2",
-        "elasticnet": "Logit with Elastic Net"
+        "elasticnet": "Logit with Elastic Net",
+        "l1": "Logit with L1"
     },
     "datasets": {
-        "breastcancer": "Breast Cancer Dataset",
-        "abalone": "Abalone Dataset",
-        "raisins": "Raisins Dataset"
+        "breastcancer": "Breast Cancer",
+        "raisins": "Raisins",
+        "abalone": "Abalone"
     },
     "metrics": {
         "elitist_complexity": "Complexity",
