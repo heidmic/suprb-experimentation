@@ -15,6 +15,7 @@
     },
     "metrics": {
         "elitist_complexity": "Complexity",
-        "elitist_error": "Error"
+        "elitist_error": "Error",
+        "test_neg_mean_squared_error": "MSE"
     }
 }

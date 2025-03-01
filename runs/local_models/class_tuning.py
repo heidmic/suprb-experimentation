@@ -31,6 +31,13 @@ from suprb.rule.initialization import MeanInit
 
 random_state = 42
 
+fold_amount = 8
+suprb_iter = 64
+tuning_iter = 100
+#fold_amount = 2
+#suprb_iter = 2
+#tuning_iter = 1
+
 Regressors = {'lasso': Lasso(alpha=0.01, random_state=random_state),
                   'elasticNet': ElasticNet(alpha=0.01, l1_ratio=0.5, random_state=random_state, fit_intercept=True,),
                    'ridge': Ridge(alpha=0.01, random_state=random_state)}
@@ -64,13 +71,15 @@ def run(problem: str, local_model: str):
     X, y = shuffle(X, y, random_state=random_state)
     
     models = Regressors
-    scoring = 'neg_mean_squared_error'
+    tuning_scoring = 'neg_mean_squared_error'
+    evaluation_metric = 'neg_mean_squared_error'
     mixing = mixing_model.ErrorExperienceHeuristic()
     matching_type = rule.matching.OrderedBound()
     fitness = rule.fitness.VolumeWu()
     if isClass:
         models = Classifiers
-        scoring='accuracy'
+        tuning_scoring='accuracy'
+        evaluation_metric = 'accuracy'
         #mixing = mixing_model.ErrorExperienceClassification()
         #matching_type=rule.matching.BinaryBound()
         #fitness = rule.fitness.PseudoAccuracy()
@@ -91,7 +100,7 @@ def run(problem: str, local_model: str):
             ),
             solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
             solution_composition__init__mixing = mixing,
-            n_iter=64,
+            n_iter=suprb_iter,
             n_rules=4,
             verbose=0,
             logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
@@ -103,9 +112,9 @@ def run(problem: str, local_model: str):
             cv=4,
             n_jobs_cv=4,
             n_jobs=4,
-            n_calls=200,
+            n_calls=tuning_iter,
             timeout=60*60*24,  # 24 hours
-            scoring=scoring,
+            scoring=tuning_scoring,
             verbose=1
     )
         
@@ -160,7 +169,7 @@ def run(problem: str, local_model: str):
             params.rule_generation__init__model__C = trial.suggest_float('rule_generation__init__model__C', 0.01, 2)
             params.rule_generation__init__model__max_iter = trial.suggest_int('rule_generation__init__model__max_iter', 100, 1000)
 
-    fold_amount = 2
+    
     random_amount = fold_amount
 
     experiment_name = f'SupRB Tuning p:{problem}; l:{local_model}'
@@ -177,7 +186,7 @@ def run(problem: str, local_model: str):
         estimator=estimator, X=X, y=y, random_state=random_state, verbose=5)
 
     experiment.perform(evaluation, cv=ShuffleSplit(
-        n_splits=fold_amount, test_size=0.25, random_state=random_state), n_jobs=fold_amount)#, scoring=scoring
+        n_splits=fold_amount, test_size=0.25, random_state=random_state), n_jobs=fold_amount, scoring=evaluation_metric)
     
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)
