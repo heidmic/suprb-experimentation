@@ -176,8 +176,8 @@ def single_table(dataset_shorts):
     latex = tabulate(columns, tablefmt="latex_booktabs", headers=headers)
     splits = latex.split("\\toprule")
     model_names = [*config["model_names"].values()]
-    methods = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in model_names])
-    latex = splits[0]+"\\toprule"+methods+splits[1]
+    headline = " ".join(["\\multicolumn{2}{c}{"+h+"} &" for h in model_names])
+    latex = splits[0]+"\\toprule"+headline+splits[1]
     with open(f"{final_output_dir}/latex_tabular/combined.txt", "w") as file:
         file.write(latex)
 
@@ -195,9 +195,9 @@ def single_table_all_error(dataset_shorts):
         columns.append(row)
     latex = tabulate(columns, tablefmt="latex_booktabs")
     splits = latex.split("\\toprule")
-    methods = " &".join(dataset_shorts.values())
-    methods =  "\n &" + methods + "\\\\"
-    latex = splits[0]+"\\toprule"+methods+splits[1]
+    headline = " &".join(dataset_shorts.values())
+    headline =  "\n &" + headline + "\\\\"
+    latex = splits[0]+"\\toprule"+headline+splits[1]
     with open(f"{final_output_dir}/latex_tabular/latex_error.txt", "w") as file:
         file.write(latex)
 
@@ -215,12 +215,31 @@ def single_table_all_complexity(dataset_shorts):
         columns.append(row)
     latex = tabulate(columns, tablefmt="latex_booktabs")
     splits = latex.split("\\toprule")
-    methods = " &".join(dataset_shorts.values())
-    methods =  "\n &" + methods + "\\\\"
-    latex = splits[0]+"\\toprule"+methods+splits[1]
+    headline = " &".join(dataset_shorts.values())
+    headline =  "\n &" + headline + "\\\\"
+    latex = splits[0]+"\\toprule"+headline+splits[1]
     with open(f"{final_output_dir}/latex_tabular/latex_complexity.txt", "w") as file:
         file.write(latex)
 
+def swaps_error(dataset_shorts, base_model):
+    columns = []
+    df = pd.read_csv(f"{summary_csv_dir}/{config['model_names'][base_model]}_swaps_summary.csv")
+    for model in config["model_names"]:
+        # Each row features one problem for one model
+        row = [utils.datasets_map[model]]
+        for problem in config["datasets"]:
+            res = df[df['Problem'].str.contains(problem + " " + f"n:{model}")]
+            row.append(str(round(float(res['MEAN_ERROR']), 2))+"pm" +
+                       str(round(float(res['STD_ERROR']), 2)))
+        columns.append(row)
+    latex = tabulate(columns, tablefmt="latex_booktabs")
+    splits = latex.split("\\toprule")
+    headline = " &".join(dataset_shorts.values())
+    headline =  "\n &" + headline + "\\\\"
+    latex = splits[0]+"\\toprule"+headline+splits[1]
+    with open(f"{final_output_dir}/latex_tabular/latex_{base_model}_swaps.txt", "w") as file:
+        file.write(latex)
+        
 
 # Add / leave out certain tables
 if __name__ == '__main__':
@@ -235,3 +254,5 @@ if __name__ == '__main__':
     single_table(dataset_shorts = datasets_short)
     single_table_all_error(dataset_shorts = datasets_short)
     single_table_all_complexity(dataset_shorts=datasets_short)
+    for model in config["model_names"]:
+        swaps_error(dataset_shorts=datasets_short, base_model=model)

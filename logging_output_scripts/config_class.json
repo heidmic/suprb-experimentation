@@ -14,6 +14,9 @@
     },
     "metrics": {
         "elitist_complexity": "Complexity",
-        "elitist_error": "Error"
+        "elitist_error": "Error",
+        "test_score": "Accuracy",
+        "test_accuracy": "Accuracy",
+        "test_f1": "F1-Score"
     }
 }

@@ -79,7 +79,7 @@ def run(problem: str, local_model: str):
     if isClass:
         models = Classifiers
         tuning_scoring='accuracy'
-        evaluation_metric = 'accuracy'
+        evaluation_metric = {'f1','accuracy'}
         #mixing = mixing_model.ErrorExperienceClassification()
         #matching_type=rule.matching.BinaryBound()
         #fitness = rule.fitness.PseudoAccuracy()

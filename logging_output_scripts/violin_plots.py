@@ -38,7 +38,7 @@ def create_violin_plots(metric_name="elitist_complexity", isClass=False):
         metric="metrics."+metric_name
         for model in config['model_names']:
             model_name = f"l:{model}"
-            fold_df = get_dataframe(all_runs_list=get_by_config(config, problem),
+            fold_df = get_dataframe(all_runs_list=get_by_config(config, problem, filter_swapped=True),
                                      exp_name=model_name, dataset=problem)
             if fold_df is not None:
                 #fold_df = fold_df[not fold_df['tags.mlflow.runName'].str.contains("n:")]
@@ -76,9 +76,8 @@ def create_violin_plots(metric_name="elitist_complexity", isClass=False):
         metric_dict = {"test_neg_mean_squared_error": "MSE",
                        "elitist_complexity": "Complexity",
                        "accuracy": "Accuracy",
-                       "elitist_error": "Error",
                        "test_score": "Score"}       
-        ax.set_ylabel(metric_dict[metric_name], weight="bold")
+        ax.set_ylabel(config['metrics'][metric_name], weight="bold")
         
         title_dict = {"concrete_strength": "Concrete Strength",
                       "combined_cycle_power_plant": "Combined Cycle Power Plant",

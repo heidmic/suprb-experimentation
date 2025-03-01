@@ -5,7 +5,7 @@ from numbers import Integral
 from typing import Iterable
 
 import numpy as np
-from sklearn.base import BaseEstimator, clone
+from sklearn.base import BaseEstimator, clone, is_classifier
 from sklearn.metrics import get_scorer, mean_squared_error, accuracy_score
 from sklearn.model_selection import cross_validate, KFold
 
@@ -24,6 +24,18 @@ def check_scoring(scoring):
 
     return list(scoring)
 
+def check_class_scoring(scoring):
+    """Always use R^2 and MSE for evaluation."""
+
+    if scoring is None:
+        scoring = set()
+    elif isinstance(scoring, Iterable):
+        scoring = set(scoring)
+    else:
+        scoring = {scoring}
+    scoring.update({'f1', 'accuracy'})
+
+    return list(scoring)
 
 def check_cv(cv, random_state=None):
     """Enable shuffle by default."""
@@ -64,7 +76,6 @@ class CustomUnfitEvaluation(Evaluation, metaclass=ABCMeta):
         self.isClass = isClass
     
     def __call__(self, **kwargs) -> tuple[list[BaseEstimator], dict]:
-        scoring = check_scoring(kwargs.pop('scoring', None))
         cv = check_cv(kwargs.pop('cv', None), random_state=self.random_state)
         scores = []
         estimators = []
@@ -90,7 +101,8 @@ class BaseCrossValidate(Evaluation, metaclass=ABCMeta):
     results_: dict
 
     def cross_validate(self, X: np.ndarray, y: np.ndarray, params: dict, **kwargs):
-        scoring = check_scoring(kwargs.pop('scoring', None))
+        #scoring = check_scoring(kwargs.pop('scoring', None))
+        scoring = kwargs.pop('scoring', None)
         cv = check_cv(kwargs.pop('cv', None), random_state=self.random_state)
 
         estimator = clone(self.estimator)
