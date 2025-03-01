@@ -33,7 +33,7 @@ random_state = 42
 
 fold_amount = 8
 suprb_iter = 64
-tuning_iter = 100
+tuning_iter = 200
 #fold_amount = 2
 #suprb_iter = 2
 #tuning_iter = 1
