@@ -26,14 +26,14 @@ def create_summary_csv(isClass=False, base_model = None):
     test_f1 = "metrics.test_f1"
     elitist_error ="metrics.elitist_error"
     test_score = "metrics.test_score"
-    train_score = "metrics.train_score"
+    training_score = "metrics.training_score"
     
     check_and_create_dir(final_output_dir, "csv_summary")
     # Head of csv-File
     if isClass:
-        header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP,MEAN_ACC,STD_ACC"
+        header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP,MEAN_ACC,STD_ACC,MEAN_F1,STD_F1"
     else:
-        header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP,MEAN_R2,STD_R2"
+        header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP,MEAN_R2,STD_R2,MEAN_MSE,STD_MSE"
     swapped = False
     if base_model is not None:
         swapped = True
@@ -43,6 +43,8 @@ def create_summary_csv(isClass=False, base_model = None):
             file.write(header)
         base_str = f"l:{base_model}"    
         all_runs_list = get_by_config(config, base_str, filter_swapped=False)
+    else:
+        header += ",MEAN_TEST,STD_TEST"
 
     for model, model_name in config['model_names'].items():
         if swapped:
@@ -52,7 +54,6 @@ def create_summary_csv(isClass=False, base_model = None):
         else:
             model_str = f"l:{model}"
             all_runs_list = get_by_config(config, model_str, filter_swapped=True)
-            header += ",MEAN_TEST,STD_TEST"
 
         fold_df = None
         values = ""
@@ -80,18 +81,27 @@ def create_summary_csv(isClass=False, base_model = None):
                 #    values += "," + str(round(mean_squared_error.mean(), 4))
                 #    values += "," + str(round(mean_squared_error.std(), 4))
 
-                if 'test_score' in fold_df:
+                if test_score in fold_df:
+                    print("Single test score")
                     values += "," + str(round(fold_df[test_score].mean(), 4))
                     values += "," + str(round(fold_df[test_score].std(), 4))
-                elif 'test_accuracy' in fold_df:
+                elif test_accuracy in fold_df:
                     values += "," + str(round(fold_df[test_accuracy].mean(), 4))
                     values += "," + str(round(fold_df[test_accuracy].std(), 4))
-                elif 'test_r2' in fold_df:
+                elif test_r2 in fold_df:
                     values += "," + str(round(fold_df[test_r2].mean(), 4))
                     values += "," + str(round(fold_df[test_r2].std(), 4))
+
+                if test_f1 in fold_df:
+                    values += "," + str(round(fold_df[test_f1].mean(), 4))
+                    values += "," + str(round(fold_df[test_f1].std(), 4))
+                if mse in fold_df:
+                    values += "," + str(round(-fold_df[mse].mean(), 4))
+                    values += "," + str(round(-fold_df[mse].std(), 4))                
                 if not swapped:
-                    values += "," + str(round(fold_df[train_score].mean(), 4))
-                    values += "," + str(round(fold_df[train_score].std(), 4))
+                    values += "," + str(round(fold_df[training_score].mean(), 4))
+                    values += "," + str(round(fold_df[training_score].std(), 4))
+
 
                 print(f"Done for {problem} with {model_name}")            
         if not swapped:

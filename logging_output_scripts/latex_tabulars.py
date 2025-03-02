@@ -16,15 +16,14 @@ with open('logging_output_scripts/config.json') as f:
 final_output_dir = f"{config['output_directory']}"
 summary_csv_dir = f"{final_output_dir}/csv_summary"
 
-# Empty string needed for formatting purposes
-
 comp_column = {0: 'MEAN_COMP', 1: 'STD_COMP', 2: 'MEDIAN_COMP', 3: 'MIN_COMP', 4: 'MAX_COMP'}
 comp_column_short = {0: 'mean', 1: 'standard deviation', 2: 'median', 3: 'min', 4: 'max'}
 datasets_short = {0: 'CS', 1: 'ASN' , 2: 'CCPP', 3: 'EH'}
+metrics = {'MEAN_COMP': 'mean', 'STD_COMP': 'standard deviation', 'MEDIAN_COMP': 'median', 'MIN_COMP': 'min', 'MAX_COMP': 'max',
+           'MEAN_R2': 'mean', 'STD_R2': 'standard deviation', 'MEAN_MSE': 'median', 'STD_MSE': 'min', 'MEAN_TEST': 'mean', 'STD_TEST': 'standard deviation'}
+metric_names = {0: 'Complexity', 1: '', 2:'', 3:'', 4:'', 5:'\hline R2-Score', 6:'Test', 7:'\hline MSE', 8:'Test', 9:'\hline R2-Sore', 10:'Training'}
 
 # Returns column with name "column_name" of "problem"
-
-
 def load_problem_columns(df, column_name):
     data_res = []
     for problem in config["datasets"]:
@@ -39,8 +38,6 @@ def create_folder(folder_name):
         os.mkdir(directory)
 
 # COMPLEXITY TABLES
-
-
 def write_complexity_all():
     comp_list = []
     for model in config["model_names"]:
@@ -56,8 +53,6 @@ def write_complexity_all():
         file.write(res)
 
 # COMPLEXITY TABLES
-
-
 def write_complexity():
     for model in config["model_names"]:
         df = pd.read_csv(f"{summary_csv_dir}/{config['model_names'][model]}_summary.csv")
@@ -72,9 +67,28 @@ def write_complexity():
         with open(f"{final_output_dir}/latex_tabular/Complexity-{model}.txt", "w") as file:
             file.write(res)
 
+def summarize_problems():
+    for i, data_set in enumerate(config["datasets"]):
+        table = []
+        #for column_name, column_name_short in zip(comp_column.values(), comp_column_short.values()):
+        r = 0
+        for metric, value_name in metrics.items():
+            row = [metric_names[r], value_name]
+            r+=1
+            for model, model_name in config["model_names"].items():
+                df = pd.read_csv(f"{summary_csv_dir}/{model_name}_summary.csv")
+                data_res = load_problem_columns(df, metric)
+                row += [data_res[i]]
+            table.append(row)
+        print(table)
+        model_names = [*config["model_names"].values()]
+        res = tabulate(table, tablefmt="latex_raw", headers=['Metric', 'Value', model_names[0], model_names[1], model_names[2]])
+        with open(f"{final_output_dir}/latex_tabular/Summary-{data_set}.txt", "w") as file:
+            file.write(res)
+
+
+
 # GENOMES (Requires Genomes to be Stored as a .json in the respective Folder) [Leave out if not needed]
-
-
 def write_genomes():
     for model in config["model_names"]:
         for problem in config["datasets"]:
@@ -247,12 +261,11 @@ if __name__ == '__main__':
     check_and_create_dir(final_output_dir, 'latex_tabular')
     # write_complexity()
     # write_complexity_all()
-    # Only use if genomes are actually tracked.
-    # write_genomes()
     # write_error()
     #write_error_all(datasets_short)
-    single_table(dataset_shorts = datasets_short)
-    single_table_all_error(dataset_shorts = datasets_short)
-    single_table_all_complexity(dataset_shorts=datasets_short)
-    for model in config["model_names"]:
-        swaps_error(dataset_shorts=datasets_short, base_model=model)
+    #single_table(dataset_shorts = datasets_short)
+    #single_table_all_error(dataset_shorts = datasets_short)
+    summarize_problems()
+    #single_table_all_complexity(dataset_shorts=datasets_short)
+    #for model in config["model_names"]:
+    #    swaps_error(dataset_shorts=datasets_short, base_model=model)

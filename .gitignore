@@ -5,6 +5,9 @@ requirements.txt
 **/mlruns/**
 mlruns/**
 mlruns*
+**/onlineruns/**
+onlineruns/**
+onlineruns*
 .7z
 *.csv
 logging_output_scripts/outputs/
@@ -12,6 +15,17 @@ logging_output_scripts/outputs/
 # SLURM
 output/**
 */output/**
+
+# Json
+output_json/**
+*/output_json/**
+
+# Tex
+*.tex
+
+# Jupyter
+.ipynb_checkpoints/
+
 
 # PyCharm
 .idea
