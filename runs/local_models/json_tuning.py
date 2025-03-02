@@ -27,6 +27,7 @@ from suprb.optimizer.rule import es, origin, mutation
 from suprb.solution.initialization import RandomInit
 import suprb.solution.mixing_model as mixing_model
 from suprb.rule.initialization import MeanInit
+from suprb.json import dump
 
 
 random_state = 42
@@ -58,8 +59,8 @@ def is_class(name: str) -> bool:
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='abalone')
-@click.option('-l', '--local_model', type=click.STRING, default='elasticnet')
+@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-l', '--local_model', type=click.STRING, default='ridge')
 def run(problem: str, local_model: str):
     print(f"Problem is {problem}, with local model {local_model}")
     isClass = is_class(name=problem)
@@ -80,7 +81,9 @@ def run(problem: str, local_model: str):
         models = Classifiers
         tuning_scoring='accuracy'
         evaluation_metric = {'f1','accuracy'}
-        mixing = mixing_model.ErrorExperienceClassification()
+        #mixing = mixing_model.ErrorExperienceClassification()
+        #matching_type=rule.matching.BinaryBound()
+        #fitness = rule.fitness.PseudoAccuracy()
 
 
     model = models[local_model]
@@ -193,6 +196,9 @@ def run(problem: str, local_model: str):
     for exp in experiment.experiments:
         trained_estimators.extend(exp.estimators_)
     base_model = models.pop(local_model)
+
+    dump(trained_estimators[0], 'estimator.json')
+
     for model in models:
         swapped_name = f'{experiment_name} Swapped n:{model}'
         print(f"Swapping {model}")
@@ -230,6 +236,8 @@ def run(problem: str, local_model: str):
             swapped_experiment.results_ = result_dict
             mlflow.set_experiment(name)
             _log_experiment(swapped_experiment, parent_name=f'Swaps of {base_model}', depth=0)
+            if i == 1:
+                dump(estimator, f'estimator_swapped_{model}.json')
 
 if __name__ == '__main__':
     run()

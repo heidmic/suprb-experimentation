@@ -18,6 +18,7 @@
         "elitist_error": "Error",
         "test_neg_mean_squared_error": "MSE",
         "test_r2": "R2-Score",
-        "test_score": "R2-Score"
+        "test_score": "R2-Score",
+        "training_score": "Training R2-Score"
     }
 }
