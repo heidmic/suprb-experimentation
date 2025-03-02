@@ -197,7 +197,7 @@ def run(problem: str, local_model: str):
         trained_estimators.extend(exp.estimators_)
     base_model = models.pop(local_model)
 
-    dump(trained_estimators[0], 'estimator.json')
+    dump(trained_estimators[0], f'estimator_{problem}_{model}.json')
 
     for model in models:
         swapped_name = f'{experiment_name} Swapped n:{model}'
@@ -237,7 +237,7 @@ def run(problem: str, local_model: str):
             mlflow.set_experiment(name)
             _log_experiment(swapped_experiment, parent_name=f'Swaps of {base_model}', depth=0)
             if i == 1:
-                dump(estimator, f'estimator_swapped_{model}.json')
+                dump(estimator, f'estimator_{problem}_{model}_swapped_{model}.json')
 
 if __name__ == '__main__':
     run()

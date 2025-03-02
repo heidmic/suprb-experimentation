@@ -7,4 +7,4 @@
 
 JOB_DIR=/data/oc-compute03/wehrfabi/my-experimentation
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
-python $JOB_DIR/runs/local_models/class_tuning.py -l Lasso"
+python $JOB_DIR/runs/local_models/class_tuning.py"
