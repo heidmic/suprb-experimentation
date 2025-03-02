@@ -59,7 +59,7 @@ def is_class(name: str) -> bool:
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option('-p', '--problem', type=click.STRING, default='concrete_strength')
 @click.option('-l', '--local_model', type=click.STRING, default='ridge')
 def run(problem: str, local_model: str):
     print(f"Problem is {problem}, with local model {local_model}")
