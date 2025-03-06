@@ -32,8 +32,8 @@ from suprb.rule.initialization import MeanInit
 random_state = 42
 
 fold_amount = 8
-suprb_iter = 64
-tuning_iter = 200
+suprb_iter = 32
+tuning_iter = 100
 #fold_amount = 2
 #suprb_iter = 2
 #tuning_iter = 1
@@ -41,9 +41,9 @@ tuning_iter = 200
 Regressors = {'lasso': Lasso(alpha=0.01, random_state=random_state),
                   'elasticNet': ElasticNet(alpha=0.01, l1_ratio=0.5, random_state=random_state, fit_intercept=True,),
                    'ridge': Ridge(alpha=0.01, random_state=random_state)}
-Classifiers = {'l1': LogisticRegression(penalty='l1', random_state=random_state),#, solver='saga'),
-               'l2': LogisticRegression(penalty='l2', random_state=random_state),#, solver='saga'),
-               'elasticnet': LogisticRegression(penalty='elasticnet', l1_ratio=0.5, random_state=random_state)}
+Classifiers = {'l1': LogisticRegression(penalty='l1', C=100, random_state=random_state, solver='saga'),
+               'l2': LogisticRegression(penalty='l2', C=100, random_state=random_state, solver='saga'),
+               'elasticnet': LogisticRegression(penalty='elasticnet', C=100, l1_ratio=0.5, random_state=random_state, solver='saga')}
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
@@ -79,7 +79,7 @@ def run(problem: str, local_model: str):
     if isClass:
         models = Classifiers
         tuning_scoring='accuracy'
-        evaluation_metric = {'f1','accuracy'}
+        evaluation_metric = ['accuracy', 'f1']
         mixing = mixing_model.ErrorExperienceClassification()
 
 
@@ -162,9 +162,8 @@ def run(problem: str, local_model: str):
         params.rule_generation__init__model__tol = trial.suggest_float('rule_generation__init__model__tol', 1e-4, 1e-1)
         # Local_model
         if isClass:#isinstance(params.rule_generation__init__model, base.ClassifierMixin):
-            params.rule_generation__init__model__solver = trial.suggest_categorical(
-                'rule_generation__init__model__solver', ['saga', 'liblinear'])
-            params.rule_generation__init__model__C = trial.suggest_float('rule_generation__init__model__C', 0.01, 2)
+            #params.rule_generation__init__model__solver = trial.suggest_categorical('rule_generation__init__model__solver', ['saga', 'liblinear'])
+            #params.rule_generation__init__model__C = trial.suggest_float('rule_generation__init__model__C', 0.01, 2)
             params.rule_generation__init__model__max_iter = trial.suggest_int('rule_generation__init__model__max_iter', 100, 1000)
 
     
@@ -192,7 +191,7 @@ def run(problem: str, local_model: str):
     trained_estimators = []
     for exp in experiment.experiments:
         trained_estimators.extend(exp.estimators_)
-    base_model = models.pop(local_model)
+    base_model = models[local_model]#models.pop(local_model)
     for model in models:
         swapped_name = f'{experiment_name} Swapped n:{model}'
         print(f"Swapping {model}")
@@ -216,10 +215,7 @@ def run(problem: str, local_model: str):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
             estimator = trained_estimators[i]
-            swapped_elitist = estimator.model_swap(model)
-            swapped_elitist.fit(X_train, y_train)
-            estimator.elitist_ = swapped_elitist
-            estimator.is_fitted = True
+            estimator.model_swap_fit(model, X_train, y_train)
             prediction = estimator.predict(X_test)
             scorer = mean_squared_error if not isClass else accuracy_score
             score = scorer(y_test, prediction)

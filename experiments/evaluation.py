@@ -83,10 +83,7 @@ class CustomUnfitEvaluation(Evaluation, metaclass=ABCMeta):
             X_train, X_test = self.X[train_index], self.X[test_index]
             y_train, y_test = self.y[train_index], self.y[test_index]
             estimator = self.trained_estimators[i]
-            swapped_elitist = estimator.model_swap(self.local_model)
-            swapped_elitist.fit(X_train, y_train)
-            estimator.elitist_ = swapped_elitist
-            estimator.is_fitted = True
+            estimator.model_swap_fit(self.local_model,X_train, y_train)
             estimator.logger_ = DefaultLogger()
             estimator.logger_.log_init(X_train, y_train, estimator)
             estimator.logger_.log_final(X_train, y_train, estimator)

@@ -9,7 +9,7 @@
     },
     "datasets": {
         "breastcancer": "Breast Cancer",
-        "raisins": "Raisins",
+        "raisin": "Raisin",
         "abalone": "Abalone"
     },
     "metrics": {
