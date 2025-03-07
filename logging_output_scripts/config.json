@@ -14,8 +14,8 @@
         "energy_heat": "Energy Efficiency target Heat Load"
     },
     "metrics": {
-        "elitist_complexity": "Complexity",
-        "elitist_error": "Error",
+        "elitist_complexity": "Number of Rules",
+        "elitist_error": "MSE",
         "test_neg_mean_squared_error": "MSE",
         "test_r2": "R2-Score",
         "test_score": "R2-Score",

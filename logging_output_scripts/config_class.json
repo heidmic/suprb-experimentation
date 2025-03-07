@@ -13,8 +13,8 @@
         "abalone": "Abalone"
     },
     "metrics": {
-        "elitist_complexity": "Complexity",
-        "elitist_error": "Error",
+        "elitist_complexity": "Number of Rules",
+        "elitist_error": "Pseudoerror",
         "test_score": "Accuracy",
         "training_score": "Training Accuracy",
         "test_accuracy": "Accuracy",

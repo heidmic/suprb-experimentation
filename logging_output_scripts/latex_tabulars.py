@@ -10,7 +10,7 @@ This script uses the tabulate package (https://pypi.org/project/tabulate/)
 to create LaTex tables based on the values calculated in Summary_csv.py
 (Except for Genomes-Tables which use a Json)
 """
-with open('logging_output_scripts/config.json') as f:
+with open('logging_output_scripts/config_class.json') as f:
     config = json.load(f)
 
 final_output_dir = f"{config['output_directory']}"
@@ -19,13 +19,18 @@ summary_csv_dir = f"{final_output_dir}/csv_summary"
 comp_column = {0: 'MEAN_COMP', 1: 'STD_COMP', 2: 'MEDIAN_COMP', 3: 'MIN_COMP', 4: 'MAX_COMP'}
 comp_column_short = {0: 'mean', 1: 'standard deviation', 2: 'median', 3: 'min', 4: 'max'}
 datasets_short = {0: 'CS', 1: 'ASN' , 2: 'CCPP', 3: 'EH'}
+datasets_short = {0: 'Breast Cancer', 1: 'Raisin', 2: 'Abalone'}
 metrics = {'MEAN_COMP': 'mean', 'STD_COMP': 'standard deviation', 'MEDIAN_COMP': 'median', 'MIN_COMP': 'min', 'MAX_COMP': 'max',
-           'MEAN_R2': 'mean', 'STD_R2': 'standard deviation', 'MEAN_MSE': 'median', 'STD_MSE': 'min', 'MEAN_TEST': 'mean', 'STD_TEST': 'standard deviation'}
-metric_names = {0: 'Complexity', 1: '', 2:'', 3:'', 4:'', 5:'\hline R2-Score', 6:'Test', 7:'\hline MSE', 8:'Test', 9:'\hline R2-Sore', 10:'Training'}
+           'MEAN_R2': 'mean', 'STD_R2': 'standard deviation', 'MEAN_MSE': 'median', 'STD_MSE': 'standard deviation', 'MEAN_TRAIN': 'mean', 'STD_TRAIN': 'standard deviation'}
+metrics = {'MEAN_COMP': 'mean', 'STD_COMP': 'standard deviation', 'MEDIAN_COMP': 'median', 'MIN_COMP': 'min', 'MAX_COMP': 'max',
+           'MEAN_ACC': 'mean', 'STD_ACC': 'standard deviation', 'MEAN_F1': 'median', 'STD_F1': 'standard deviation', 'MEAN_TRAIN': 'mean', 'STD_TRAIN': 'standard deviation'}
+metric_names = {0: 'Complexity', 1: '', 2:'', 3:'', 4:'', 5:'\hline R2-Score', 6:'Test', 7:'\hline MSE', 8:'Test', 9:'\hline R2-Score', 10:'Training'}
+metric_names = {0: 'Complexity', 1: '', 2:'', 3:'', 4:'', 5:'\hline Accuracy', 6:'Test', 7:'\hline F1-Score', 8:'Test', 9:'\hline Accuracy', 10:'Training'}
 
 # Returns column with name "column_name" of "problem"
 def load_problem_columns(df, column_name):
     data_res = []
+    df['Problem'] = df['Problem'].astype(str)  # Ensure 'Problem' column is treated as string
     for problem in config["datasets"]:
         res = df[df['Problem'].str.contains(problem)]
         data_res.append(float(res[column_name]))
@@ -67,10 +72,10 @@ def write_complexity():
         with open(f"{final_output_dir}/latex_tabular/Complexity-{model}.txt", "w") as file:
             file.write(res)
 
+
 def summarize_problems():
     for i, data_set in enumerate(config["datasets"]):
         table = []
-        #for column_name, column_name_short in zip(comp_column.values(), comp_column_short.values()):
         r = 0
         for metric, value_name in metrics.items():
             row = [metric_names[r], value_name]
@@ -80,7 +85,6 @@ def summarize_problems():
                 data_res = load_problem_columns(df, metric)
                 row += [data_res[i]]
             table.append(row)
-        print(table)
         model_names = [*config["model_names"].values()]
         res = tabulate(table, tablefmt="latex_raw", headers=['Metric', 'Value', model_names[0], model_names[1], model_names[2]])
         with open(f"{final_output_dir}/latex_tabular/Summary-{data_set}.txt", "w") as file:
@@ -170,22 +174,38 @@ def write_error():
         file.write(problem_1 + "\n\n" + problem_2 + "\n\n" + problem_3 + "\n\n" + problem_4)
 
 
-def single_table(dataset_shorts):
+def single_table():
     columns = []
     for problem in config["datasets"]:
-        # Each row features one problem for one model
+        # Each row features one problem
         row = []
         row.append(config["datasets"][problem])
         for model in config["model_names"]:
             df = pd.read_csv(f"{summary_csv_dir}/{config['model_names'][model]}_summary.csv")
+            df['Problem'] = df['Problem'].astype(str)  # Ensure 'Problem' column is treated as string
             res = df[df['Problem'].str.contains(problem)]
-            row.append(str(round(float(res['MEAN_ERROR']), 2))+"pm" +
-                       str(round(float(res['STD_ERROR']), 2)))
-            row.append(str(round(float(res['MEAN_COMP']), 2))+"pm" +
-                       str(round(float(res['STD_COMP']), 2)))
+            if not res.empty:
+                res = res.iloc[0]  # Select the first row
+                mean_acc = res['MEAN_TRAIN']
+                std_acc = res['STD_TRAIN']
+                mean_comp = res['MEAN_COMP']
+                std_comp = res['STD_COMP']
+                
+                if pd.isna(mean_acc) or mean_acc == "" or pd.isna(std_acc) or std_acc == "":
+                    row.append("None")
+                else:
+                    row.append(f"{round(float(mean_acc), 3)}pm{round(float(std_acc), 3)}")
+                
+                if pd.isna(mean_comp) or mean_comp == "" or pd.isna(std_comp) or std_comp == "":
+                    row.append("None")
+                else:
+                    row.append(f"{round(float(mean_comp), 1)}pm{round(float(std_comp), 1)}")
+            else:
+                row.append("None")
+                row.append("None")
         columns.append(row)
     frame = pd.DataFrame(columns)
-    headers = [x for y in [['Error', 'Complexity'] for i in range(
+    headers = [x for y in [['Accuracy', 'Complexity'] for i in range(
         frame.shape[1]-1)] for x in y]
     latex = tabulate(columns, tablefmt="latex_booktabs", headers=headers)
     splits = latex.split("\\toprule")
@@ -204,14 +224,10 @@ def single_table_all_error(dataset_shorts):
         for problem in config["datasets"]:
             df = pd.read_csv(f"{summary_csv_dir}/{config['model_names'][model]}_summary.csv")
             res = df[df['Problem'].str.contains(problem)]
-            row.append(str(round(float(res['MEAN_ERROR']), 2))+"pm" +
-                       str(round(float(res['STD_ERROR']), 2)))
+            row.append(str(round(float(res['MEAN_ERROR']), 3))+"\pm" +
+                       str(round(float(res['STD_ERROR']), 3)))
         columns.append(row)
-    latex = tabulate(columns, tablefmt="latex_booktabs")
-    splits = latex.split("\\toprule")
-    headline = " &".join(dataset_shorts.values())
-    headline =  "\n &" + headline + "\\\\"
-    latex = splits[0]+"\\toprule"+headline+splits[1]
+    latex = tabulate(columns, tablefmt="latex_raw", headers=['Model']+list(dataset_shorts.values()))
     with open(f"{final_output_dir}/latex_tabular/latex_error.txt", "w") as file:
         file.write(latex)
 
@@ -224,48 +240,61 @@ def single_table_all_complexity(dataset_shorts):
         for problem in config["datasets"]:
             df = pd.read_csv(f"{summary_csv_dir}/{config['model_names'][model]}_summary.csv")
             res = df[df['Problem'].str.contains(problem)]
-            row.append(str(round(float(res['MEAN_COMP']), 2))+"pm" +
-                       str(round(float(res['STD_COMP']), 2)))
+            row.append(str(round(float(res['MEAN_COMP']), 1))+"\pm" +
+                       str(round(float(res['STD_COMP']), 1)))
         columns.append(row)
-    latex = tabulate(columns, tablefmt="latex_booktabs")
-    splits = latex.split("\\toprule")
-    headline = " &".join(dataset_shorts.values())
-    headline =  "\n &" + headline + "\\\\"
-    latex = splits[0]+"\\toprule"+headline+splits[1]
+    latex = tabulate(columns, tablefmt="latex_raw", headers=['Model']+list(dataset_shorts.values()))
     with open(f"{final_output_dir}/latex_tabular/latex_complexity.txt", "w") as file:
         file.write(latex)
 
 def swaps_error(dataset_shorts, base_model):
     columns = []
+    base_df = pd.read_csv(f"{summary_csv_dir}/{config['model_names'][base_model]}_summary.csv")
     df = pd.read_csv(f"{summary_csv_dir}/{config['model_names'][base_model]}_swaps_summary.csv")
+    base_df['Problem'] = base_df['Problem'].astype(str)  # Ensure 'Problem' column is treated as string
+    df['Problem'] = df['Problem'].astype(str)  # Ensure 'Problem' column is treated as string
     for model in config["model_names"]:
-        # Each row features one problem for one model
-        row = [utils.datasets_map[model]]
+        row = [config["model_names"][model]]#[utils.datasets_map[model]]
+        #Each row features one m one problem forodel
         for problem in config["datasets"]:
-            res = df[df['Problem'].str.contains(problem + " " + f"n:{model}")]
-            row.append(str(round(float(res['MEAN_ERROR']), 2))+"pm" +
-                       str(round(float(res['STD_ERROR']), 2)))
+            if model == base_model:
+                res = base_df[base_df['Problem'].str.contains(problem)]
+                if res.empty:
+                    continue
+                row.append(str(round(float(res['MEAN_TRAIN']), 3))+"\pm " +
+                        str(round(float(res['STD_TRAIN']), 3)))
+            else:
+                res = df[df['Problem'].str.contains(problem + " " + f"n:{model}")]
+                if res.empty:
+                    continue
+                row.append(str(round(float(res['MEAN_ACC']), 3))+"\pm " +
+                        str(round(float(res['STD_ACC']), 3)))
         columns.append(row)
-    latex = tabulate(columns, tablefmt="latex_booktabs")
-    splits = latex.split("\\toprule")
-    headline = " &".join(dataset_shorts.values())
-    headline =  "\n &" + headline + "\\\\"
-    latex = splits[0]+"\\toprule"+headline+splits[1]
+    latex = tabulate(columns, tablefmt="latex_raw", headers=['Model']+list(dataset_shorts.values()))
+    #splits = latex.split("\\toprule")
+    #headline = " &".join(dataset_shorts.values())
+    #headline =  "\n &" + headline + "\\\\"
+    #latex = splits[0]+"\\toprule"+headline+splits[1]
     with open(f"{final_output_dir}/latex_tabular/latex_{base_model}_swaps.txt", "w") as file:
         file.write(latex)
-        
+
 
 # Add / leave out certain tables
-if __name__ == '__main__':
+def create_latex_tables(isClass = False):
+    print("STARTING latex tabulars")
     final_output_dir = f"{config['output_directory']}"
     check_and_create_dir(final_output_dir, 'latex_tabular')
     # write_complexity()
     # write_complexity_all()
     # write_error()
     #write_error_all(datasets_short)
-    #single_table(dataset_shorts = datasets_short)
     #single_table_all_error(dataset_shorts = datasets_short)
-    summarize_problems()
     #single_table_all_complexity(dataset_shorts=datasets_short)
-    #for model in config["model_names"]:
-    #    swaps_error(dataset_shorts=datasets_short, base_model=model)
+    single_table()
+    summarize_problems()
+    for model in config["model_names"]:
+        swaps_error(dataset_shorts=datasets_short, base_model=model)
+
+
+if __name__ == '__main__':
+    create_latex_tables(isClass = False)

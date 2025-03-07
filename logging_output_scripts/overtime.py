@@ -59,6 +59,7 @@ def get_histogram(experiment_name, dataset_name, metric_name, steps, isClass = F
 
 
 def create_plots(metric_name='elitist_complexity', steps=64, isClass=False):
+    print("STARTING timeline-plots")
     config_path = CONFIG_PATH
     if isClass:
         config_path = CLASS_CONFIG_PATH
@@ -74,6 +75,8 @@ def create_plots(metric_name='elitist_complexity', steps=64, isClass=False):
         for model in config['model_names']:
             model_name = f"l:{model}"
             result = get_histogram(model_name, dataset_name, metric_name, steps, isClass=isClass)
+            if result is None:
+                continue
             for i, res in enumerate(result):
                 results[0].append(res)
                 results[1].append(i)

@@ -23,6 +23,7 @@ sns.set_theme(style="whitegrid",
 
 
 def create_violin_plots(metric_name="elitist_complexity", isClass=False):
+    print("STARTING violin-plots")
     config_path = CONFIG_PATH
     if isClass:
         config_path = CLASS_CONFIG_PATH
@@ -67,17 +68,18 @@ def create_violin_plots(metric_name="elitist_complexity", isClass=False):
         # Store violin-plots of all models in one plot
         fig, ax = plt.subplots()
 
-        ax = sns.violinplot(x='Used_Representation', y=metric_name,
-                             data=res_var, scale="width", scale_hue=False)
-        # ax = sns.swarmplot(x='Used_Representation', y=metric_name, data=res_var, size=2)
+        # ax = sns.violinplot(x='Used_Representation', y=metric_name,data=res_var, scale="width", scale_hue=False)
+        ax = sns.swarmplot(x='Used_Representation', y=metric_name, data=res_var, size=2)
 
         ax.set_xlabel('Estimator', weight="bold")
         
         metric_dict = {"test_neg_mean_squared_error": "MSE",
                        "elitist_complexity": "Complexity",
                        "accuracy": "Accuracy",
-                       "test_score": "Score"}       
-        ax.set_ylabel(config['metrics'][metric_name], weight="bold")
+                       "test_score": "Score",
+                       "training_score": "Accuracy",}       
+        #ax.set_ylabel(config['metrics'][metric_name], weight="bold")
+        ax.set_ylabel(metric_dict[metric_name], weight="bold")
         
         title_dict = {"concrete_strength": "Concrete Strength",
                       "combined_cycle_power_plant": "Combined Cycle Power Plant",
@@ -88,8 +90,8 @@ def create_violin_plots(metric_name="elitist_complexity", isClass=False):
                       "abalone": "Abalone"}
         ax.set_title(title_dict[problem], style="italic")
         ax.set_box_aspect(1)
-        # fig.savefig(f"{final_output_dir}/{problem}_swarm.png", dpi=500)
-        fig.savefig(f"{final_output_dir}/{problem}_{metric_name}.png", dpi=500)
+        fig.savefig(f"{final_output_dir}/{problem}_swarm.png", dpi=500)
+        #fig.savefig(f"{final_output_dir}/{problem}_{metric_name}.png", dpi=500)
 
 
 if __name__ == '__main__':

@@ -133,9 +133,8 @@ def get_by_config(config, search_string, filter_swapped=True):
     all_runs_list = []
     models = [key for key in config['model_names']]
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash' and item != '0']
-
     for run in all_runs:
-        for run_name in mlflow.search_runs([run])['tags.mlflow.runName']:
+        for run_name in mlflow.search_runs([run]).get('tags.mlflow.runName', "No run name"):
             if search_string in run_name:
                 if filter_swapped:
                     if 'n:' in run_name:
@@ -162,8 +161,24 @@ def get_dataframe(all_runs_list, exp_name, dataset):
         else:
             continue
 
-
     return None
+
+
+def get_all_dataframe(all_runs_list, exp_name, dataset):
+    ret = None
+    # Returns experiments split over multiple runs
+    for run in all_runs_list:
+        df = run[run['tags.mlflow.runName'].str.contains(f"{exp_name}")]
+        
+        if not df.empty:
+            df = df[df['tags.mlflow.runName'].str.contains(f"{dataset}")]
+        
+        if not df.empty:
+            # Filter out individual runs (Removes averaged values)
+            df = df[df['tags.fold'].str.contains("True", na=False)]
+            ret = pd.concat([ret, df], ignore_index=True) if ret is not None else df
+
+    return ret
 
 
 def check_and_create_dir(output_folder, output_dir):
@@ -213,7 +228,7 @@ datasets_map = {
     "elasticNet": "Elastic Net",
         "breastcancer": "Breast Cancer",
         "abalone": "Abalone",
-        "raisins": "Raisins",
+        "raisin": "Raisin",
         "concrete_strength": "Concrete Strength",
         "airfoil_self_noise": "Airfoil Self Noise",
         "combined_cycle_power_plant": "Combined Cycle Power Plant",
