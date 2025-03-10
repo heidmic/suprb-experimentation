@@ -19,7 +19,7 @@ if __name__ == "__main__":
         violin_plots.create_violin_plots(metric_name="training_score", isClass=True)
         overtime.create_plots(metric_name="training_score", isClass=True)
     else:
-        violin_plots.create_violin_plots(metric_name="test_neg_mean_squared_error", isClass=False)
+        violin_plots.create_violin_plots(metric_name="test_r2", isClass=False)
         overtime.create_plots(metric_name="training_score", isClass=False)
     summary_csv.create_summary_csv(isClass=isClass)
     

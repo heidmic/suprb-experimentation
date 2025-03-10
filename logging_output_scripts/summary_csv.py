@@ -13,6 +13,7 @@ CLASS_CONFIG_PATH = 'logging_output_scripts/config_class.json'
 
 
 def create_summary_csv(isClass=False, base_model = None):
+    print("STARTING summary csv")
     config_path = CONFIG_PATH
     if isClass:
         config_path = CLASS_CONFIG_PATH
@@ -53,10 +54,9 @@ def create_summary_csv(isClass=False, base_model = None):
             model_str = f"l:{model}"
             all_runs_list = get_by_config(config, model_str, filter_swapped=True)
 
-        fold_df = None
         values = ""
         for problem in config['datasets']:
-            values += log_values(all_runs_list, model_str, problem, swapped)
+            values += log_values(all_runs_list, model_str, problem, log_comp=True, swapped=swapped)
             print(f"Done for {problem} with {model_name}") 
                     
         if not swapped:
@@ -143,7 +143,7 @@ def log_alternate(isClass = True):
         config_path = CLASS_CONFIG_PATH
     with open(config_path) as f:
         config = json.load(f)
-    model = "Forest"
+    model = "Tree"
     conf = {
         "data_directory": "mlruns",
         "model_names":  {
@@ -151,15 +151,16 @@ def log_alternate(isClass = True):
         }
     }
     list=get_by_config(conf, model)
-    res = log_values(list, model, "breastcancer", log_comp=False, swapped=True)
-    print(res)
-    header = "Experiment, Score, Std_Score"
-    final_output_dir = f"{config['output_directory']}"
-    with open(f"{final_output_dir}/csv_summary/alternate_summary.csv", "w") as file:
-            file.write(header + res)
+    val = ""
+    for problem in config['datasets']:
+        val += log_values(list, model, problem, log_comp=False, swapped=True)
+        print(val)
+        header = "Problem, Score, Std_Score"
+        final_output_dir = f"{config['output_directory']}"
+    with open(f"{final_output_dir}/csv_summary/Forest_summary.csv", "w") as file:
+            file.write(header + val)
                                
 
 if __name__ == '__main__':
-    log_alternate()
-    print("STARTING summary csv")
-    #create_summary_csv(base_model="l2", isClass=True)
+    #log_alternate()
+    create_summary_csv(isClass=True)

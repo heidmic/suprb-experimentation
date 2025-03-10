@@ -68,8 +68,8 @@ def create_violin_plots(metric_name="elitist_complexity", isClass=False):
         # Store violin-plots of all models in one plot
         fig, ax = plt.subplots()
 
-        # ax = sns.violinplot(x='Used_Representation', y=metric_name,data=res_var, scale="width", scale_hue=False)
-        ax = sns.swarmplot(x='Used_Representation', y=metric_name, data=res_var, size=2)
+        ax = sns.violinplot(x='Used_Representation', y=metric_name,data=res_var, scale="width", scale_hue=False)
+        # ax = sns.swarmplot(x='Used_Representation', y=metric_name, data=res_var, size=2)
 
         ax.set_xlabel('Estimator', weight="bold")
         
@@ -78,8 +78,8 @@ def create_violin_plots(metric_name="elitist_complexity", isClass=False):
                        "accuracy": "Accuracy",
                        "test_score": "Score",
                        "training_score": "Accuracy",}       
-        #ax.set_ylabel(config['metrics'][metric_name], weight="bold")
-        ax.set_ylabel(metric_dict[metric_name], weight="bold")
+        ax.set_ylabel(config['metrics'][metric_name], weight="bold")
+        #ax.set_ylabel(metric_dict[metric_name], weight="bold")
         
         title_dict = {"concrete_strength": "Concrete Strength",
                       "combined_cycle_power_plant": "Combined Cycle Power Plant",

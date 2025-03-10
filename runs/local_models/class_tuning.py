@@ -196,6 +196,7 @@ def run(problem: str, local_model: str):
         swapped_name = f'{experiment_name} Swapped n:{model}'
         print(f"Swapping {model}")
         '''
+        # Custom splitting and evaluation handled by eval
         swapped_experiment = Experiment(name=swapped_name,  verbose=0)
         swapped_experiment.with_random_states(random_states, n_jobs=random_amount)
 
@@ -210,6 +211,7 @@ def run(problem: str, local_model: str):
         print("Estimators: " + str(getattr(swapped_experiment, 'estimators_', None)))
         '''
 
+        # Custom splitting and evaluation done manually
         splitter = ShuffleSplit(n_splits=fold_amount, test_size=0.25, random_state=random_states[0])
         for i, (train_index, test_index) in enumerate(splitter.split(X)):
             X_train, X_test = X[train_index], X[test_index]

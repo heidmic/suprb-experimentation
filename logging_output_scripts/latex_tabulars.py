@@ -1,5 +1,6 @@
 import json
 import os
+import numpy as np
 import pandas as pd
 from tabulate import tabulate
 from logging_output_scripts.utils import check_and_create_dir
@@ -19,12 +20,13 @@ summary_csv_dir = f"{final_output_dir}/csv_summary"
 comp_column = {0: 'MEAN_COMP', 1: 'STD_COMP', 2: 'MEDIAN_COMP', 3: 'MIN_COMP', 4: 'MAX_COMP'}
 comp_column_short = {0: 'mean', 1: 'standard deviation', 2: 'median', 3: 'min', 4: 'max'}
 datasets_short = {0: 'CS', 1: 'ASN' , 2: 'CCPP', 3: 'EH'}
-datasets_short = {0: 'Breast Cancer', 1: 'Raisin', 2: 'Abalone'}
 metrics = {'MEAN_COMP': 'mean', 'STD_COMP': 'standard deviation', 'MEDIAN_COMP': 'median', 'MIN_COMP': 'min', 'MAX_COMP': 'max',
            'MEAN_R2': 'mean', 'STD_R2': 'standard deviation', 'MEAN_MSE': 'median', 'STD_MSE': 'standard deviation', 'MEAN_TRAIN': 'mean', 'STD_TRAIN': 'standard deviation'}
+metric_names = {0: 'Complexity', 1: '', 2:'', 3:'', 4:'', 5:'\hline R2-Score', 6:'Test', 7:'\hline MSE', 8:'Test', 9:'\hline R2-Score', 10:'Training'}
+datasets_short = {0: 'Breast Cancer', 1: 'Raisin', 2: 'Abalone'}
 metrics = {'MEAN_COMP': 'mean', 'STD_COMP': 'standard deviation', 'MEDIAN_COMP': 'median', 'MIN_COMP': 'min', 'MAX_COMP': 'max',
            'MEAN_ACC': 'mean', 'STD_ACC': 'standard deviation', 'MEAN_F1': 'median', 'STD_F1': 'standard deviation', 'MEAN_TRAIN': 'mean', 'STD_TRAIN': 'standard deviation'}
-metric_names = {0: 'Complexity', 1: '', 2:'', 3:'', 4:'', 5:'\hline R2-Score', 6:'Test', 7:'\hline MSE', 8:'Test', 9:'\hline R2-Score', 10:'Training'}
+
 metric_names = {0: 'Complexity', 1: '', 2:'', 3:'', 4:'', 5:'\hline Accuracy', 6:'Test', 7:'\hline F1-Score', 8:'Test', 9:'\hline Accuracy', 10:'Training'}
 
 # Returns column with name "column_name" of "problem"
@@ -279,17 +281,60 @@ def swaps_error(dataset_shorts, base_model):
         file.write(latex)
 
 
+def write_tree():
+    table = []
+    for problem in config["datasets"]:
+        row = []
+        # Log Score
+        df = pd.read_csv(f"{summary_csv_dir}/Tree_summary.csv")
+        res = df[df['Problem'].str.contains(problem)]
+        row.append(str(round(float(res['Score']), 3))+"\pm " +
+                        str(round(float(res['Std_Score']), 3)))
+        # Log Complexity
+        df = pd.read_csv(f"{summary_csv_dir}/Tree_comp_summary.csv")
+        res = df[df['Problem'].str.contains(problem)]
+        row.append(str(round(float(res['Mean_depth']), 3))+"\pm " +
+                        str(round(float(res['Std_depth']), 3)))
+        row.append(str(round(float(res['Mean_leaves']), 3))+"\pm " +
+                        str(round(float(res['Std_leaves']), 3)))
+        table.append(row)
+    row_names = ['R2-Score', 'Depth', 'Number of Leaves']
+    table = [row_names] + table
+    table = np.transpose(table)
+    ret = tabulate(table, tablefmt="latex_raw", headers=['Metric', 'Breastcancer', 'Raisin', 'Abalone'])
+    with open(f"{final_output_dir}/latex_tabular/tree_table.txt", "w") as file:
+        file.write(ret)
+
+
+def write_forest():
+    table = []
+    for problem in config["datasets"]:
+        row = []
+        df = pd.read_csv(f"{summary_csv_dir}/Forest_summary.csv")
+        res = df[df['Problem'].str.contains(problem)]
+        row.append(str(round(float(res['Score']), 3))+"\pm " +
+                        str(round(float(res['Std_Score']), 3)))
+        table.append(row)
+    row_names = ['R2-Score']
+    table = np.transpose([row_names] + table)
+    ret = tabulate(table, tablefmt="latex_raw", headers=['Metric', 'Breastcancer', 'Raisin', 'Abalone'])
+    with open(f"{final_output_dir}/latex_tabular/forest_table.txt", "w") as file:
+        file.write(ret)
+
+
 # Add / leave out certain tables
 def create_latex_tables(isClass = False):
     print("STARTING latex tabulars")
     final_output_dir = f"{config['output_directory']}"
     check_and_create_dir(final_output_dir, 'latex_tabular')
+    # write_tree()
+    # write_forest()
     # write_complexity()
     # write_complexity_all()
     # write_error()
-    #write_error_all(datasets_short)
-    #single_table_all_error(dataset_shorts = datasets_short)
-    #single_table_all_complexity(dataset_shorts=datasets_short)
+    # write_error_all(datasets_short)
+    # single_table_all_error(dataset_shorts = datasets_short)
+    # single_table_all_complexity(dataset_shorts=datasets_short)
     single_table()
     summarize_problems()
     for model in config["model_names"]:
