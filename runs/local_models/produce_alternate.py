@@ -2,13 +2,13 @@ import json
 import decision_tree
 from logging_output_scripts.utils import check_and_create_dir
 import rf
-CONFIG_PATH = 'logging_output_scripts/config.json'
-CLASS_CONFIG_PATH = 'logging_output_scripts/config_class.json'
+REGRESSOR_CONFIG_PATH = 'logging_output_scripts/config_regression.json'
+CLASSIFIER_CONFIG_PATH = 'logging_output_scripts/config_classification.json'
 
 def run(isClass): 
-    config_path = CONFIG_PATH
+    config_path = REGRESSOR_CONFIG_PATH
     if isClass:
-        config_path = CLASS_CONFIG_PATH
+        config_path = CLASSIFIER_CONFIG_PATH
     with open(config_path) as f:
         config = json.load(f)
     

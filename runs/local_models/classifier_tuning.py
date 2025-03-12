@@ -52,7 +52,7 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         return getattr(datasets, method_name)(**kwargs)
     
 
-def is_class(name: str) -> bool:
+def is_classification(name: str) -> bool:
     from problems import datasets
     return datasets.is_classification(name)
 
@@ -62,7 +62,7 @@ def is_class(name: str) -> bool:
 @click.option('-l', '--local_model', type=click.STRING, default='elasticnet')
 def run(problem: str, local_model: str):
     print(f"Problem is {problem}, with local model {local_model}")
-    isClassifier = is_class(name=problem)
+    isClassifier = is_classification(name=problem)
     X, y = load_dataset(name=problem, return_X_y=True)
     if not isClassifier:
         X, y = scale_X_y(X, y)

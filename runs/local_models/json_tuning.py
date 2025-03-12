@@ -11,7 +11,7 @@ from sklearn.utils import Bunch, shuffle
 from sklearn.model_selection import ShuffleSplit
 
 from experiments import Experiment
-from experiments.evaluation import CrossValidate, CustomUnfitEvaluation
+from experiments.evaluation import CrossValidate, CustomSwapEvaluation
 from experiments.mlflow import log_experiment, _log_experiment, log_run, log_run_result
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
@@ -53,7 +53,7 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         return getattr(datasets, method_name)(**kwargs)
     
 
-def is_class(name: str) -> bool:
+def is_classification(name: str) -> bool:
     from problems import datasets
     return datasets.is_classification(name)
 
@@ -63,7 +63,7 @@ def is_class(name: str) -> bool:
 @click.option('-l', '--local_model', type=click.STRING, default='ridge')
 def run(problem: str, local_model: str):
     print(f"Problem is {problem}, with local model {local_model}")
-    isClass = is_class(name=problem)
+    isClass = is_classification(name=problem)
     X, y = load_dataset(name=problem, return_X_y=True)
     if not isClass:
         X, y = scale_X_y(X, y)
