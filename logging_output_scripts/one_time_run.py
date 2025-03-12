@@ -217,7 +217,7 @@ adel = {"SupRB": "SupRB",
         "Decision Tree": "DT", }
 
 if __name__ == '__main__':
-    with open("logging_output_scripts/config.json", "r") as f:
+    with open("logging_output_scripts/config_regression.json", "r") as f:
         config = json.load(f)
 
     def run_main():
@@ -240,7 +240,7 @@ if __name__ == '__main__':
         config["heuristics"] = setting[1]
         config["data_directory"] = setting[4]
 
-        with open("logging_output_scripts/config.json", "w") as f:
+        with open("logging_output_scripts/config_regression.json", "w") as f:
             json.dump(config, f)
 
         time.sleep(10)

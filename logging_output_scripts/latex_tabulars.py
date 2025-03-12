@@ -11,7 +11,7 @@ This script uses the tabulate package (https://pypi.org/project/tabulate/)
 to create LaTex tables based on the values calculated in Summary_csv.py
 (Except for Genomes-Tables which use a Json)
 """
-with open('logging_output_scripts/config_class.json') as f:
+with open('logging_output_scripts/config_classification.json') as f:
     config = json.load(f)
 
 final_output_dir = f"{config['output_directory']}"
@@ -323,7 +323,7 @@ def write_forest():
 
 
 # Add / leave out certain tables
-def create_latex_tables(isClass = False):
+def create_latex_tables(isClassifier = False):
     print("STARTING latex tabulars")
     final_output_dir = f"{config['output_directory']}"
     check_and_create_dir(final_output_dir, 'latex_tabular')
@@ -342,4 +342,4 @@ def create_latex_tables(isClass = False):
 
 
 if __name__ == '__main__':
-    create_latex_tables(isClass = False)
+    create_latex_tables(isClassifier = False)

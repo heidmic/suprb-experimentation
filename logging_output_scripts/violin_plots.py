@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from logging_output_scripts.utils import get_dataframe, check_and_create_dir
 
-CONFIG_PATH = 'logging_output_scripts/config.json'
-CLASS_CONFIG_PATH = 'logging_output_scripts/config_class.json'
+REGRESSOR_CONFIG_PATH = 'logging_output_scripts/config_regression.json'
+CLASSIFIER_REGRESSOR_CONFIG_PATH = 'logging_output_scripts/config_classification.json'
 """
 Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
@@ -22,11 +22,11 @@ sns.set_theme(style="whitegrid",
               })
 
 
-def create_violin_plots(metric_name="elitist_complexity", isClass=False):
+def create_violin_plots(metric_name="elitist_complexity", isClassifier=False):
     print("STARTING violin-plots")
-    config_path = CONFIG_PATH
-    if isClass:
-        config_path = CLASS_CONFIG_PATH
+    config_path = REGRESSOR_CONFIG_PATH
+    if isClassifier:
+        config_path = CLASSIFIER_REGRESSOR_CONFIG_PATH
     with open(config_path) as f:
         config = json.load(f)
     check_and_create_dir(config['output_directory'],"violin_plots")

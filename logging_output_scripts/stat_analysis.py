@@ -118,7 +118,7 @@ def cli():
 
 
 def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, ylabel=None):
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"
@@ -218,7 +218,7 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
 
 
 def ttest(latex, cand1, cand2, cand1_name, cand2_name):
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"

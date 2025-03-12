@@ -1,0 +1,23 @@
+{
+    "data_directory": "mlruns",
+    "output_directory": "logging_output_scripts/outputs",
+    "normalize_datasets": false,
+    "model_names": {
+        "l2": "Logit with L2",
+        "elasticnet": "Logit with Elastic Net",
+        "l1": "Logit with L1"
+    },
+    "datasets": {
+        "breastcancer": "Breast Cancer",
+        "raisin": "Raisin",
+        "abalone": "Abalone"
+    },
+    "metrics": {
+        "elitist_complexity": "Number of Rules",
+        "elitist_error": "Pseudoerror",
+        "test_score": "Accuracy",
+        "training_score": "Training Accuracy",
+        "test_accuracy": "Accuracy",
+        "test_f1": "F1-Score"
+    }
+}

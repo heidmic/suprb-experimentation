@@ -34,7 +34,7 @@ complexity = "metrics.elitist_complexity"
 
 
 def create_plots():
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"

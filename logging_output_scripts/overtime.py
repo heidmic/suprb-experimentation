@@ -12,8 +12,8 @@ from sklearn.preprocessing import MinMaxScaler
 Uses seaborn-package to create MSE-Time and Complexity-Time Plots comparing model performances
 on multiple datasets
 """
-CONFIG_PATH = 'logging_output_scripts/config.json'
-CLASS_CONFIG_PATH = 'logging_output_scripts/config_class.json'
+REGRESSOR_CONFIG_PATH = 'logging_output_scripts/config_regression.json'
+CLASSIFIER_REGRESSOR_CONFIG_PATH = 'logging_output_scripts/config_classification.json'
 sns.set_style("whitegrid")
 sns.set(rc={"figure.dpi":300, 'savefig.dpi':300})
 sns.set_theme(style="whitegrid",
@@ -29,10 +29,10 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 plt.tight_layout()
 
-def get_histogram(experiment_name, dataset_name, metric_name, steps, isClass = False):
-    config_path = CONFIG_PATH
-    if isClass:
-        config_path = CLASS_CONFIG_PATH
+def get_histogram(experiment_name, dataset_name, metric_name, steps, isClassifier = False):
+    config_path = REGRESSOR_CONFIG_PATH
+    if isClassifier:
+        config_path = CLASSIFIER_REGRESSOR_CONFIG_PATH
     with open(config_path) as f:
         config = json.load(f)
 
@@ -58,11 +58,11 @@ def get_histogram(experiment_name, dataset_name, metric_name, steps, isClass = F
     pass
 
 
-def create_plots(metric_name='elitist_complexity', steps=64, isClass=False):
+def create_plots(metric_name='elitist_complexity', steps=64, isClassifier=False):
     print("STARTING timeline-plots")
-    config_path = CONFIG_PATH
-    if isClass:
-        config_path = CLASS_CONFIG_PATH
+    config_path = REGRESSOR_CONFIG_PATH
+    if isClassifier:
+        config_path = CLASSIFIER_REGRESSOR_CONFIG_PATH
     with open(config_path) as f:
         config = json.load(f)
     final_output_dir = f"{config['output_directory']}"
@@ -74,7 +74,7 @@ def create_plots(metric_name='elitist_complexity', steps=64, isClass=False):
         legend_labels = []
         for model in config['model_names']:
             model_name = f"l:{model}"
-            result = get_histogram(model_name, dataset_name, metric_name, steps, isClass=isClass)
+            result = get_histogram(model_name, dataset_name, metric_name, steps, isClassifier=isClassifier)
             if result is None:
                 continue
             for i, res in enumerate(result):

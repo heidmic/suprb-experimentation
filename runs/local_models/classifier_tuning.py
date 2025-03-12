@@ -11,7 +11,7 @@ from sklearn.utils import Bunch, shuffle
 from sklearn.model_selection import ShuffleSplit
 
 from experiments import Experiment
-from experiments.evaluation import CrossValidate, CustomUnfitEvaluation
+from experiments.evaluation import CrossValidate, CustomSwapEvaluation
 from experiments.mlflow import log_experiment, _log_experiment, log_run, log_run_result
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
@@ -34,9 +34,9 @@ random_state = 42
 fold_amount = 8
 suprb_iter = 32
 tuning_iter = 100
-#fold_amount = 2
-#suprb_iter = 2
-#tuning_iter = 1
+fold_amount = 2
+suprb_iter = 2
+tuning_iter = 1
 
 Regressors = {'lasso': Lasso(alpha=0.01, random_state=random_state),
                   'elasticNet': ElasticNet(alpha=0.01, l1_ratio=0.5, random_state=random_state, fit_intercept=True,),
@@ -62,11 +62,11 @@ def is_class(name: str) -> bool:
 @click.option('-l', '--local_model', type=click.STRING, default='elasticnet')
 def run(problem: str, local_model: str):
     print(f"Problem is {problem}, with local model {local_model}")
-    isClass = is_class(name=problem)
+    isClassifier = is_class(name=problem)
     X, y = load_dataset(name=problem, return_X_y=True)
-    if not isClass:
+    if not isClassifier:
         X, y = scale_X_y(X, y)
-    elif isClass:
+    elif isClassifier:
         X = MinMaxScaler(feature_range=(-1, 1)).fit_transform(X)
     X, y = shuffle(X, y, random_state=random_state)
     
@@ -76,7 +76,7 @@ def run(problem: str, local_model: str):
     mixing = mixing_model.ErrorExperienceHeuristic()
     matching_type = rule.matching.OrderedBound()
     fitness = rule.fitness.VolumeWu()
-    if isClass:
+    if isClassifier:
         models = Classifiers
         tuning_scoring='accuracy'
         evaluation_metric = ['accuracy', 'f1']
@@ -161,7 +161,7 @@ def run(problem: str, local_model: str):
         
         params.rule_generation__init__model__tol = trial.suggest_float('rule_generation__init__model__tol', 1e-4, 1e-1)
         # Local_model
-        if isClass:#isinstance(params.rule_generation__init__model, base.ClassifierMixin):
+        if isClassifier:#isinstance(params.rule_generation__init__model, base.ClassifierMixin):
             #params.rule_generation__init__model__solver = trial.suggest_categorical('rule_generation__init__model__solver', ['saga', 'liblinear'])
             #params.rule_generation__init__model__C = trial.suggest_float('rule_generation__init__model__C', 0.01, 2)
             params.rule_generation__init__model__max_iter = trial.suggest_int('rule_generation__init__model__max_iter', 100, 1000)
@@ -195,13 +195,13 @@ def run(problem: str, local_model: str):
     for model in models:
         swapped_name = f'{experiment_name} Swapped n:{model}'
         print(f"Swapping {model}")
-        '''
+        
         # Custom splitting and evaluation handled by eval
         swapped_experiment = Experiment(name=swapped_name,  verbose=0)
         swapped_experiment.with_random_states(random_states, n_jobs=random_amount)
 
-        eval = CustomUnfitEvaluation(dummy_estimator=estimator, X=X, y=y, random_state=random_state,
-                                            verbose=5, local_model=models[model], trained_estimators=trained_estimators, isClass=isClass)
+        eval = CustomSwapEvaluation(dummy_estimator=estimator, X=X, y=y, random_state=random_state,
+                                            verbose=5, local_model=models[model], trained_estimators=trained_estimators, isClass=isClassifier)
         experiment.perform(eval, cv=ShuffleSplit(
             n_splits=fold_amount, test_size=0.25, random_state=random_state), n_jobs=fold_amount)
         
@@ -209,8 +209,8 @@ def run(problem: str, local_model: str):
         print("log_experiment: " + str(log_experiment(swapped_experiment)))
         print("Results: " + str(getattr(swapped_experiment, 'results_', None)))
         print("Estimators: " + str(getattr(swapped_experiment, 'estimators_', None)))
+        
         '''
-
         # Custom splitting and evaluation done manually
         splitter = ShuffleSplit(n_splits=fold_amount, test_size=0.25, random_state=random_states[0])
         for i, (train_index, test_index) in enumerate(splitter.split(X)):
@@ -228,6 +228,6 @@ def run(problem: str, local_model: str):
             swapped_experiment.results_ = result_dict
             mlflow.set_experiment(name)
             _log_experiment(swapped_experiment, parent_name=f'Swaps of {base_model}', depth=0)
-
+        '''
 if __name__ == '__main__':
     run()

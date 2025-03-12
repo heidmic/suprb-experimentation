@@ -8,15 +8,15 @@ stores the results in a new csv-File for all Models specified
 Leave out/add metrics that you want to evaluate
 """
 
-CONFIG_PATH = 'logging_output_scripts/config.json'
-CLASS_CONFIG_PATH = 'logging_output_scripts/config_class.json'
+REGRESSOR_CONFIG_PATH = 'logging_output_scripts/config_regression.json'
+CLASSIFIER_REGRESSOR_CONFIG_PATH = 'logging_output_scripts/config_classification.json'
 
 
-def create_summary_csv(isClass=False, base_model = None):
+def create_summary_csv(isClassifier=False, base_model = None):
     print("STARTING summary csv")
-    config_path = CONFIG_PATH
-    if isClass:
-        config_path = CLASS_CONFIG_PATH
+    config_path = REGRESSOR_CONFIG_PATH
+    if isClassifier:
+        config_path = CLASSIFIER_REGRESSOR_CONFIG_PATH
     with open(config_path) as f:
         config = json.load(f)
 
@@ -28,7 +28,7 @@ def create_summary_csv(isClass=False, base_model = None):
     swapped = False
     if base_model is not None:
         swapped = True
-        if isClass:
+        if isClassifier:
             header += ",MEAN_ACC,STD_ACC"
         else:
             header += ",MEAN_R2,STD_R2"
@@ -39,7 +39,7 @@ def create_summary_csv(isClass=False, base_model = None):
         base_str = f"l:{base_model}"    
         all_runs_list = get_by_config(config, base_str, filter_swapped=False)
     else:
-        if isClass:
+        if isClassifier:
             header += ",MEAN_ACC,STD_ACC,MEAN_F1,STD_F1"
         else:
             header += ",MEAN_R2,STD_R2,MEAN_MSE,STD_MSE"
@@ -137,10 +137,10 @@ def log_values(all_runs_list, model_str, problem, log_comp = True, swapped = Fal
     return val
 
 
-def log_alternate(isClass = True):
-    config_path = CONFIG_PATH
-    if isClass:
-        config_path = CLASS_CONFIG_PATH
+def log_alternate(isClassifier = True):
+    config_path = REGRESSOR_CONFIG_PATH
+    if isClassifier:
+        config_path = CLASSIFIER_REGRESSOR_CONFIG_PATH
     with open(config_path) as f:
         config = json.load(f)
     model = "Tree"
@@ -163,4 +163,4 @@ def log_alternate(isClass = True):
 
 if __name__ == '__main__':
     #log_alternate()
-    create_summary_csv(isClass=True)
+    create_summary_csv(isClassifier=True)

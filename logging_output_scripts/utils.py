@@ -7,7 +7,7 @@ results_dict = {}
 
 
 def filter_runs(all_runs_df=None):
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
 
     if all_runs_df is not None:
@@ -31,7 +31,7 @@ def filter_runs(all_runs_df=None):
 
 
 def get_normalized_df(exp_name):
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
     df = pd.DataFrame()
     for dataset in config["datasets"]:
@@ -41,7 +41,7 @@ def get_normalized_df(exp_name):
 
 
 def get_csv_df(exp_name, dataset):
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
 
     df = pd.read_csv(f"{config['data_directory']}/{dataset}_all.csv")
@@ -51,7 +51,7 @@ def get_csv_df(exp_name, dataset):
 def get_df(exp_name, dataset):
     #return results_dict[(exp_name, dataset)]
 
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
 
     # all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
@@ -96,7 +96,7 @@ def get_df(exp_name, dataset):
 def get_all():
     print("Get all mlflow runs...")
     
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
     client = mlflow.tracking.MlflowClient()
     all_runs = [item for item in next(os.walk(config['data_directory']))[1] if item != '.trash']
@@ -111,7 +111,7 @@ def get_all():
 def get_all_runs(problem):
     print(f"Get all mlflow runs of {problem}...")
 
-    with open('logging_output_scripts/config.json') as f:
+    with open('logging_output_scripts/config_regression.json') as f:
         config = json.load(f)
 
     all_runs_list = []
