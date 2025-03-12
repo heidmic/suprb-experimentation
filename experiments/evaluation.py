@@ -19,7 +19,7 @@ def check_scoring(scoring):
         scoring = set(scoring)
     else:
         scoring = {scoring}
-    scoring.update({'r2', 'neg_mean_squared_error'})
+    scoring.update({"r2", "neg_mean_squared_error", "neg_mean_absolute_error"})
 
     return list(scoring)
 
@@ -121,10 +121,12 @@ class CrossValidate(BaseCrossValidate):
             y: np.ndarray,
             random_state: int = None,
             verbose: int = 0,
+            y_scaler=None,
     ):
         super().__init__(estimator=estimator, random_state=random_state, verbose=verbose)
         self.X = X
         self.y = y
+        self.y_scaler = y_scaler
 
     def __call__(self, **kwargs) -> tuple[list[BaseEstimator], dict]:
         scores = self.cross_validate(self.X, self.y, **kwargs)
@@ -133,4 +135,18 @@ class CrossValidate(BaseCrossValidate):
         estimators = scores.pop('estimator')
 
         self.estimators_, self.results_ = estimators, scores
-        return estimators, scores
+
+        if self.y_scaler:
+            self.results_["y_scaler_var"] = self.y_scaler.var_
+            self.results_["y_scaler_std"] = np.sqrt(self.y_scaler.var_)
+
+            self.results_["test_neg_mean_squared_error_unscaled"] = (
+                self.results_["test_neg_mean_squared_error"]
+                * self.results_["y_scaler_var"]
+            )
+            self.results_["test_neg_mean_absolute_error"] = (
+                self.results_["test_neg_mean_absolute_error"]
+                * self.results_["y_scaler_std"]
+            )
+
+        return self.estimators_, self.results_
