@@ -1,13 +1,8 @@
-# Requirements
-requirements.txt
 
 # MlFlow
 **/mlruns/**
 mlruns/**
 mlruns*
-**/onlineruns/**
-onlineruns/**
-onlineruns*
 .7z
 *.csv
 logging_output_scripts/outputs/
@@ -19,13 +14,6 @@ output/**
 # Json
 output_json/**
 */output_json/**
-
-# Tex
-*.tex
-
-# Jupyter
-.ipynb_checkpoints/
-
 
 # PyCharm
 .idea
