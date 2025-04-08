@@ -12,4 +12,5 @@ experiment="runs/comparisons/suprb_all_tuning.py"
 dataset="airfoil_self_noise"
 study_name="SupRB - Airfoil"
 
-srun nix-shell $JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID -n $study_name
+srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
+python $JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID" -n $study_name
