@@ -8,7 +8,8 @@ mkShell {
   venvDir = "./_venv";
   # Add dependencies that pip can't fetch here (or that we don't want to
   # install using pip).
-  buildInputs = (with pkgs.python310Packages; [ python310 venvShellHook wheel ])
+  buildInputs = (with pkgs.python310Packages; [ python310 venvShellHook wheel pip ]) ++ [
+  pkgs.stdenv.cc.cc]
      ++ (import ./system-dependencies.nix { inherit pkgs; });
   postShellHook = ''
     unset SOURCE_DATE_EPOCH
@@ -20,4 +21,3 @@ mkShell {
     pip install -r requirements.txt
   '';
 }
-
