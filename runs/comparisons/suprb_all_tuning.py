@@ -43,7 +43,7 @@ def run(problem: str, job_id: str, study_name: str):
     print(f"Problem is {problem}, with job id {job_id}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
-    X, y = scale_X_y(X, y)
+    X, y, y_scaler = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
