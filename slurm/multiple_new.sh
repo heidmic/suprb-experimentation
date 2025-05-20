@@ -4,7 +4,7 @@ echo $filename
 datasets=("concrete_strength" "energy_cool" "combined_cycle_power_plant" "airfoil_self_noise")
 fitness_funcs=("PseudoBIC", "ComplexityWu")
 
-for fit  ${fitness_funcs[@]}; do
+for fit in ${fitness_funcs[@]}; do
     for dset in ${datasets[@]}; do
         export experiment_name=${dset}
         export problem=${dset}
