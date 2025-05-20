@@ -478,7 +478,7 @@ def run(problem: str, job_id: str, fitness_func: str):
     jobs = 1
     print(estimator.get_params().keys())
 
-    experiment_name = f"SupRB Tuning j:{job_id} p:{problem}"
+    experiment_name = f"SupRB Tuning j:{job_id} p:{problem} -f:{fitness_func}"
     print(experiment_name)
     experiment = Experiment(name=experiment_name, verbose=10)
 
