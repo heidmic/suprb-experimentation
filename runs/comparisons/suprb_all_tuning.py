@@ -1,6 +1,7 @@
 import numpy as np
 import click
-import mlflow
+
+# import mlflow
 from optuna import Trial
 
 from sklearn.linear_model import Ridge
@@ -9,7 +10,8 @@ from sklearn.model_selection import ShuffleSplit
 
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
-from experiments.mlflow import log_experiment
+
+# from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
@@ -39,19 +41,19 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.command()
 @click.option("-p", "--problem", type=click.STRING, default="airfoil_self_noise")
 @click.option("-j", "--job_id", type=click.STRING, default="NA")
-@click.option("-f", "--fitness_func", type=click.STRING, default="NoName")
+@click.option("-f", "--fitness_func", type=click.STRING, default="PseudoBIC")
 def run(problem: str, job_id: str, fitness_func: str):
     print(f"Problem is {problem}, with job id {job_id}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
-    X, y = scale_X_y(X, y)
+    X, y, _ = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
         rule_discovery=rs.RandomSearch(),
         solution_composition=abc.ArtificialBeeColonyAlgorithm(),
         n_iter=32,
-        n_rules=4,
+        n_rules=16,
         verbose=10,
         logger=CombinedLogger([("stdout", StdoutLogger()), ("default", DefaultLogger())]),
     )
