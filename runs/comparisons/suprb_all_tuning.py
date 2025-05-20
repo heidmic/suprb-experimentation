@@ -475,20 +475,17 @@ def run(problem: str, job_id: str, fitness_func: str):
 
     jobs = 1
 
-    experiment_name = f"{experiment_name}_{random_state}"
+    experiment_name = f"SupRB Tuning j:{job_id} p:{problem}"
     print(experiment_name)
     experiment = Experiment(name=experiment_name, verbose=10)
+
+    tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
+    experiment.with_tuning(suprb_space, tuner=tuner)
 
     random_states = np.random.SeedSequence(random_state).generate_state(jobs)
     experiment.with_random_states(random_states, n_jobs=jobs)
 
-    evaluation = CrossValidate(
-        estimator=estimator,
-        X=X,
-        y=y,
-        random_state=random_state,
-        verbose=10,
-    )
+    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
     experiment.perform(
         evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs
