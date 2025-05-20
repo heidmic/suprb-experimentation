@@ -73,7 +73,7 @@ def run(problem: str, job_id: str, study_name: str, fitness_func: str):
     @param_space()
     def suprb_space(trial: Trial, params: Bunch):
         params.rule_discovery = trial.suggest_categorical(
-            "rule_discovery", ["ES1xLambda", "NoveltySearch", "RandomSearch"]
+            "rule_discovery", ["ES1xLambda"]  # , "NoveltySearch", "RandomSearch"]
         )  # nopep8
 
         if params.rule_discovery == "ES1xLambda":
@@ -270,11 +270,11 @@ def run(problem: str, job_id: str, study_name: str, fitness_func: str):
             "solution_composition",
             [
                 "GeneticAlgorithm",
-                "ArtificialBeeColonyAlgorithm",
-                "AntColonyOptimization",
-                "GreyWolfOptimizer",
-                "ParticleSwarmOptimization",
-                "RandomSearch",
+                # "ArtificialBeeColonyAlgorithm",
+                # "AntColonyOptimization",
+                # "GreyWolfOptimizer",
+                # "ParticleSwarmOptimization",
+                # "RandomSearch",
             ],
         )  # nopep8
 
