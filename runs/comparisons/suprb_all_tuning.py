@@ -362,8 +362,8 @@ def run(problem: str, job_id: str, fitness_func: str):
                     "solution_composition__selection__k", 3, 10
                 )  # nopep8
 
-            params.solution_composition__mutation__mutation_rate = trial.suggest_float(
-                "solution_composition__mutation__mutation_rate", 0.0, 0.1
+            params.solution_composition__mutation_rate = trial.suggest_float(
+                "solution_composition__mutation_rate", 0.0, 0.1
             )  # nopep8
 
             # GA crossover
@@ -379,8 +379,8 @@ def run(problem: str, job_id: str, fitness_func: str):
                     "solution_composition__crossover__n", 1, 10
                 )  # nopep8
 
-            params.solution_composition__crossover__crossover_rate = trial.suggest_float(
-                "solution_composition__crossover__crossover_rate", 0.7, 1.0
+            params.solution_composition__crossover_rate = trial.suggest_float(
+                "solution_composition__crossover_rate", 0.7, 1.0
             )  # nopep8
 
         elif params.solution_composition == "ArtificialBeeColonyAlgorithm":
@@ -476,6 +476,7 @@ def run(problem: str, job_id: str, fitness_func: str):
         # exit()
 
     jobs = 1
+    print(estimator.get_params().keys())
 
     experiment_name = f"SupRB Tuning j:{job_id} p:{problem}"
     print(experiment_name)
