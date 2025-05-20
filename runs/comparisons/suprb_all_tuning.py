@@ -1,7 +1,7 @@
 import numpy as np
 import click
 
-# import mlflow
+import mlflow
 from optuna import Trial
 
 from sklearn.linear_model import Ridge
@@ -11,7 +11,7 @@ from sklearn.model_selection import ShuffleSplit
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
 
-# from experiments.mlflow import log_experiment
+from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
