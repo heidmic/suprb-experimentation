@@ -15,4 +15,4 @@ export OMP_NUM_THREADS=1
 
 JOB_DIR=/hpc/gpfs2/home/u/sraroman/suprb-experimentation
 export PYTHONPATH=${PYTHONPATH}:${JOB_DIR}
-srun python $JOB_DIR/runs/comparisons/suprb_all_tuning.py -n $experiment_name -p $problem -f $fitness_func
+srun python $JOB_DIR/runs/comparisons/suprb_all_tuning.py -p $problem -f $fitness_func

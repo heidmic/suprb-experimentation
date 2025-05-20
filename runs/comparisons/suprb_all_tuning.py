@@ -39,9 +39,8 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
 @click.command()
 @click.option("-p", "--problem", type=click.STRING, default="airfoil_self_noise")
 @click.option("-j", "--job_id", type=click.STRING, default="NA")
-@click.option("-n", "--experiment_name", type=click.STRING, default="NoName")
 @click.option("-f", "--fitness_func", type=click.STRING, default="NoName")
-def run(problem: str, job_id: str, study_name: str, fitness_func: str):
+def run(problem: str, job_id: str, fitness_func: str):
     print(f"Problem is {problem}, with job id {job_id}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
@@ -58,7 +57,7 @@ def run(problem: str, job_id: str, study_name: str, fitness_func: str):
     )
 
     tuning_params = dict(
-        study_name=study_name,
+        study_name=problem,
         estimator=estimator,
         random_state=random_state,
         cv=4,
@@ -302,7 +301,7 @@ def run(problem: str, job_id: str, study_name: str, fitness_func: str):
                 params.solution_composition__init__p = trial.suggest_float("solution_composition__init__p", 0.3, 0.8)
 
             params.solution_composition__init__fitness = trial.suggest_categorical(
-                "solution_composition__init__fitness", ["PseudoBIC", "ComplexityEmary", "ComplexityWu"]
+                "solution_composition__init__fitness", [fitness_func]
             )  # nopep8
             params.solution_composition__init__fitness = getattr(
                 suprb.solution.fitness, params.solution_composition__init__fitness
