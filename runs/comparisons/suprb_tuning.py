@@ -102,14 +102,6 @@ def run(problem: str, job_id: str, rule_amount: int, filter_subpopulation: str,
         params.solution_composition__mutation__mutation_rate = trial.suggest_float(
             'solution_composition__mutation_rate', 0, 0.1)
 
-        # Mixing
-        params.solution_composition__init__mixing__filter_subpopulation__rule_amount = rule_amount
-        params.solution_composition__init__mixing__experience_weight = experience_weight
-
-        params.solution_composition__init__mixing__filter_subpopulation = getattr(mixing_model, filter_subpopulation)()
-        params.solution_composition__init__mixing__experience_calculation = getattr(
-            mixing_model, experience_calculation)()
-
         # Upper and lower bound clip the experience into a given range
         # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
         #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
