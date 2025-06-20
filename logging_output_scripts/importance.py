@@ -136,10 +136,20 @@ def mutual_information(X, y, x_cols):
 
 
 def get_df(f):
-    with open(f, "r") as file:
-        log_text = file.readlines()
-
     data = []
+
+    def extract_trial_lines(file_path):
+        pattern = re.compile(r"\bTrial\s+\d+\s+finished with value:")
+        matched_lines = []
+
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                if pattern.search(line):
+                    matched_lines.append(line.strip())  # strip() removes newlines
+
+        return matched_lines
+
+    log_text = extract_trial_lines(f)
 
     for line in log_text:
         trial_match = re.search(r"Trial (\d+)", line)
@@ -221,15 +231,23 @@ if __name__ == "__main__":
     pd.set_option("display.max_colwidth", None)
 
     files = [
-        "anova_output/output-7911518.txt",
-        "anova_output/output-7911519.txt",
-        "anova_output/output-7911520.txt",
-        "anova_output/output-7911521.txt",
+        # PseudoBIC
+        "anova_output/output-8183338.txt",
+        "anova_output/output-8183339.txt",
+        "anova_output/output-8183340.txt",
+        "anova_output/output-8183341.txt",
+        # WU
+        # "anova_output/output-8183343.txt",
+        # "anova_output/output-8183344.txt",
+        # "anova_output/output-8183346.txt",
+        # "anova_output/output-8183347.txt",
     ]
 
     df, X, y, X_scaled_df, x_cols = get_merged_df(files)
 
-    # check_f_anova(df)
+    np.float = float
+
+    check_f_anova(df)
     # chi2contingency(df, "sc__crossover_rate", "sc__mutation_rate")
     # check_linearity(df, "sc__crossover_rate", "sc__mutation_rate")
     # check_normality(df, "sc__crossover_rate", "sc__mutation_rate")
