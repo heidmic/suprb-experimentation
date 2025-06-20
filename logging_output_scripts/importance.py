@@ -25,6 +25,9 @@ def create_path(path):
 
 
 def check_f_anova(df, exclude=None):
+    # Necessary for f_anova package to work with current numpy version
+    np.float = float
+
     param_names = [col for col in df.columns if col != "value" and col != exclude]
 
     cs = ConfigurationSpace()
@@ -244,8 +247,6 @@ if __name__ == "__main__":
     ]
 
     df, X, y, X_scaled_df, x_cols = get_merged_df(files)
-
-    np.float = float
 
     check_f_anova(df)
     # chi2contingency(df, "sc__crossover_rate", "sc__mutation_rate")
