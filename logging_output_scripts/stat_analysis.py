@@ -37,7 +37,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from IPython import embed
 from logging_output_scripts.utils import get_csv_df, get_dataframe, check_and_create_dir, get_all_runs, get_df, get_normalized_df
 import json
 import math
