@@ -24,6 +24,7 @@ def create_path(path):
         print(f"Created directory: {dir_path}")
 
 
+# Use fANOVA to quantify the impact of each hyperparameter and their interactions on model performance
 def check_f_anova(df, exclude=None):
     # Necessary for f_anova package to work with current numpy version
     np.float = float
@@ -77,6 +78,7 @@ def check_f_anova(df, exclude=None):
     plt.show()
 
 
+# Plot a scatter plot to visually assess linearity between two parameters
 def check_linearity(df, col1, col2):
     plt.figure(figsize=(8, 6))
     sns.scatterplot(x=df[col1], y=df[col2])
@@ -89,6 +91,7 @@ def check_linearity(df, col1, col2):
     plt.savefig(f"{directory}/linearity_{col1}_{col2}")
 
 
+# Plot histograms to visually assess normality between two parameters
 def check_normality(df, col1, col2):
     plt.figure(figsize=(8, 6))
     sns.histplot(df[col1], kde=True, color="blue", label=col1)
@@ -101,6 +104,7 @@ def check_normality(df, col1, col2):
     plt.savefig(f"{directory}/normality_{col1}_{col2}")
 
 
+# Use shapiro to test whether a dataset is drawn from a normal distribution (Shapiro-Wilk test)
 def check_normality_shapiro(data):
     stat, p_value = shapiro(data)
 
@@ -113,6 +117,7 @@ def check_normality_shapiro(data):
         print("The data is likely not normally distributed (reject H0).")
 
 
+# Use chi2_contingency to test for independence between two categorical variables
 def chi2contingency(df, col1, col2):
     contingency_table = pd.crosstab(df[col1], df[col2])
     chi2, p, dof, expected = chi2_contingency(contingency_table)
@@ -124,6 +129,7 @@ def chi2contingency(df, col1, col2):
         print("All expected frequencies are adequate.")
 
 
+# Use mutual_info_regression to estimate the dependency between each feature
 def mutual_information(X, y, x_cols):
     mi_val = mutual_info_regression(X, y)
     data = list(zip(x_cols, mi_val))
