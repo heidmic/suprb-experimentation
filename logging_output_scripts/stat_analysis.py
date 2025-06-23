@@ -15,9 +15,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import subprocess
+
+
 import sys
-from functools import partial
+import warnings
+
+if not (sys.version_info.major == 3 and sys.version_info.minor == 10):
+    RED = "\033[91m"
+    RESET = "\033[0m"
+    warnings.warn(
+        RED + "\n\n\nWARNING: You are not using Python 3.10! It might be that cmpbayes is not supported with your Python version.\n"
+        "Please create a new venv with Python 3.10:\n"
+        "python3.10 -m venv .venv_name and then install requirements from requirements_python3.10.txt\n\n" + RESET
+    )
 
 import arviz as az
 import click
