@@ -1,3 +1,14 @@
+"""
+This file contains multiple functions to check the importance of parameters:
+
+check_f_anova: Use fANOVA to quantify the impact of each hyperparameter and their interactions on model performance
+check_linearity: Plot a scatter plot to visually assess linearity between two parameters
+check_normality: Plot histograms to visually assess normality between two parameters
+check_normality_shapiro: Use shapiro to test whether a dataset is drawn from a normal distribution (Shapiro-Wilk test)
+chi2contingency: Use chi2_contingency to test for independence between two categorical variables
+mutual_information: Use mutual_info_regression to estimate the dependency between each feature
+"""
+
 import re
 import ast
 
