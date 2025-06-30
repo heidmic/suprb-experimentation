@@ -17,17 +17,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-import sys
-import warnings
+# import sys
+# import warnings
 
-if not (sys.version_info.major == 3 and sys.version_info.minor == 10):
-    RED = "\033[91m"
-    RESET = "\033[0m"
-    warnings.warn(
-        RED + "\n\n\nWARNING: You are not using Python 3.10! It might be that cmpbayes is not supported with your Python version.\n"
-        "Please create a new venv with Python 3.10:\n"
-        "python3.10 -m venv .venv_name and then install requirements from requirements_python3.10.txt\n\n" + RESET
-    )
+# if not (sys.version_info.major == 3 and sys.version_info.minor == 10):
+#     RED = "\033[91m"
+#     RESET = "\033[0m"
+#     warnings.warn(
+#         RED + "\n\n\nWARNING: You are not using Python 3.10! It might be that cmpbayes is not supported with your Python version.\n"
+#         "Please create a new venv with Python 3.10:\n"
+#         "python3.10 -m venv .venv_name and then install requirements from requirements_python3.10.txt\n\n" + RESET
+#     )
 
 import arviz as az
 import click
@@ -161,7 +161,7 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
         i = -1
         for mode, f in variants.items():
             i += 1
-            d = f(df)[config["heuristics"]]
+            d = f(df)[config["heuristics"].keys()]
 
             print(d)
 
