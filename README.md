@@ -23,8 +23,6 @@ Follow the same steps as above, but clone the repository on licca.
 
 ## Run logging_output_scripts
 
-For running the scripts that are using the package cmpbayes, create a new venv and use requirements_python3.10.txt to install the necessary packages, as cmpbayes currently does not work with python3.12
-
 The easiest (and most comfortable) to run the scrirpts to create the graphs in logging_output_scripts is to use the **one_time_run.py**. Here is how to use it:
 
 1) Convert your mlruns to a csv file (the scripts also work with mlruns, but the graph creation with csv is a lot faster)

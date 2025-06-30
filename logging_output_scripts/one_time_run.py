@@ -252,7 +252,7 @@ def run_main():
         all_runs_df = mlflow.search_runs(search_all_experiments=True)
         filter_runs(all_runs_df)
 
-    # create_plots()
+    create_plots()
     calvo(ylabel=setting[2])
 
     if setting[0] == "diss-graphs/graphs/RBML":
