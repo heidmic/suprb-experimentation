@@ -1,4 +1,4 @@
--e git+https://github.com/heidmic/suprb@set-python-version#egg=suprb
+-e git+https://github.com/heidmic/suprb@master#egg=suprb
 -e git+https://github.com/RomanSraj/cmpbayes@update-pystan#egg=cmpbayes
 
 arviz==0.21.0
