@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 
 from pathlib import Path
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from collections import defaultdict
 from sklearn.feature_selection import mutual_info_regression
 from scipy.stats import shapiro, chi2_contingency
 from fanova import fANOVA
@@ -184,7 +185,7 @@ def get_df(f):
         if params_match:
             parameters = ast.literal_eval(params_match.group(1))
             parameters["trial"] = trial_number
-            parameters["value"] = -value
+            parameters["value"] = value
 
         data.append(parameters)
 
@@ -247,16 +248,84 @@ def get_merged_df(files):
     return df, X, y, X_scaled_df, x_cols
 
 
+def calculate_numeric_ranges(top_k_runs):
+    numeric_cols = top_k_runs.select_dtypes(include="number")
+    numeric_summary = pd.DataFrame(
+        {
+            "min": numeric_cols.min(),
+            "max": numeric_cols.max(),
+            "median": numeric_cols.median(),
+            "5% quantil": numeric_cols.quantile(0.05),
+            "95% quantil": numeric_cols.quantile(0.95),
+        }
+    )
+
+    print(numeric_summary)
+
+
+def calculate_non_numeric_ranges(top_k_runs):
+    bool_cols = top_k_runs.select_dtypes(include="bool")
+
+    extract_deep_prefix = lambda col: (
+        col if "__" not in col else f"{col.rsplit('__', 1)[0]}__{col.rsplit('__', 1)[1].split('_')[0]}",
+        col if "__" not in col else col.rsplit("__", 1)[1],
+    )
+
+    prefix_to_postfix_stats = defaultdict(list)
+
+    for col in bool_cols.columns:
+        deep_prefix, postfix = extract_deep_prefix(col)
+        true_rows = top_k_runs[top_k_runs[col]]
+        count_true = len(true_rows)
+
+        if count_true > 0:
+            prefix_to_postfix_stats[deep_prefix].append(
+                {
+                    "postfix": postfix,
+                    "true_count": count_true,
+                    "min": true_rows["value"].min(),
+                    "max": true_rows["value"].max(),
+                    "median": true_rows["value"].median(),
+                    "5% quantil": true_rows["value"].quantile(0.05),
+                    "95% quantil": true_rows["value"].quantile(0.95),
+                }
+            )
+
+    for prefix, rows in prefix_to_postfix_stats.items():
+        print(f"\n\033[31m{prefix}: \033[0m")
+        df_group = pd.DataFrame(rows).dropna()
+        total_true = df_group["true_count"].sum()
+        df_group["percentage_chosen"] = (df_group["true_count"] / total_true * 100).round(2).astype(str) + "%"
+        df_group = df_group.drop(columns=["true_count"])
+        cols = ["percentage_chosen"] + [col for col in df_group.columns if col != "percentage_chosen"]
+        df_group = df_group[cols]
+
+        print(df_group.to_string(index=False))
+
+
+def calculate_ranges_from_tuning_results(df, k_largest=None, k_percentage=None):
+    if k_largest:
+        top_k_runs = df.nlargest(k_largest, "value")
+    elif k_percentage:
+        top_k_runs = df.nlargest(int(len(df) * 0.10), "value")
+    else:
+        print("You need to provide either k_largest or k_percentage!")
+        return
+
+    calculate_numeric_ranges(top_k_runs)
+    calculate_non_numeric_ranges(top_k_runs)
+
+
 if __name__ == "__main__":
     pd.set_option("display.max_colwidth", None)
 
     files = [
         # PseudoBIC
         "anova_output/output-8183338.txt",
-        "anova_output/output-8183339.txt",
-        "anova_output/output-8183340.txt",
-        "anova_output/output-8183341.txt",
-        # WU
+        # "anova_output/output-8183339.txt",
+        # "anova_output/output-8183340.txt",
+        # "anova_output/output-8183341.txt",
+        # # WU
         # "anova_output/output-8183343.txt",
         # "anova_output/output-8183344.txt",
         # "anova_output/output-8183346.txt",
@@ -265,7 +334,9 @@ if __name__ == "__main__":
 
     df, X, y, X_scaled_df, x_cols = get_merged_df(files)
 
-    check_f_anova(df)
+    calculate_ranges_from_tuning_results(df, k_largest=20)
+
+    # check_f_anova(df)
     # chi2contingency(df, "sc__crossover_rate", "sc__mutation_rate")
     # check_linearity(df, "sc__crossover_rate", "sc__mutation_rate")
     # check_normality(df, "sc__crossover_rate", "sc__mutation_rate")
