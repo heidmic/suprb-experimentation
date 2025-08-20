@@ -1,9 +1,10 @@
 -e git+https://github.com/heidmic/suprb@master#egg=suprb
--e git+https://github.com/RomanSraj/cmpbayes@update-pystan#egg=cmpbayes
+-e git+https://github.com/dpaetzel/cmpbayes@main#egg=cmpbayes
 
 arviz==0.21.0
 click==8.2.1
 fanova==2.0.19 # (needs: sudo apt-get install swig and sudo apt-get install python3.12-dev)
+ipython==9.4.0
 matplotlib==3.10.3
 mlflow==3.1.0
 mlflow-skinny==3.1.0
