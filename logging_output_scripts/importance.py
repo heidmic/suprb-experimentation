@@ -2,6 +2,8 @@
 This file contains multiple functions to check the importance of parameters:
 
 check_f_anova: Use fANOVA to quantify the impact of each hyperparameter and their interactions on model performance
+    Usage requires the package fanova==2.0.19 (needs: sudo apt-get install swig and sudo apt-get install python3.12-dev)
+        which is therefore not included in the standard requirements
 check_linearity: Plot a scatter plot to visually assess linearity between two parameters
 check_normality: Plot histograms to visually assess normality between two parameters
 check_normality_shapiro: Use shapiro to test whether a dataset is drawn from a normal distribution (Shapiro-Wilk test)
