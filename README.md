@@ -21,7 +21,7 @@ This repo also features scripts to automatically perform hyperparametersearch, r
 Follow the same steps as above, but clone the repository on licca.
 
 
-## Run logging_output_scripts
+## Run logging_output_scripts (you need either Linux or WSL to run the statistical analysis)
 
 The easiest (and most comfortable) to run the scrirpts to create the graphs in logging_output_scripts is to use the **one_time_run.py**. Here is how to use it:
 
