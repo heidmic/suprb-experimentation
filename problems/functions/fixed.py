@@ -96,7 +96,16 @@ def welch(X: np.ndarray) -> np.ndarray:
 def dette_pepelyshev(X: np.ndarray) -> np.ndarray:
     """https://www.sfu.ca/~ssurjano/detpep108d.html"""
     s = np.sum([i * np.log(1 + np.sum(X[:, 0:i])) for i in range(3, 8)])
+<<<<<<< HEAD
     y = 4 * (X[:, 0] - 2 + 8 * X[:, 1] - 8 * X[:, 1] ** 2) ** 2 + (3 - 4 * X[:, 1]) + 16 * np.sqrt(X[:, 2] + 1) * (2 * X[:, 2] - 1) ** 2 + s
+=======
+    y = (
+        4 * (X[:, 0] - 2 + 8 * X[:, 1] - 8 * X[:, 1] ** 2) ** 2
+        + (3 - 4 * X[:, 1])
+        + 16 * np.sqrt(X[:, 2] + 1) * (2 * X[:, 2] - 1) ** 2
+        + s
+    )
+>>>>>>> merge_this
     return y
 
 
@@ -162,7 +171,13 @@ def otl_circuit(X: np.ndarray) -> np.ndarray:
 def borehole(X: np.ndarray) -> np.ndarray:
     """https://www.sfu.ca/~ssurjano/borehole.html"""
     r_w, r, T_u, H_u, T_l, H_l, L, K_w = X.T
+<<<<<<< HEAD
     y = (2 * np.pi * T_u * (H_u - H_l)) / (np.log(r / r_w) * (1 + ((2 * L * T_u) / (np.log(r / r_w) * r_w**2 * K_w)) + T_u / T_l))
+=======
+    y = (2 * np.pi * T_u * (H_u - H_l)) / (
+        np.log(r / r_w) * (1 + ((2 * L * T_u) / (np.log(r / r_w) * r_w**2 * K_w)) + T_u / T_l)
+    )
+>>>>>>> merge_this
     return y
 
 

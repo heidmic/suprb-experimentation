@@ -18,7 +18,9 @@ def get_rows(input_directory: str, experiment_name: str, dataset_name: str, file
     return row_list
 
 
-def print_mean_stdvar(input_directory: str, experiment_name: str, dataset_name: str, file_line_func_name: str, attribute: str):
+def print_mean_stdvar(
+    input_directory: str, experiment_name: str, dataset_name: str, file_line_func_name: str, attribute: str
+):
     row_list = get_rows(input_directory, experiment_name, dataset_name, file_line_func_name)
     attribute_list = [float(item[attribute]) for item in row_list]
     attribute_list = np.asarray(attribute_list)
@@ -27,7 +29,17 @@ def print_mean_stdvar(input_directory: str, experiment_name: str, dataset_name: 
     print(f"{experiment_name}, {dataset_name}, {attribute}, {mean}, {stdv}")
 
 
+<<<<<<< HEAD
 dataset_list = ["combined_cycle_power_plant", "airfoil_self_noise", "concrete_strength", "parkinson_total", "protein_structure"]
+=======
+dataset_list = [
+    "combined_cycle_power_plant",
+    "airfoil_self_noise",
+    "concrete_strength",
+    "parkinson_total",
+    "protein_structure",
+]
+>>>>>>> merge_this
 optimizer_list = ["GA", "SAGA1", "SAGA2", "SAGA3"]
 
 if __name__ == "__main__":

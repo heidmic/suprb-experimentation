@@ -30,11 +30,24 @@ def csr_space(trial: Trial, params: Bunch):
     # Evolution Strategy - Mutation, Mutation_sigma, Initialization, Init_sigma, Delay (delta) and fitness_alpha
     sigma_space = [0, 3]
 
+<<<<<<< HEAD
     params.rule_discovery__mutation = trial.suggest_categorical("mutation", ["Normal", "HalfnormIncrease", "UniformIncrease"])
     params.rule_discovery__mutation = getattr(mutation, params.rule_discovery__mutation)()
     # Unique to CSR
     params.rule_discovery__mutation__sigma = np.array(
         [trial.suggest_float("sigma_mutate_center", *sigma_space), trial.suggest_float("sigma_mutate_spread", *sigma_space)]
+=======
+    params.rule_discovery__mutation = trial.suggest_categorical(
+        "mutation", ["Normal", "HalfnormIncrease", "UniformIncrease"]
+    )
+    params.rule_discovery__mutation = getattr(mutation, params.rule_discovery__mutation)()
+    # Unique to CSR
+    params.rule_discovery__mutation__sigma = np.array(
+        [
+            trial.suggest_float("sigma_mutate_center", *sigma_space),
+            trial.suggest_float("sigma_mutate_spread", *sigma_space),
+        ]
+>>>>>>> merge_this
     )
 
     params.rule_discovery__init = trial.suggest_categorical("initialization", ["MeanInit", "NormalInit"])
@@ -42,7 +55,14 @@ def csr_space(trial: Trial, params: Bunch):
     if isinstance(params.rule_discovery__init, rule.initialization.NormalInit):
         # Unique to CSR
         params.rule_discovery__init__sigma = np.array(
+<<<<<<< HEAD
             [trial.suggest_float("sigma_init_center", *sigma_space), trial.suggest_float("sigma_init_spread", *sigma_space)]
+=======
+            [
+                trial.suggest_float("sigma_init_center", *sigma_space),
+                trial.suggest_float("sigma_init_spread", *sigma_space),
+            ]
+>>>>>>> merge_this
         )
 
     alpha_space = [0, 0.1]
@@ -56,7 +76,13 @@ def csr_space(trial: Trial, params: Bunch):
         params.rule_discovery__delay = trial.suggest_int("delay", low=1, high=25)
 
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
+<<<<<<< HEAD
     params.solution_composition__selection = trial.suggest_categorical("selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"])
+=======
+    params.solution_composition__selection = trial.suggest_categorical(
+        "selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"]
+    )
+>>>>>>> merge_this
     params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
     if isinstance(params.solution_composition__selection, ga.selection.Tournament):
         params.solution_composition__selection__k = trial.suggest_int("selection__k", 3, 10)
@@ -69,7 +95,17 @@ def csr_space(trial: Trial, params: Bunch):
     params.solution_composition__mutation__mutation_rate = trial.suggest_float("mutation_rate", 0, 0.1)
 
 
+<<<<<<< HEAD
 datasets = {0: "parkinson_total", 1: "protein_structure", 2: "airfoil_self_noise", 3: "concrete_strength", 4: "combined_cycle_power_plant"}
+=======
+datasets = {
+    0: "parkinson_total",
+    1: "protein_structure",
+    2: "airfoil_self_noise",
+    3: "concrete_strength",
+    4: "combined_cycle_power_plant",
+}
+>>>>>>> merge_this
 
 
 @click.command()

@@ -31,7 +31,18 @@ class Experiment:
     tuned_params_: dict
     tuning_results_: Any
 
+<<<<<<< HEAD
     def __init__(self, name: str = "Default", params: dict = None, tuner: ParameterTuner = None, n_jobs: int = None, verbose: int = 1):
+=======
+    def __init__(
+        self,
+        name: str = "Default",
+        params: dict = None,
+        tuner: ParameterTuner = None,
+        n_jobs: int = None,
+        verbose: int = 1,
+    ):
+>>>>>>> merge_this
         self.name = name
         self.tuner = tuner
         self.n_jobs = n_jobs
@@ -140,7 +151,15 @@ class Experiment:
             return experiments[0]
 
     def with_tuning(
+<<<<<<< HEAD
         self, param_space: Union[dict, Callable], tuner: ParameterTuner = None, propagate: bool = False, overwrite: bool = False
+=======
+        self,
+        param_space: Union[dict, Callable],
+        tuner: ParameterTuner = None,
+        propagate: bool = False,
+        overwrite: bool = False,
+>>>>>>> merge_this
     ) -> Experiment:
         """
         Add parameter tuning to the experiment.

@@ -82,7 +82,13 @@ def run(problem: str, solution_composition: str, job_id: str):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
+<<<<<<< HEAD
         params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
+=======
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
+            "rule_discovery__init__fitness__alpha", 0.01, 0.2
+        )
+>>>>>>> merge_this
 
         # Solution Composition
         if solution_composition == "ga":
@@ -98,7 +104,13 @@ def run(problem: str, solution_composition: str, job_id: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__selection, suprb.optimizer.solution.ga.selection.Tournament):
+<<<<<<< HEAD
                 params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)  # nopep8
+=======
+                params.solution_composition__selection__k = trial.suggest_int(
+                    "solution_composition__selection__k", 3, 10
+                )  # nopep8
+>>>>>>> merge_this
 
             params.solution_composition__mutation__mutation_rate = trial.suggest_float(
                 "solution_composition__mutation__mutation_rate", 0.0, 0.1
@@ -116,7 +128,13 @@ def run(problem: str, solution_composition: str, job_id: str):
                 "solution_composition__crossover__crossover_rate", 0.7, 1.0
             )  # nopep8
             if isinstance(params.solution_composition__crossover, suprb.optimizer.solution.ga.crossover.NPoint):
+<<<<<<< HEAD
                 params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)  # nopep8
+=======
+                params.solution_composition__crossover__n = trial.suggest_int(
+                    "solution_composition__crossover__n", 1, 10
+                )  # nopep8
+>>>>>>> merge_this
 
         elif solution_composition == "saga1":
             # SAGA1 Base
@@ -133,7 +151,13 @@ def run(problem: str, solution_composition: str, job_id: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__selection, suprb.optimizer.solution.saga1.selection.Tournament):
+<<<<<<< HEAD
                 params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)  # nopep8
+=======
+                params.solution_composition__selection__k = trial.suggest_int(
+                    "solution_composition__selection__k", 3, 10
+                )  # nopep8
+>>>>>>> merge_this
 
             # SAGA1 crossover
             params.solution_composition__crossover = trial.suggest_categorical(
@@ -144,7 +168,13 @@ def run(problem: str, solution_composition: str, job_id: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__crossover, suprb.optimizer.solution.saga1.crossover.NPoint):
+<<<<<<< HEAD
                 params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)  # nopep8
+=======
+                params.solution_composition__crossover__n = trial.suggest_int(
+                    "solution_composition__crossover__n", 1, 10
+                )  # nopep8
+>>>>>>> merge_this
 
         elif solution_composition == "saga2":
             # SAGA2 Base
@@ -161,7 +191,13 @@ def run(problem: str, solution_composition: str, job_id: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__selection, suprb.optimizer.solution.saga2.selection.Tournament):
+<<<<<<< HEAD
                 params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)  # nopep8
+=======
+                params.solution_composition__selection__k = trial.suggest_int(
+                    "solution_composition__selection__k", 3, 10
+                )  # nopep8
+>>>>>>> merge_this
 
             # SAGA2 crossover
             params.solution_composition__crossover = trial.suggest_categorical(
@@ -172,7 +208,13 @@ def run(problem: str, solution_composition: str, job_id: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__crossover, suprb.optimizer.solution.saga2.crossover.NPoint):
+<<<<<<< HEAD
                 params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)  # nopep8
+=======
+                params.solution_composition__crossover__n = trial.suggest_int(
+                    "solution_composition__crossover__n", 1, 10
+                )  # nopep8
+>>>>>>> merge_this
 
         elif solution_composition == "saga3":
             # SAGA3 Base
@@ -189,7 +231,13 @@ def run(problem: str, solution_composition: str, job_id: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__selection, suprb.optimizer.solution.saga3.selection.Tournament):
+<<<<<<< HEAD
                 params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)  # nopep8
+=======
+                params.solution_composition__selection__k = trial.suggest_int(
+                    "solution_composition__selection__k", 3, 10
+                )  # nopep8
+>>>>>>> merge_this
 
             # SAGA3 crossover
             # not needed as it is selfadapting
@@ -215,7 +263,13 @@ def run(problem: str, solution_composition: str, job_id: str):
                 "solution_composition__crossover__crossover_rate", 0.7, 1.0
             )  # nopep8
             if isinstance(params.solution_composition__crossover, suprb.optimizer.solution.sas.crossover.NPoint):
+<<<<<<< HEAD
                 params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)  # nopep8
+=======
+                params.solution_composition__crossover__n = trial.suggest_int(
+                    "solution_composition__crossover__n", 1, 10
+                )  # nopep8
+>>>>>>> merge_this
 
             params.solution_composition__mutation__mutation_rate = trial.suggest_float(
                 "solution_composition__mutation__mutation_rate", 0.0, 0.1

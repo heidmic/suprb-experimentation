@@ -183,7 +183,13 @@ estimator = SupRB(
     rule_discovery=es.ES1xLambda(
         operator="&",
         n_iter=10_000,
+<<<<<<< HEAD
         init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
+=======
+        init=rule.initialization.MeanInit(
+            fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
+        ),
+>>>>>>> merge_this
         mutation=es.mutation.HalfnormIncrease(),
         origin_generation=origin.SquaredError(),
     ),
@@ -195,5 +201,16 @@ estimator = SupRB(
 )
 
 shared_tuning_params = dict(
+<<<<<<< HEAD
     estimator=estimator, random_state=random_state, cv=4, n_jobs_cv=4, n_jobs=4, n_calls=128, timeout=90 * 60 * 60, verbose=10  # 90 hours
+=======
+    estimator=estimator,
+    random_state=random_state,
+    cv=4,
+    n_jobs_cv=4,
+    n_jobs=4,
+    n_calls=128,
+    timeout=90 * 60 * 60,  # 90 hours
+    verbose=10,
+>>>>>>> merge_this
 )

@@ -58,7 +58,13 @@ def pso_space(trial: Trial, params: Bunch):
         params.movement.c = trial.suggest_float("c", 0, 3)
     elif isinstance(params.movement, pso.movement.BinaryQuantum):
         params.movement.p_learning = trial.suggest_float("p_learning", 0.01, 1)
+<<<<<<< HEAD
         params.movement.n_attractors = trial.suggest_int("n_attractors", 1, global_params.solution_composition__population_size // 2)
+=======
+        params.movement.n_attractors = trial.suggest_int(
+            "n_attractors", 1, global_params.solution_composition__population_size // 2
+        )
+>>>>>>> merge_this
 
 
 def abc_space(trial: Trial, params: Bunch):

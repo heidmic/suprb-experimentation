@@ -7,7 +7,19 @@ from experiments import Experiment
 from experiments.evaluation import CrossValidate
 from experiments.mlflow import log_experiment
 from problems import scale_X_y
+<<<<<<< HEAD
 from shared_config import load_dataset, global_params, estimator, random_state, dataset_params, get_optimizer, optimizer_params
+=======
+from shared_config import (
+    load_dataset,
+    global_params,
+    estimator,
+    random_state,
+    dataset_params,
+    get_optimizer,
+    optimizer_params,
+)
+>>>>>>> merge_this
 
 
 @click.command()

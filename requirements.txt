@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 -e git+https://github.com/heidmic/suprb@master#egg=suprb
 -e git+https://github.com/dpaetzel/cmpbayes@main#egg=cmpbayes
 
+=======
+-e git+https://github.com/felixheptner/suprb@master#egg=suprb
+-e git+https://github.com/dpaetzel/cmpbayes@main#egg=cmpbayes
+>>>>>>> merge_this
 arviz==0.21.0
 click==8.2.1
 ipython==9.4.0
