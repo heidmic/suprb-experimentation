@@ -4,9 +4,6 @@ from suprb.logging.combination import CombinedLogger
 from suprb.logging.multi_objective import MOLogger
 from typing import Optional
 
-<<<<<<< HEAD
-__all__ = ["fitness"]
-=======
 
 __all__ = ["fitness", "train_hypervolume"]
 
@@ -20,7 +17,6 @@ def _get_default_logger(estimator: BaseEstimator) -> Optional[MOLogger]:
             for name, sublogger in logger.loggers_:
                 if isinstance(sublogger, MOLogger):
                     return sublogger
->>>>>>> merge_this
 
 
 def fitness(model: SupRB):

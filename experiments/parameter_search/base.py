@@ -14,11 +14,7 @@ from sklearn.metrics import get_scorer_names
 
 
 def _validate_sklearn_metric(metric: str) -> bool:
-<<<<<<< HEAD
     return metric in get_scorer_names()
-=======
-    return metric in sklearn.metrics.get_scorer_names()
->>>>>>> merge_this
 
 
 def _validate_own_metric(metric: str) -> bool:
@@ -78,27 +74,19 @@ class ParameterTuner(metaclass=ABCMeta):
                 return_estimator=True,
                 verbose=self.verbose,
                 error_score="raise",
-<<<<<<< HEAD
-=======
                 return_indices=True,
->>>>>>> merge_this
             )
 
             if _validate_sklearn_metric(self.scoring):
                 score = scores["test_score"]
             elif _validate_own_metric(self.scoring):
                 score = [getattr(metrics, self.scoring)(_estimator) for _estimator in scores["estimator"]]
-<<<<<<< HEAD
-            else:
-                raise ValueError("invalid scoring metric")
-=======
             elif _validate_own_test_metric(self.scoring):
                 scores = _moo_hv_pf_from_scores(scores, self.X_train, self.y_train)
                 scores = _soo_fitness_from_scores(scores, self.X_train, self.y_train)
                 score = scores[self.scoring]
             else:
                 raise ValueError(f"invalid scoring metric: {self.scoring}. ")
->>>>>>> merge_this
 
             return -np.mean(score)
 
