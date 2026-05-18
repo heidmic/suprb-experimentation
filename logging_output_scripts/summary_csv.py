@@ -6,7 +6,7 @@ Extracts values from csv-Files gained from mlflow, performs calculations and
 stores the results in a new csv-File for all Models specified
 Leave out/add metrics that you want to evaluate
 """
-with open('logging_output_scripts/config.json') as f:
+with open("logging_output_scripts/config.json") as f:
     config = json.load(f)
 
 final_output_dir = f"{config['output_directory']}"
@@ -16,13 +16,13 @@ mse = "metrics.test_neg_mean_squared_error"
 
 def create_summary_csv():
     check_and_create_dir(final_output_dir, "csv_summary")
-    for heuristic, renamed_heuristic in config['heuristics'].items():
+    for heuristic, renamed_heuristic in config["heuristics"].items():
         # Head of csv-File
         header = f"Problem,MIN_COMP,MAX_COMP,MEAN_COMP,STD_COMP,MEDIAN_COMP,MEAN_MSE,STD_MSE"
         fold_df = None
 
         values = "\n"
-        for problem in config['datasets']:
+        for problem in config["datasets"]:
             values += problem
             fold_df = get_df(heuristic, problem)
 
@@ -40,7 +40,7 @@ def create_summary_csv():
                 values += "," + str(round(mean_squared_error.mean(), 4))
                 values += "," + str(round(mean_squared_error.std(), 4))
 
-                values += '\n'
+                values += "\n"
 
                 print(f"Done for {problem} with {renamed_heuristic}")
 
@@ -48,5 +48,5 @@ def create_summary_csv():
             file.write(header + values)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_summary_csv()

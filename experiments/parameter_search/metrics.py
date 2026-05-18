@@ -1,6 +1,6 @@
 from suprb import SupRB
 
-__all__ = ['fitness']
+__all__ = ["fitness"]
 
 
 def fitness(model: SupRB):
