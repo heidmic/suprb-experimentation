@@ -170,13 +170,8 @@ def single_table(dataset_shorts):
         for heuristic in config["heuristics"]:
             df = pd.read_csv(f"{summary_csv_dir}/{heuristic}_summary.csv")
             res = df[df["Problem"].str.contains(problem)]
-<<<<<<< HEAD
-            row.append(str(round(float(res["MEAN_MSE"]), 2)) + "\u00b1" + str(round(float(res["STD_MSE"]), 2)))
-            row.append(str(round(float(res["MEAN_COMP"]), 2)) + "\u00b1" + str(round(float(res["STD_COMP"]), 2)))
-=======
             row.append(str(round(float(res["MEAN_MSE"]), 2)) + "\u00B1" + str(round(float(res["STD_MSE"]), 2)))
             row.append(str(round(float(res["MEAN_COMP"]), 2)) + "\u00B1" + str(round(float(res["STD_COMP"]), 2)))
->>>>>>> merge_this
         columns.append(row)
     frame = pd.DataFrame(columns)
     headers = [x for y in [["MSE", "Complexity"] for i in range(frame.shape[1] - 1)] for x in y]
@@ -199,11 +194,7 @@ def single_table_all_mse(dataset_shorts):
         for problem in config["datasets"]:
             df = pd.read_csv(f"{summary_csv_dir}/{config['heuristics'][heuristic]}_summary.csv")
             res = df[df["Problem"].str.contains(problem)]
-<<<<<<< HEAD
-            row.append(str(round(float(res["MEAN_MSE"]), 2)) + "\u00b1" + str(round(float(res["STD_MSE"]), 2)))
-=======
             row.append(str(round(float(res["MEAN_MSE"]), 2)) + "\u00B1" + str(round(float(res["STD_MSE"]), 2)))
->>>>>>> merge_this
         columns.append(row)
     frame = pd.DataFrame(columns)
     headers = [x for y in [["MSE"] for i in range(frame.shape[1] - 1)] for x in y]
@@ -225,11 +216,7 @@ def single_table_all_complexity():
         for problem in config["datasets"]:
             df = pd.read_csv(f"{summary_csv_dir}/{config['heuristics'][heuristic]}_summary.csv")
             res = df[df["Problem"].str.contains(problem)]
-<<<<<<< HEAD
-            row.append(str(round(float(res["MEAN_COMP"]), 2)) + "\u00b1" + str(round(float(res["STD_COMP"]), 2)))
-=======
             row.append(str(round(float(res["MEAN_COMP"]), 2)) + "\u00B1" + str(round(float(res["STD_COMP"]), 2)))
->>>>>>> merge_this
         columns.append(row)
     frame = pd.DataFrame(columns)
     headers = [x for y in [["Complexity"] for i in range(frame.shape[1] - 1)] for x in y]

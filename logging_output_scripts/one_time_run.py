@@ -10,7 +10,6 @@ from logging_output_scripts import violin_and_swarm_plots
 from logging_output_scripts import moo_plots
 from logging_output_scripts.stat_analysis import calvo, ttest, cohens_pairwise_d
 from logging_output_scripts.utils import filter_runs
-<<<<<<< HEAD
 from logging_output_scripts import latex_tabulars
 
 datasets = {
@@ -21,8 +20,6 @@ datasets = {
     "protein_structure": "Physiochemical Properties of Protein Tertiary Structure",
     "parkinson_total": "Parkinson's Telemonitoring",
 }
-=======
->>>>>>> merge_this
 
 saga_datasets = {
     "combined_cycle_power_plant": "Combined Cycle Power Plant",
@@ -37,8 +34,8 @@ datasets_no_pppts = {
     "combined_cycle_power_plant": "Combined Cycle Power Plant",
     "airfoil_self_noise": "Airfoil Self-Noise",
     "concrete_strength": "Concrete Strength",
-<<<<<<< HEAD
     "energy_cool": "Energy Efficiency Cooling",
+    "parkinson_total": "Parkinson's Telemonitoring"
 }
 
 solution_composition = {
@@ -216,11 +213,8 @@ mixing.append(mixing10)
 mixing.append(mixing11)
 mixing.append(mixing12)
 
-=======
-    "parkinson_total": "Parkinson's Telemonitoring"
-}
 
->>>>>>> merge_this
+
 
 def mlruns_to_csv(datasets, subdir, normalize):
     all_runs_df = mlflow.search_runs(search_all_experiments=True)
@@ -229,14 +223,28 @@ def mlruns_to_csv(datasets, subdir, normalize):
     for dataset in datasets:
         mse = "metrics.test_neg_mean_squared_error"
         complexity = "metrics.elitist_complexity"
-<<<<<<< HEAD
 
         df = all_runs_df[
             all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) & (all_runs_df["tags.fold"] == "True")
         ]
         df = df[["tags.mlflow.runName", mse, complexity]]
         print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
-=======
+
+        df[mse] *= -1
+        if normalize:
+            df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
+            df[complexity] = (df[complexity] - np.min(df[complexity])) / (
+                    np.max(df[complexity]) - np.min(df[complexity]))
+        df.to_csv(f"mlruns_csv/{subdir}/{dataset}_all.csv", index=False)
+
+
+def mlruns_to_csv_felix(datasets, subdir, normalize):
+    all_runs_df = mlflow.search_runs(search_all_experiments=True)
+
+    print("Dataset\t\t\tMin MSE\tMax MSE\tMin Complexity\tMax Complexity")
+    for dataset in datasets:
+        mse = "metrics.test_neg_mean_squared_error"
+        complexity = "metrics.elitist_complexity"
         hypervolume = "metrics.hypervolume"
         sc_iters = "metrics.sc_iterations"
         spread = "metrics.spread"
@@ -251,7 +259,6 @@ def mlruns_to_csv(datasets, subdir, normalize):
         roots = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(
             dataset, case=False, na=False) & (all_runs_df["tags.root"] == 'True')]
         roots = roots[["tags.mlflow.runName", "artifact_uri", "params.tuned_params"]]
->>>>>>> merge_this
 
         df[mse] *= -1
         if normalize:
@@ -262,14 +269,13 @@ def mlruns_to_csv(datasets, subdir, normalize):
         roots.to_csv(f"mlruns_csv/{subdir}/{dataset}_roots.csv", index=False)
 
 
-<<<<<<< HEAD
 saga = {"s:ga": "GA", "s:saga1": "SAGA1", "s:saga2": "SAGA2", "s:saga3": "SAGA3", "s:sas": "SAGA4"}
 
 adel = {
     "SupRB": "SupRB",
     "Random Forest": "RF",
     "Decision Tree": "DT",
-=======
+}
 ga_baseline = {
     "Baseline c:ga32": "GA 32",
     "Baseline c:ga64": "GA 64",
@@ -352,7 +358,6 @@ pop_size = {
 more_rules = {
     "Baseline nsga2": "128 Rules",
     "MoreRules nsga2": "1024 Rules"
->>>>>>> merge_this
 }
 
 
