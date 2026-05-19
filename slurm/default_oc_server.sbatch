@@ -13,8 +13,5 @@ dataset="airfoil_self_noise"
 study_name="SupRB-Airfoil"
 
 srun nix-shell $JOB_DIR/slurm/default.nix --command "PYTHONPATH=$JOB_DIR/$PYTHONPATH \
-<<<<<<< HEAD
 python $JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID -n $study_name"
-=======
 python $JOB_DIR/$experiment -p $dataset -j $SLURM_JOB_ID -r $rules_amount -f"
->>>>>>> merge_this

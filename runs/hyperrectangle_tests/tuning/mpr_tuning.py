@@ -29,13 +29,9 @@ def rule_discovery_space(trial: Trial, params: Bunch):
     # Evolution Strategy - Mutation, Mutation_sigma, Initialization, Init_sigma, Delay (delta) and fitness_alpha
     sigma_space = [0, 3]
 
-<<<<<<< HEAD
-    params.rule_discovery__mutation = trial.suggest_categorical("mutation", ["Normal", "HalfnormIncrease", "UniformIncrease"])
-=======
     params.rule_discovery__mutation = trial.suggest_categorical(
         "mutation", ["Normal", "HalfnormIncrease", "UniformIncrease"]
     )
->>>>>>> merge_this
     params.rule_discovery__mutation = getattr(mutation, params.rule_discovery__mutation)()
     # Unique to MPR
     params.rule_discovery__mutation__sigma = np.array(
@@ -61,13 +57,9 @@ def rule_discovery_space(trial: Trial, params: Bunch):
         params.rule_discovery__delay = trial.suggest_int("delay", low=1, high=25)
 
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
-<<<<<<< HEAD
-    params.solution_composition__selection = trial.suggest_categorical("selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"])
-=======
     params.solution_composition__selection = trial.suggest_categorical(
         "selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"]
     )
->>>>>>> merge_this
     params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
     if isinstance(params.solution_composition__selection, ga.selection.Tournament):
         params.solution_composition__selection__k = trial.suggest_int("selection__k", 3, 10)
@@ -80,9 +72,6 @@ def rule_discovery_space(trial: Trial, params: Bunch):
     params.solution_composition__mutation__mutation_rate = trial.suggest_float("mutation_rate", 0, 0.1)
 
 
-<<<<<<< HEAD
-datasets = {0: "parkinson_total", 1: "protein_structure", 2: "airfoil_self_noise", 3: "concrete_strength", 4: "combined_cycle_power_plant"}
-=======
 datasets = {
     0: "parkinson_total",
     1: "protein_structure",
@@ -90,7 +79,6 @@ datasets = {
     3: "concrete_strength",
     4: "combined_cycle_power_plant",
 }
->>>>>>> merge_this
 
 
 @click.command()

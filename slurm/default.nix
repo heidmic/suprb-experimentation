@@ -6,17 +6,6 @@ with import (builtins.fetchGit {
 
 mkShell {
   venvDir = "./_venv";
-<<<<<<< HEAD
-  # Add dependencies that pip can't fetch here (or that we don't want to
-  # install using pip).
-  buildInputs = (with pkgs.python310Packages; [ python310 venvShellHook wheel pip ]) ++ [
-  pkgs.stdenv.cc.cc]
-     ++ (import ./system-dependencies.nix { inherit pkgs; });
-  postShellHook = ''
-    unset SOURCE_DATE_EPOCH
-    export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [pkgs.stdenv.cc.cc]}:${pkgs.lib.makeLibraryPath [pkgs.zlib]}:$LD_LIBRARY_PATH"
-    export PYTHONPATH=$venvDir/${python310.sitePackages}:$PYTHONPATH
-=======
 
   buildInputs = [
     pkgs.python312
@@ -29,7 +18,6 @@ mkShell {
     unset SOURCE_DATE_EPOCH
     export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc pkgs.zlib ]}:$LD_LIBRARY_PATH"
     export PYTHONPATH=$venvDir/${pkgs.python312.sitePackages}:$PYTHONPATH
->>>>>>> merge_this
   '';
 
   postVenvCreation = ''
