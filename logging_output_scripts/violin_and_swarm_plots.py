@@ -27,25 +27,18 @@ def create_plots():
     """
     sns.set_style("whitegrid")
     sns.set_theme(
-<<<<<<< HEAD
-        style="whitegrid", font="Times New Roman", font_scale=1.7, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42}
-=======
         style="whitegrid",
         font="Times New Roman",
         font_scale=1.7,
         rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42},
->>>>>>> merge_this
     )
 
     plt.rcParams["font.family"] = "serif"
     plt.rcParams["font.serif"] = ["Times New Roman"] + plt.rcParams["font.serif"]
     plt.rcParams["figure.dpi"] = 200
 
-<<<<<<< HEAD
     plt.tight_layout()
 
-=======
->>>>>>> merge_this
     with open("logging_output_scripts/config.json") as f:
         config = json.load(f)
 
@@ -83,11 +76,7 @@ def create_plots():
 
         def ax_config(axis, y_label):
             x_lab = ""
-<<<<<<< HEAD
-            ax.set_ylabel(y_label, weight="bold")
-=======
             ax.set_ylabel(y_label, weight="bold", fontsize=18)
->>>>>>> merge_this
             ax.set_title(config["datasets"][problem], style="italic", fontsize=14)
             ax.set_xlabel(x_lab, weight="bold", labelpad=10)
 
@@ -113,11 +102,7 @@ def create_plots():
             #  "box": sns.boxplot
         }
 
-<<<<<<< HEAD
-        y_axis_label = {"MSE": mse, "Complexity": complexity}
-=======
         y_axis_label = config["metrics"]
->>>>>>> merge_this
 
         f_index = heuristic.find("f:")
         result = heuristic[f_index + 2 :]
@@ -126,11 +111,7 @@ def create_plots():
             for y_label, y_axis in y_axis_label.items():
                 fig, ax = plt.subplots(dpi=400)
                 plt.subplots_adjust(left=0.2, right=0.95, top=0.92, bottom=0.22)
-<<<<<<< HEAD
-                ax = function(x="Used_Representation", y=y_axis, data=res_var, size=3)
-=======
                 ax = function(x="Used_Representation", y=y_axis, data=res_var)
->>>>>>> merge_this
                 ax_config(ax, y_label)
                 plt.tight_layout()
                 fig.savefig(f"{final_output_dir}/{datasets_map[problem]}_{name}_{y_label}.png")

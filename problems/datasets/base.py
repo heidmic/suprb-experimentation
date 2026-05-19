@@ -11,13 +11,7 @@ from sklearn.datasets import load_diabetes
 DATASETS_PATH = (pathlib.Path(__file__).parent / "data").resolve()
 
 
-<<<<<<< HEAD
 def load_dataset(filename: str, target_column: str, return_X_y: bool, as_frame: bool, remove_columns: list = None) -> ProblemRepr:
-=======
-def load_dataset(
-    filename: str, target_column: str, return_X_y: bool, as_frame: bool, remove_columns: list = None
-) -> ProblemRepr:
->>>>>>> merge_this
     frame = pd.read_csv(DATASETS_PATH / filename, sep=",")
 
     data = frame.drop(columns=[target_column] + (remove_columns if remove_columns is not None else []))
@@ -92,13 +86,7 @@ def load_airfoil_self_noise(return_X_y: bool = True, as_frame: bool = False):
 
     Downloaded from https://archive.ics.uci.edu/ml/datasets/Airfoil+Self-Noise.
     """
-<<<<<<< HEAD
     return load_dataset(filename="airfoil_self_noise.csv", target_column="SPL", return_X_y=return_X_y, as_frame=as_frame)
-=======
-    return load_dataset(
-        filename="airfoil_self_noise.csv", target_column="SPL", return_X_y=return_X_y, as_frame=as_frame
-    )
->>>>>>> merge_this
 
 
 def load_energy_heat(return_X_y: bool = True, as_frame: bool = False):
@@ -114,13 +102,7 @@ def load_energy_heat(return_X_y: bool = True, as_frame: bool = False):
     Downloaded from https://archive.ics.uci.edu/ml/datasets/energy+efficiency.
     """
 
-<<<<<<< HEAD
     return load_dataset(filename="energy.csv", target_column="Y1", return_X_y=return_X_y, as_frame=as_frame, remove_columns=["Y2"])
-=======
-    return load_dataset(
-        filename="energy.csv", target_column="Y1", return_X_y=return_X_y, as_frame=as_frame, remove_columns=["Y2"]
-    )
->>>>>>> merge_this
 
 
 def load_energy_cool(return_X_y: bool = True, as_frame: bool = False):
@@ -136,13 +118,7 @@ def load_energy_cool(return_X_y: bool = True, as_frame: bool = False):
     Downloaded from https://archive.ics.uci.edu/ml/datasets/energy+efficiency.
     """
 
-<<<<<<< HEAD
     return load_dataset(filename="energy.csv", target_column="Y2", return_X_y=return_X_y, as_frame=as_frame, remove_columns=["Y1"])
-=======
-    return load_dataset(
-        filename="energy.csv", target_column="Y2", return_X_y=return_X_y, as_frame=as_frame, remove_columns=["Y1"]
-    )
->>>>>>> merge_this
 
 
 def load_forest_fires(return_X_y: bool = True, as_frame: bool = False):
@@ -216,10 +192,4 @@ def load_protein_structure(return_X_y: bool = True, as_frame: bool = False, samp
     Downloaded from
     https://https://archive.ics.uci.edu/ml/datasets/Physicochemical+Properties+of+Protein+Tertiary+Structure.
     """
-<<<<<<< HEAD
     return load_dataset(filename="protein_structure.csv", target_column="RMSD", return_X_y=return_X_y, as_frame=as_frame)
-=======
-    return load_dataset(
-        filename="protein_structure.csv", target_column="RMSD", return_X_y=return_X_y, as_frame=as_frame
-    )
->>>>>>> merge_this

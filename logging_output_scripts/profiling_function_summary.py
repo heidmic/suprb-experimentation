@@ -29,9 +29,6 @@ def print_mean_stdvar(
     print(f"{experiment_name}, {dataset_name}, {attribute}, {mean}, {stdv}")
 
 
-<<<<<<< HEAD
-dataset_list = ["combined_cycle_power_plant", "airfoil_self_noise", "concrete_strength", "parkinson_total", "protein_structure"]
-=======
 dataset_list = [
     "combined_cycle_power_plant",
     "airfoil_self_noise",
@@ -39,7 +36,6 @@ dataset_list = [
     "parkinson_total",
     "protein_structure",
 ]
->>>>>>> merge_this
 optimizer_list = ["GA", "SAGA1", "SAGA2", "SAGA3"]
 
 if __name__ == "__main__":

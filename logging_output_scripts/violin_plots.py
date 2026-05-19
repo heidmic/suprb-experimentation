@@ -9,16 +9,12 @@ Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
 sns.set_style("whitegrid")
-<<<<<<< HEAD
-sns.set_theme(style="whitegrid", font="Times New Roman", font_scale=1, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42})
-=======
 sns.set_theme(
     style="whitegrid",
     font="Times New Roman",
     font_scale=1,
     rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42},
 )
->>>>>>> merge_this
 
 final_output_dir = f"{config['output_directory']}/violin_plots"
 create_output_dir(config["output_directory"])
@@ -48,13 +44,7 @@ def create_violin_plots():
                 else:
                     current_res = fold_df.assign(Used_Representation=name)
                     if "metrics.test_neg_mean_squared_error" in current_res.keys():
-<<<<<<< HEAD
                         current_res["test_neg_mean_squared_error"] = current_res.pop("metrics.test_neg_mean_squared_error")
-=======
-                        current_res["test_neg_mean_squared_error"] = current_res.pop(
-                            "metrics.test_neg_mean_squared_error"
-                        )
->>>>>>> merge_this
                     res_var = pd.concat([res_var, current_res])
 
                 print(f"Done for {problem} with {heuristic}")

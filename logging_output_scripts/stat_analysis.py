@@ -51,16 +51,12 @@ pd.options.display.max_rows = 2000
 # TODO Store via PGF backend with nicer LaTeXy fonts etc.
 # https://jwalton.info/Matplotlib-latex-PGF/
 # matplotlib.use("pgf")
-<<<<<<< HEAD
-sns.set_theme(style="whitegrid", font="Times New Roman", font_scale=0.8, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42})
-=======
 sns.set_theme(
     style="whitegrid",
     font="Times New Roman",
     font_scale=0.8,
     rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42},
 )
->>>>>>> merge_this
 
 # Add \the\linewidth into the LaTeX file to get this value (it's in pt).
 linewidth = 213.41443
@@ -73,11 +69,8 @@ textwidth /= 72.27
 elitist_complexity = "metrics.elitist_complexity"
 mse = "metrics.test_neg_mean_squared_error"
 
-<<<<<<< HEAD
 metrics = {mse: "MSE", elitist_complexity: "Model Complexity"}
-=======
 HIGHER_IS_BETTER = ["metrics.hypervolume", "metrics.test_hypervolume"]
->>>>>>> merge_this
 
 
 def smart_print(df, latex):
