@@ -428,95 +428,11 @@ def run_main():
               cand2_name="$N = 128$")
 
     if len(config["heuristics"]) > 1:
-    calvo(ylabel=setting[2])
+        calvo(ylabel=setting[2])
 
     moo_plots.create_plots()
 
 
-<<<<<<< HEAD
-        ttest(latex=False, cand1="NSLC False", cand2="NSLC True", cand1_name="NSLC-G", cand2_name="NSLC-P")
-        ttest(latex=False, cand1="MCNS True", cand2="NSLC True", cand1_name="MCNS-P", cand2_name="NSLC-P")
-        ttest(latex=False, cand1="MCNS False", cand2="NSLC True", cand1_name="MCNS-G", cand2_name="NSLC-P")
-        ttest(latex=False, cand1=" NS True", cand2="NSLC True", cand1_name="NS-P", cand2_name="NSLC-P")
-        ttest(latex=False, cand1=" NS False", cand2="NSLC True", cand1_name="NS-G", cand2_name="NSLC-P")
-
-        ttest(latex=False, cand1="MCNS True", cand2="NSLC False", cand1_name="MCNS-P", cand2_name="NSLC-G")
-        ttest(latex=False, cand1="MCNS False", cand2="NSLC False", cand1_name="MCNS-G", cand2_name="NSLC-G")
-        ttest(latex=False, cand1=" NS True", cand2="NSLC False", cand1_name="NS-P", cand2_name="NSLC-G")
-        ttest(latex=False, cand1=" NS False", cand2="NSLC False", cand1_name="NS-G", cand2_name="NSLC-G")
-
-        ttest(latex=False, cand1="MCNS False", cand2="MCNS True", cand1_name="MCNS-G", cand2_name="MCNS-P")
-        ttest(latex=False, cand1=" NS True", cand2="MCNS True", cand1_name="NS-P", cand2_name="MCNS-P")
-        ttest(latex=False, cand1=" NS False", cand2="MCNS True", cand1_name="NS-G", cand2_name="MCNS-P")
-
-        ttest(latex=False, cand1=" NS True", cand2="MCNS False", cand1_name="NS-P", cand2_name="MCNS-G")
-        ttest(latex=False, cand1=" NS False", cand2="MCNS False", cand1_name="NS-G", cand2_name="MCNS-G")
-
-        ttest(latex=False, cand1=" NS False", cand2=" NS True", cand1_name="NS-G", cand2_name="NS-P")
-
-    if setting[0] == "diss-graphs/graphs/SC":
-        ga_switch = "ES Tuning"  # "GeneticAlgorithm"
-        ttest(latex=False, cand1="RandomSearch", cand2=ga_switch, cand1_name="RS", cand2_name="GA")
-        ttest(latex=False, cand1="ArtificialBeeColonyAlgorithm", cand2=ga_switch, cand1_name="ABC", cand2_name="GA")
-        ttest(latex=False, cand1="AntColonyOptimization", cand2=ga_switch, cand1_name="ACO", cand2_name="GA")
-        ttest(latex=False, cand1="GreyWolfOptimizer", cand2=ga_switch, cand1_name="GWO", cand2_name="GA")
-        ttest(latex=False, cand1="ParticleSwarmOptimization", cand2=ga_switch, cand1_name="PSO", cand2_name="GA")
-
-    if setting[0] == "diss-graphs/graphs/MIX":
-        if setting[4] != "mlruns_csv/MIX/subset_":
-            ttest(
-                latex=False,
-                cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation",
-                cand1_name=r"$l$ Best",
-                cand2_name="Base",
-            )
-
-        ttest(
-            latex=False,
-            cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
-            cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation",
-            cand1_name="Experience Cap",
-            cand2_name="Base",
-        )
-        ttest(
-            latex=False,
-            cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
-            cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation",
-            cand1_name="Experience Cap (dim)",
-            cand2_name="Base",
-        )
-        ttest(
-            latex=False,
-            cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
-            cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
-            cand1_name="Experience Cap",
-            cand2_name="Experience Cap (dim)",
-        )
-
-    if setting[0] == "diss-graphs/graphs/SAGA":
-        ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="SAGA1", cand2_name="GA")
-        ttest(latex=False, cand1="s:saga2", cand2="s:ga", cand1_name="SAGA2", cand2_name="GA")
-        ttest(latex=False, cand1="s:saga3", cand2="s:ga", cand1_name="SAGA3", cand2_name="GA")
-        ttest(latex=False, cand1="s:sas", cand2="s:ga", cand1_name="SAGA4", cand2_name="GA")
-        ttest(latex=False, cand1="s:saga1", cand2="s:saga2", cand1_name="SAGA1", cand2_name="SAGA2")
-        ttest(latex=False, cand1="s:saga1", cand2="s:saga3", cand1_name="SAGA1", cand2_name="SAGA3")
-        ttest(latex=False, cand1="s:saga1", cand2="s:sas", cand1_name="SAGA1", cand2_name="SAGA4")
-        ttest(latex=False, cand1="s:saga2", cand2="s:saga3", cand1_name="SAGA2", cand2_name="SAGA3")
-        ttest(latex=False, cand1="s:saga2", cand2="s:sas", cand1_name="SAGA2", cand2_name="SAGA4")
-        ttest(latex=False, cand1="s:saga3", cand2="s:sas", cand1_name="SAGA3", cand2_name="SAGA4")
-
-
-if __name__ == "__main__":
-    rd = ["diss-graphs/graphs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
-    sc = ["diss-graphs/graphs/SC_only_GA", solution_composition, "Solution Composition", False, "mlruns_csv/SC_only_GA"]
-    xcsf = ["diss-graphs/graphs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]
-    adeles = ["diss-graphs/graphs/ADELES", adel, "Rule Discovery", False, "mlruns"]
-    mix_calvo = ["diss-graphs/graphs/MIX", mixing_calvo, "Mixing Variant", True, "mlruns_csv/MIX"]
-    mix_calvo_sub = ["diss-graphs/graphs/MIX/subset", mixing_calvo_subset, "Mixing Variant", True, "mlruns_csv/MIX"]
-    sagas = ["diss-graphs/graphs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
-    sc_rd = ["diss-graphs/graphs/SC", sc_mix_rd, "Solution Composition", False, "mlruns_csv/SC"]
-=======
     # violin_and_swarm_plots.create_plots()
 
 
@@ -543,7 +459,6 @@ if __name__ == '__main__':
     test = ["diss-graphs/graphs/TEST", test, "Configuration", False, "mlruns_csv/TEST"]
     spea2_only = ["diss-graphs/graphs/SPEA2_ONLY", spea2_only, "Configuration", False, "mlruns_csv/SPEA2_ONLY",
                   ga_baseline_more_tuning]
->>>>>>> merge_this
 
     # setting = ga_base
     # setting = test

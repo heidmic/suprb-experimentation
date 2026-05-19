@@ -126,16 +126,12 @@ def cli():
 
 def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, ylabel=None):
 
-<<<<<<< HEAD
-    sns.set_theme(style="whitegrid", font="Times New Roman", font_scale=1, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42})
-=======
     sns.set_theme(
         style="whitegrid",
         font="Times New Roman",
         font_scale=1,
         rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42},
     )
->>>>>>> merge_this
 
     with open("logging_output_scripts/config.json") as f:
         config = json.load(f)
@@ -198,15 +194,12 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
             print(d.to_numpy())
 
             # NOTE We fix the random seed here to enable model caching.
-<<<<<<< HEAD
             model = cmpbayes.Calvo(d.to_numpy(), higher_better=False, algorithm_labels=d.columns.to_list()).fit(
                 num_samples=chosen_sample_num, random_seed=1
             )
-=======
-            model = cmpbayes.Calvo(
+            model1 = cmpbayes.Calvo(
                 d.to_numpy(), higher_better=higher_is_better, algorithm_labels=d.columns.to_list()
             ).fit(num_samples=chosen_sample_num, random_seed=1)
->>>>>>> merge_this
 
             if check_mcmc:
                 smart_print(az.summary(model.infdata_), latex=latex)
@@ -235,12 +228,6 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
             result = result.replace("/", "")
 
             fig.savefig(
-<<<<<<< HEAD
-                f"{final_output_dir}/calvo_{result}_{metric}{'' if not small_set else '-small'}.pdf", dpi=fig.dpi, bbox_inches="tight"
-            )
-        else:
-            fig.savefig(f"{final_output_dir}/calvo_{metric}{'' if not small_set else '-small'}.pdf", dpi=fig.dpi, bbox_inches="tight")
-=======
                 f"{final_output_dir}/calvo_{result}_{metric}{'' if not small_set else '-small'}.pdf",
                 dpi=fig.dpi,
                 bbox_inches="tight",
@@ -251,7 +238,6 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
                 dpi=fig.dpi,
                 bbox_inches="tight",
             )
->>>>>>> merge_this
 
 def cohens_pairwise_d(candidate_pairs: List[Tuple[str, str]], candidate_pair_names: List[str]) -> None:
     """
@@ -382,14 +368,10 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
         # fig, ax = plt.subplots(len(config["datasets"]), figsize=(textwidth, 5), dpi=72)
         num_heuristics = len(config["heuristics"])
         fig, ax = plt.subplots(
-<<<<<<< HEAD
-            nrows=math.ceil(len(config["datasets"]) / 2), ncols=2, figsize=(8, 0.75 * math.ceil(len(config["datasets"]) / 2) * 2), dpi=72
-=======
             nrows=math.ceil(len(config["datasets"]) / 2),
             ncols=2,
             figsize=(8, 0.75 * math.ceil(len(config["datasets"]) / 2) * 2),
             dpi=72,
->>>>>>> merge_this
         )
         ax = ax.ravel()
         for i, task in enumerate(config["datasets"]):
@@ -431,13 +413,9 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             if not (i == 1 or i == 3):
                 xlabel = (
-<<<<<<< HEAD
-                    f"MSE({cand2_name}) - MSE({cand1_name})" if metrics[metric] == "MSE" else (f"COMP({cand2_name}) - COMP({cand1_name})\n")
-=======
                     f"MSE({cand2_name}) - MSE({cand1_name})"
                     if metrics[metric] == "MSE"
                     else (f"COMP({cand2_name}) - COMP({cand1_name})\n")
->>>>>>> merge_this
                 )
 
                 ylabel = "Density"
@@ -464,10 +442,6 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             # Add HDI lines and values.
             ax_val.vlines(x=hdi, ymin=-0.1 * max(y), ymax=1.2 * max(y), colors="C1", linestyles="dashed")
-<<<<<<< HEAD
-            ax_val.text(x=hdi[0], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[0], 2), ha="right", va="center", color="C1", fontweight="bold")
-            ax_val.text(x=hdi[1], y=1.3 * max(y), s=round_to_n_sig_figs(hdi[1], 2), ha="left", va="center", color="C1", fontweight="bold")
-=======
             ax_val.text(
                 x=hdi[0],
                 y=1.3 * max(y),
@@ -486,7 +460,6 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 color="C1",
                 fontweight="bold",
             )
->>>>>>> merge_this
 
             ax_val.set_ylim(top=1.2 * max(y))
             if metrics[metric] == "Model Complexity":
@@ -510,12 +483,8 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
                 probs[config["datasets"][task]] = {
                     f"p({cand1_name} practically higher complexity)": (sample < rope[0]).sum() / len(sample),
-<<<<<<< HEAD
-                    f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
-=======
                     f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum()
                     / len(sample),
->>>>>>> merge_this
                     f"p({cand2_name} practically higher complexity)": (rope[1] < sample).sum() / len(sample),
                 }
 
@@ -525,9 +494,6 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             nname = "mse" if metric == "metrics.test_neg_mean_squared_error" else "complexity"
 
-<<<<<<< HEAD
-            xlabel = f"MSE({cand2_name}) - MSE({cand1_name})" if metrics[metric] == "MSE" else (f"COMP({cand2_name}) - COMP({cand1_name})")
-=======
             if metrics[metric] == "MSE":
                 xlabel = f"MSE({cand2_name}) - MSE({cand1_name})"
                 nname = "mse"
@@ -541,7 +507,6 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
                 xlabel = f"{metrics[metric]}({cand2_name}) - {metrics[metric]}({cand1_name})"
                 nname = metrics[metric]
 
->>>>>>> merge_this
             ylabel = "Density"
             fig.text(0.5, -0.01, xlabel, ha="center")
             fig.text(0.01, 0.5, ylabel, ha="center", rotation=90)
