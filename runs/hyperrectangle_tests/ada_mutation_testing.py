@@ -17,9 +17,6 @@ from runs.hyperrectangle_tests.configurations.shared_config import (
 )
 from runs.hyperrectangle_tests.configurations.dataset_params import params_obr, params_ubr, params_csr, params_mpr
 
-<<<<<<< HEAD
-datasets = {0: "parkinson_total", 1: "protein_structure", 2: "airfoil_self_noise", 3: "concrete_strength", 4: "combined_cycle_power_plant"}
-=======
 datasets = {
     0: "parkinson_total",
     1: "protein_structure",
@@ -27,7 +24,6 @@ datasets = {
     3: "concrete_strength",
     4: "combined_cycle_power_plant",
 }
->>>>>>> merge_this
 
 # CHANGE FOR TESTING (Choices: OBR, UBR, CSR and MPR)
 representation = "CSR"
@@ -54,14 +50,10 @@ sigma_representations = {"OBR": sigma_obr, "UBR": sigma_ubr, "CSR": sigma_csr, "
 @click.option("-p", "--problem", type=click.STRING, default="airfoil_self_noise")
 @click.option("-c", "--sigma_choice", type=click.INT, default=0)
 def run(problem: str = "airfoil_self_noise", sigma_choice: int = 0):
-<<<<<<< HEAD
-    print(f"Problem is {problem}, Representation is {representation}," f" sigma is {sigma_representations[representation][sigma_choice]}")
-=======
     print(
         f"Problem is {problem}, Representation is {representation},"
         f" sigma is {sigma_representations[representation][sigma_choice]}"
     )
->>>>>>> merge_this
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
 

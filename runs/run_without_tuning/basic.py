@@ -97,24 +97,16 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
         rule_discovery=ES1xLambda(
             n_jobs=1,
             origin_generation=origin.SquaredError(),
-<<<<<<< HEAD
-            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
-=======
             init=rule.initialization.MeanInit(
                 fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
             ),
->>>>>>> merge_this
         ),
         solution_composition=GeneticAlgorithm(
             n_iter=64,
             n_jobs=1,
-<<<<<<< HEAD
-            init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight)),
-=======
             init=suprb.solution.initialization.RandomInit(
                 fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight)
             ),
->>>>>>> merge_this
         ),
         logger=CombinedLogger([("stdout", StdoutLogger()), ("default", DefaultLogger())]),
     )

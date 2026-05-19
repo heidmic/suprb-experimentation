@@ -17,9 +17,6 @@ from runs.hyperrectangle_tests.configurations.shared_config import (
 )
 from runs.hyperrectangle_tests.configurations.dataset_params import params_obr, params_ubr, params_csr, params_mpr
 
-<<<<<<< HEAD
-datasets = {0: "parkinson_total", 1: "protein_structure", 2: "airfoil_self_noise", 3: "concrete_strength", 4: "combined_cycle_power_plant"}
-=======
 datasets = {
     0: "parkinson_total",
     1: "protein_structure",
@@ -27,7 +24,6 @@ datasets = {
     3: "concrete_strength",
     4: "combined_cycle_power_plant",
 }
->>>>>>> merge_this
 
 # CHANGE FOR TESTING (Choices: OBR, UBR, CSR and MPR)
 representation = "MPR"

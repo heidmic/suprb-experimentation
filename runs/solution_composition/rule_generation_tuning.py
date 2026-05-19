@@ -10,9 +10,6 @@ from experiments.mlflow import log_experiment
 from experiments.parameter_search import param_space
 from experiments.parameter_search.optuna import OptunaTuner
 from problems import scale_X_y
-<<<<<<< HEAD
-from runs.solution_composition.shared_config import shared_tuning_params, load_dataset, global_params, dataset_params, random_state
-=======
 from runs.solution_composition.shared_config import (
     shared_tuning_params,
     load_dataset,
@@ -20,7 +17,6 @@ from runs.solution_composition.shared_config import (
     dataset_params,
     random_state,
 )
->>>>>>> merge_this
 
 
 @click.command()
