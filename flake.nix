@@ -1,15 +1,29 @@
 {
-  description = "A very basic flake";
-
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:cachix/devenv-nixpkgs/rolling"; # packages are usually pre-built, but may be older
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; # newest packages, but may build from source
+    devenv.url = "github:cachix/devenv";
   };
 
-  outputs = { self, nixpkgs }: {
+  outputs = {
+    self,
+    nixpkgs,
+    devenv,
+    ...
+  } @ inputs: let
+    system = "x86_64-linux";
+    pkgs = nixpkgs.legacyPackages.${system};
+  in {
+    # If you're using non-OSS software:
+    # nixpkgs.allowUnfree = true;
 
-    packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
+    # If you need native CUDA support (doesn't apply to packages like PyTorch which bundle their own CUDA):
+    # nixpkgs.config.cudaSupport = true;
 
-    packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
-
+    devShells.${system}.default = devenv.lib.mkShell {
+      inherit inputs pkgs;
+      # devenv.nix will contain your configuration
+      modules = [(import ./devenv.nix)];
+    };
   };
 }
