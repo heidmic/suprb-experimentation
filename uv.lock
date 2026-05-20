@@ -2,6 +2,9 @@ version = 1
 revision = 3
 requires-python = "==3.12.11"
 
+[manifest]
+overrides = [{ name = "suprb", marker = "python_full_version >= '3.12'", git = "https://github.com/heidmic/suprb?rev=master" }]
+
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"

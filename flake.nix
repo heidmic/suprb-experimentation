@@ -7,6 +7,10 @@
     #nixpkgs.url = "github:NixOS/nixpkgs/687f05a9184cad4eaf905c48b63649e3a86f5433"; #new
 
     devenv.url = "github:cachix/devenv";
+
+    # für languages.python.version 
+    nixpkgs-python.url = "github:cachix/nixpkgs-python";
+    nixpkgs-python.inputs = { nixpkgs.follows = "nixpkgs"; };
   };
 
   outputs = {

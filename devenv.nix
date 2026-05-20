@@ -18,8 +18,8 @@
       enable = true;
 
       # Choose your Python version:
-      package = pkgs.python312; # welche version
-      # version = "3.14.1";  # Use this only if you need a specific patch version, may build from source
+      #package = pkgs.python312; 
+      version = "3.12.11";  # use this bc suprb requires == 3.12.11
 
       /* package = py.withPackages (ps: with ps; [
       suprb
