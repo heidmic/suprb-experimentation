@@ -1,2 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "suprb-experimentation"
+version = "0.1.0"
+description = "Experimentation Setups for the Supervised Rule-based Learning System (SupRB)"
+readme = "README.md"
+authors = [
+  { name = "Michael Heider",          email = "michael.heider@uni-a.de" },
+  { name = "Jonathan Wurth" },
+  { name = "Roman-Alexander Sraj" },
+  { name = "David Pätzel" },
+]
+requires-python = "==3.12.11"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  # Git-Pakete (nicht auf PyPI)
+  "suprb @ git+https://github.com/heidmic/suprb@master",
+  "cmpbayes @ git+https://github.com/dpaetzel/cmpbayes@main",
+  # Aus setup.cfg (jetzt mit gepinnten Versionen)
+  "numpy>=1.20.0",
+  "scipy>=1.7.0",
+  "scikit-learn==1.7.0",
+  # Aus requirements.txt
+  "arviz==0.21.0",
+  "click==8.2.1",
+  "ipython==9.4.0",
+  "matplotlib==3.10.3",
+  "mlflow==3.1.0",
+  "optuna==4.4.0",
+  "optuna-dashboard==0.18.0",
+  "pandas==2.3.0",
+  "pytest==8.4.1",
+  "seaborn==0.13.2",
+  "tabulate==0.9.0",
+  "tqdm==4.67.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]  # entspricht find: aus setup.cfg
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.black]
 line-length = 140

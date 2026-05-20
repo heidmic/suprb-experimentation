@@ -4,26 +4,46 @@
   config,
   inputs,
   ...
-}: {
+}: 
+{
   packages = with pkgs; [
     gcc
     gccStdenv.cc.cc.lib
     libz
   ];
+
   languages = {
     python = {
       # If you don't need Python, comment this out:
       enable = true;
 
       # Choose your Python version:
-      # package = pkgs.python314;
+      package = pkgs.python312; # welche version
       # version = "3.14.1";  # Use this only if you need a specific patch version, may build from source
 
+      /* package = py.withPackages (ps: with ps; [
+      suprb
+      cmpbayes
+      arviz
+      click
+      ipython
+      matplotlib
+      mlflow        # deckt mlflow-skinny mit ab
+      optuna
+      optuna-dashboard
+      pandas
+      pytest
+      scikit-learn
+      seaborn
+      tabulate
+      tqdm
+    ]); */
+
       # Use the uv package manager:
-      # uv = {
-      #   enable = true;
-      #   sync.enable = true;
-      # };
+      uv = {
+        enable = true;
+        sync.enable = true;
+      };
 
       # Use venv and requirements.txt:
       # venv = {
@@ -31,18 +51,12 @@
       #   requirements = ./requirements.txt;  # Create this yourself
       # };
     };
-
-    languages.rust = {
-      # If you need Rust, comment this in:
-      #   enable = true;
-      #   channel = "stable"; # or "nixpkgs" or "nightly"
-      #   version = "1.81.0"; # or "latest"
-    };
   };
 
   env.LD_LIBRARY_PATH = lib.makeLibraryPath [
     pkgs.stdenv.cc.cc.lib
     pkgs.zlib
-    "/run/opengl-driver" # libcuda.so, libnvidia-*.so from host driver, only necessary for PyTorch/CUDA
+    #"/run/opengl-driver" # libcuda.so, libnvidia-*.so from host driver, only necessary for PyTorch/CUDA
   ];
 }
+
