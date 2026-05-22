@@ -8,7 +8,7 @@
     # Automatische Installation deiner requirements.txt in das venv
     venv = {
       enable = true;
-      requirements = ./requirements.txt;
+      requirements = ../requirements.txt;
     };
   };
 
