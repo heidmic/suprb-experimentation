@@ -44,7 +44,7 @@ cd "${PROJECT_DIR}"
 
 # 4. Experiment über die neue Nix-Flake-Umgebung ausführen
 # Wichtig: Dein Python-Skript sollte Ausgaben in den Ordner schreiben, der in $SCRATCH hinterlegt ist
-nix develop --no-pure-eval --command python "${PROJECT_DIR}/${EXPERIMENT}" \
+nix develop ./slurm --no-pure-eval --command python "${PROJECT_DIR}/${EXPERIMENT}" \
     -p "${dataset}" \
     -j "${SLURM_ARRAY_JOB_ID}" \
     -o "${OPTIMIZER}" \
