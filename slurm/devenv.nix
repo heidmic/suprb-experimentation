@@ -12,34 +12,26 @@
   ];
 
   languages = {
-    python = {
-      # If you don't need Python, comment this out:
-      enable = true;
+        python = {
+            # If you don't need Python, comment this out:
+            enable = true;
 
-      # Choose your Python version:
-      package = pkgs.python312;
-      version = "3.12.11"; # Use this only if you need a specific patch version, may build from source
+            # Choose your Python version:
+            
+            version = "3.12.11"; # Use this only if you need a specific patch version, may build from source
 
-      # Use the uv package manager:
-      uv = {
-        enable = true;
-        sync.enable = true;
-      };
 
-      # Use venv and requirements.txt:
-      venv = {
-        enable = true;
-        requirements = ./requirements.txt; # Create this yourself
-      };
+            # Use venv and requirements.txt:
+            venv = {
+                enable = true;
+                requirements = ../requirements.txt; # Create this yourself
+            };
+        };
     };
 
-    # HIER KORRIGIERT: Da wir schon "inside" von languages sind, 
-    # reicht hier einfach nur "rust =" statt "languages.rust ="
-    rust = {
-      # If you need Rust, comment this in:
-      #   enable = true;
-      #   channel = "stable"; # or "nixpkgs" or "nightly"
-      #   version = "1.81.0"; # or "latest"
-    };
-  };
+
+  env.LD_LIBRARY_PATH = lib.makeLibraryPath [
+    pkgs.stdenv.cc.cc.lib
+    pkgs.zlib
+  ];
 }
