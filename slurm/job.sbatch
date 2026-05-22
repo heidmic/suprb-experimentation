@@ -42,7 +42,6 @@ cd "${PROJECT_DIR}"
 nix develop ./slurm --no-pure-eval --command env PYTHONPATH="${PROJECT_DIR}:${PYTHONPATH}" python "${PROJECT_DIR}/${EXPERIMENT}" \
     -p "${dataset}" \
     -j "${SLURM_ARRAY_JOB_ID}" \
-    -o "${OPTIMIZER}" \
-    --output "$SCRATCH"
+    -o "${OPTIMIZER}"
 
 save_results "$SCRATCH" "~/results/sweep-$SLURM_ARRAY_JOB_ID/task-$SLURM_ARRAY_TASK_ID"
