@@ -34,6 +34,8 @@ study_name="${OPTIMIZER} Tuning - ${dataset}"
 
 echo "[$(date)] Tuning optimizer '${OPTIMIZER}' on dataset '${dataset}' (array task ${SLURM_ARRAY_TASK_ID})"
 
+sleep $(( RANDOM % 21 ))
+
 cd "${PROJECT_DIR}"
 
 # Führt das Flake im slurm-Unterordner aus
