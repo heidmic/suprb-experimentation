@@ -1,7 +1,7 @@
 { pkgs, config, ... }: {
   languages.python = {
     enable = true;
-    # Nutzt das native Paket aus dem fixierten Nixpkgs (Garantiert 3.12.11)
+    # Holt Python aus dem oben definierten Commit
     package = pkgs.python312;
     
     venv = {
