@@ -1,33 +1,25 @@
-{ pkgs, ... }:
-
-let
-  python = pkgs.python312;
-in
-{
-  packages = [
-    python
-    pkgs.git
-    pkgs.gcc
-  ];
-
+{ pkgs, config, ... }: {
+  
+  # Python 3.12 aktivieren
   languages.python = {
     enable = true;
-    package = python;
-
-    venv.enable = true;
-
-    pip.enable = true;
-
-    pip.install = ''
-      pip install -r ../requirements.txt
-    '';
+    version = "3.12";
+    
+    # Automatische Installation deiner requirements.txt in das venv
+    venv = {
+      enable = true;
+      requirements = ./requirements.txt;
+    };
   };
 
+  # System-Abhängigkeiten (Ersatz für deine system-dependencies.nix und CC/zlib Hooks)
+  packages = with pkgs; [
+    stdenv.cc.cc
+    zlib
+  ];
+
+  # Umgebungsvariablen setzen (Sauberer Ersatz für das alte postShellHook)
   env = {
-    PYTHONPATH = "../src:..";
-
-    MPLBACKEND = "Agg";
-
-    MLFLOW_TRACKING_URI = "file:../mlruns";
+    LD_LIBRARY_PATH = "${pkgs.stdenv.cc.cc.lib}/lib:${pkgs.zlib}/lib:$LD_LIBRARY_PATH";
   };
 }
