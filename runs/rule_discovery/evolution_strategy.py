@@ -75,7 +75,9 @@ def run(problem: str):
         rule_discovery=es.ES1xLambda(
             operator="&",
             n_iter=10_000,
-            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
+            init=rule.initialization.MeanInit(
+                fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
+            ),
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
@@ -105,7 +107,9 @@ def run(problem: str):
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
         params.rule_discovery__delay = trial.suggest_int("rule_discovery__delay", 10, 100)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
+            "rule_discovery__init__fitness__alpha", 0.01, 0.2
+        )
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
@@ -116,13 +120,17 @@ def run(problem: str):
         if isinstance(params.solution_composition__selection, ga.selection.Tournament):
             params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)
 
-        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
+        params.solution_composition__crossover = trial.suggest_categorical(
+            "solution_composition__crossover", ["NPoint", "Uniform"]
+        )
         params.solution_composition__crossover = getattr(ga.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
+            "solution_composition__mutation_rate", 0, 0.1
+        )
 
     experiment = Experiment(name=f"{problem} ES Tuning & Experimentation", verbose=10)
 

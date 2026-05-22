@@ -43,8 +43,19 @@ def get_csv_df(heuristic, dataset):
     with open("logging_output_scripts/config.json") as f:
         config = json.load(f)
 
-    df = pd.read_csv(f"{config['data_directory']}/{dataset}_all.csv")
-    return df[df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
+    fold_df = pd.read_csv(f"{config['data_directory']}/{dataset}_all.csv")
+    fold_df = fold_df[fold_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
+    return fold_df
+
+
+def get_csv_root_df(heuristic, dataset):
+    with open("logging_output_scripts/config.json") as f:
+        config = json.load(f)
+
+    root_df = pd.read_csv(f"{config['data_directory']}/{dataset}_roots.csv")
+    root_df = root_df[root_df["tags.mlflow.runName"].str.contains(heuristic, case=False, na=False)]
+    root_df = root_df[root_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False)]
+    return root_df
 
 
 def get_df(heuristic, dataset):

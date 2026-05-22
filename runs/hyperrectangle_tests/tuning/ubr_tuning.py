@@ -49,7 +49,9 @@ def ubr_space(trial: Trial, params: Bunch):
     else:
         params.rule_discovery__delay = trial.suggest_int("delay", low=1, high=25)
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
-    params.solution_composition__selection = trial.suggest_categorical("selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"])
+    params.solution_composition__selection = trial.suggest_categorical(
+        "selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"]
+    )
     params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
     if isinstance(params.solution_composition__selection, ga.selection.Tournament):
         params.solution_composition__selection__k = trial.suggest_int("selection__k", 3, 10)
@@ -62,7 +64,13 @@ def ubr_space(trial: Trial, params: Bunch):
     params.solution_composition__mutation__mutation_rate = trial.suggest_float("mutation_rate", 0, 0.1)
 
 
-datasets = {0: "parkinson_total", 1: "protein_structure", 2: "airfoil_self_noise", 3: "concrete_strength", 4: "combined_cycle_power_plant"}
+datasets = {
+    0: "parkinson_total",
+    1: "protein_structure",
+    2: "airfoil_self_noise",
+    3: "concrete_strength",
+    4: "combined_cycle_power_plant",
+}
 
 
 @click.command()

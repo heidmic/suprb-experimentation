@@ -31,6 +31,12 @@ if __name__ == "__main__":
 
     experiment = Experiment(verbose=10)
     evaluation = CrossValidateTest(
-        estimator=estimator, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test, random_state=random_state, verbose=10
+        estimator=estimator,
+        X_train=X_train,
+        y_train=y_train,
+        X_test=X_test,
+        y_test=y_test,
+        random_state=random_state,
+        verbose=10,
     )
     experiment.perform(evaluation, cv=8, n_jobs=4)

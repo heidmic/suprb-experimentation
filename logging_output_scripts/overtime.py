@@ -14,7 +14,12 @@ on multiple datasets
 """
 sns.set_style("whitegrid")
 sns.set(rc={"figure.dpi": 300, "savefig.dpi": 300})
-sns.set_theme(style="whitegrid", font="Times New Roman", font_scale=1, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42})
+sns.set_theme(
+    style="whitegrid",
+    font="Times New Roman",
+    font_scale=1,
+    rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42},
+)
 
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.serif"] = ["Times New Roman"] + plt.rcParams["font.serif"]

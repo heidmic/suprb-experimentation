@@ -40,7 +40,9 @@ if __name__ == "__main__":
         "rule_discovery__mutation__sigma": Real(0.01, 2),
     }
 
-    tuner = SkoptTuner(model, X_train, y_train, scoring="r2", n_calls=10, cv=2, n_jobs_cv=2, verbose=10, random_state=random_state)
+    tuner = SkoptTuner(
+        model, X_train, y_train, scoring="r2", n_calls=10, cv=2, n_jobs_cv=2, verbose=10, random_state=random_state
+    )
     tuned_params, _ = tuner(parameter_space=param_space, local_params={})
 
     model.set_params(**tuned_params)

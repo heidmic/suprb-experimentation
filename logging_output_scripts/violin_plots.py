@@ -9,7 +9,12 @@ Uses seaborn-package to create violin-Plots comparing model performances
 on multiple datasets
 """
 sns.set_style("whitegrid")
-sns.set_theme(style="whitegrid", font="Times New Roman", font_scale=1, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42})
+sns.set_theme(
+    style="whitegrid",
+    font="Times New Roman",
+    font_scale=1,
+    rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42},
+)
 
 final_output_dir = f"{config['output_directory']}/violin_plots"
 create_output_dir(config["output_directory"])

@@ -38,7 +38,9 @@ def run(problem: str, job_id: str):
 
     estimator = SupRB(
         rule_discovery=ES1xLambda(n_iter=2, lmbda=2, operator="+", delay=150, random_state=random_state, n_jobs=1),
-        solution_composition=GeneticAlgorithm(n_iter=2, population_size=2, elitist_ratio=0.2, random_state=random_state, n_jobs=1),
+        solution_composition=GeneticAlgorithm(
+            n_iter=2, population_size=2, elitist_ratio=0.2, random_state=random_state, n_jobs=1
+        ),
     )
 
     experiment_name = f"{problem}"

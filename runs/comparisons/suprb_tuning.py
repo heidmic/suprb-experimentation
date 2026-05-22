@@ -88,20 +88,53 @@ def run(
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
+            "rule_discovery__init__fitness__alpha", 0.01, 0.2
+        )
 
         # GA
         params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)
 
-        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
+        params.solution_composition__crossover = trial.suggest_categorical(
+            "solution_composition__crossover", ["NPoint", "Uniform"]
+        )
         params.solution_composition__crossover = getattr(ga.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0.0, 0.1)
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
+            "solution_composition__mutation_rate", 0, 0.1
+        )
 
-    experiment_name = f"SupRB Tuning j:{job_id} p:{problem}; r:{rule_amount}; f:{filter_subpopulation}; -e:{experience_calculation}"
+        # Mixing
+        params.solution_composition__init__mixing__filter_subpopulation__rule_amount = rule_amount
+        params.solution_composition__init__mixing__experience_weight = experience_weight
+
+        params.solution_composition__init__mixing__filter_subpopulation = getattr(mixing_model, filter_subpopulation)()
+        params.solution_composition__init__mixing__experience_calculation = getattr(
+            mixing_model, experience_calculation
+        )()
+
+        # Upper and lower bound clip the experience into a given range
+        # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
+        #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
+
+        if isinstance(
+            params.solution_composition__init__mixing__experience_calculation,
+            mixing_model.CapExperienceWithDimensionality,
+        ):
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+                "solution_composition__init__mixing__experience_calculation__upper_bound", 2, 5
+            )
+        else:
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
+                "solution_composition__init__mixing__experience_calculation__upper_bound", 20, 50
+            )
+
+    experiment_name = (
+        f"SupRB Tuning j:{job_id} p:{problem}; r:{rule_amount}; f:{filter_subpopulation}; -e:{experience_calculation}"
+    )
     print(experiment_name)
     experiment = Experiment(name=experiment_name, verbose=10)
 

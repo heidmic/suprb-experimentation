@@ -1,4 +1,11 @@
-from logging_output_scripts.utils import get_csv_df, get_normalized_df, check_and_create_dir, get_dataframe, get_all_runs, get_df
+from logging_output_scripts.utils import (
+    get_csv_df,
+    get_normalized_df,
+    check_and_create_dir,
+    get_dataframe,
+    get_all_runs,
+    get_df,
+)
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -9,6 +16,8 @@ from sklearn.preprocessing import MinMaxScaler
 
 mse = "metrics.test_neg_mean_squared_error"
 complexity = "metrics.elitist_complexity"
+hypervolume = "metrics.hypervolume"
+spread = "metrics.spread"
 
 
 def create_plots():
@@ -18,7 +27,10 @@ def create_plots():
     """
     sns.set_style("whitegrid")
     sns.set_theme(
-        style="whitegrid", font="Times New Roman", font_scale=1.7, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42}
+        style="whitegrid",
+        font="Times New Roman",
+        font_scale=1.7,
+        rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42},
     )
 
     plt.rcParams["font.family"] = "serif"
@@ -64,13 +76,15 @@ def create_plots():
 
         def ax_config(axis, y_label):
             x_lab = ""
-            ax.set_ylabel(y_label, weight="bold")
+            ax.set_ylabel(y_label, weight="bold", fontsize=18)
             ax.set_title(config["datasets"][problem], style="italic", fontsize=14)
             ax.set_xlabel(x_lab, weight="bold", labelpad=10)
 
+            plt.xticks(rotation=15, ha="right", fontsize=12)
+
             # Change this to adjust y_axis ticks
             y_min = max(0, min(ax.get_yticks()))
-            y_max = min(1, max(ax.get_yticks()))
+            y_max = max(ax.get_yticks())
 
             # Change this to adjust the tick size
             num_ticks = 7
@@ -82,12 +96,13 @@ def create_plots():
             plt.yticks(y_tick_positions, [f"{x:.3g}" for x in y_tick_positions])
 
         ################### MSE ###########################
-        plots = {  # "violin": sns.violinplot,
+        plots = {
+            "violin": sns.violinplot,
             "swarm": sns.swarmplot,
             #  "box": sns.boxplot
         }
 
-        y_axis_label = {"MSE": mse, "Complexity": complexity}
+        y_axis_label = config["metrics"]
 
         f_index = heuristic.find("f:")
         result = heuristic[f_index + 2 :]
@@ -96,10 +111,10 @@ def create_plots():
             for y_label, y_axis in y_axis_label.items():
                 fig, ax = plt.subplots(dpi=400)
                 plt.subplots_adjust(left=0.2, right=0.95, top=0.92, bottom=0.22)
-                ax = function(x="Used_Representation", y=y_axis, data=res_var, size=3)
+                ax = function(x="Used_Representation", y=y_axis, data=res_var)
                 ax_config(ax, y_label)
-
-                fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
+                plt.tight_layout()
+                fig.savefig(f"{final_output_dir}/{datasets_map[problem]}_{name}_{y_label}.png")
                 plt.close(fig)
 
         if config["data_directory"] == "mlruns_csv/MIX":

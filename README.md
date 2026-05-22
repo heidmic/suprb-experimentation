@@ -1,25 +1,11 @@
-# SupRB experimentation
+# SupRB experimentation for SupRB MOO Solution Composition
 
-This repo contains a collection of preset experiments going beyond the examples in the main SupRB repository (https://github.com/heidmic/suprb).
-The main repository contains the source code of the supervised machine learning system and references the associated publications.
-This repo also features scripts to automatically perform hyperparametersearch, run on SLURM-based server infrastructure and to generate tables and graphs based on run results.
-
-
-## Create an experiment on the OC server:
-
-
-1) Clone repository to /data/oc-compute03/${USER}/ (if you don't have that folder already create it) 
-2) Create an output directory within your cloned repository (/data/oc-compute03/${USER}/<repo_name>/output)
-3) Check (and recheck) that your sbatch file is correct (see slurm/default.sbatch). Make sure that JOB_DIR and EXPERIMENT are correct and that you link to the correct path where your nix file is located
-4) Call sbatch script with: sbatch slurm/default.sbatch 
-5) You can check if your job is running with **squeue**. If it's not listed there, check the error in **output/output<job_id>**
-
-
-## Create an experiment on licca:
-
-
-Follow the same steps as above, but clone the repository on licca.
-
+This repository contains the code used to tune, train, and evaluate Multi Objective Solution Composition in SupRB.
+It also contains the code to generate the graphs and tables for the paper "Exploring Multi-Objective Optimization to Balance
+Performance and Complexity in Explainable Machine
+Learning".
+It is a fork of the original SupRB experimentation repository, which can be found here: 
+https://github.com/heidmic/suprb-experimentation
 
 ## Run logging_output_scripts (you need either Linux or WSL to run the statistical analysis)
 

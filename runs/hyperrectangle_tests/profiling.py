@@ -66,7 +66,13 @@ def prof_to_csv(prof: cProfile.Profile):
     return "\n".join(lines)
 
 
-datasets = {0: "parkinson_total", 1: "protein_structure", 2: "airfoil_self_noise", 3: "concrete_strength", 4: "combined_cycle_power_plant"}
+datasets = {
+    0: "parkinson_total",
+    1: "protein_structure",
+    2: "airfoil_self_noise",
+    3: "concrete_strength",
+    4: "combined_cycle_power_plant",
+}
 
 # Performs 10 different runs for each Representation/Learning Task-combination and stores information in csv-Files
 if __name__ == "__main__":
