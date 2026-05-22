@@ -1,7 +1,7 @@
 {
   inputs = {
     # Dieser korrekte Commit enthält exakt Python 3.12.11
-    nixpkgs.url = "github:nixos/nixpkgs/e5f9da4b679b361498b8c2be783ff3021966a938";
+    nixpkgs.url = "github:nixos/nixpkgs/8cbadfa068534bdd8238eea362d2bf0b1d46b7e8";
     devenv.url = "github:cachix/devenv";
   };
 
