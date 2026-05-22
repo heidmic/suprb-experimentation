@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/5ca65548d7d9e48793b80e6402fc6e736a33719b";
     devenv.url = "github:cachix/devenv";
     
     # Diese beiden Zeilen lösen den Fehler:
