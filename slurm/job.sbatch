@@ -39,7 +39,7 @@ sleep $(( RANDOM % 21 ))
 cd "${PROJECT_DIR}"
 
 # Führt das Flake im slurm-Unterordner aus
-nix develop ./slurm --no-pure-eval --command python "${PROJECT_DIR}/${EXPERIMENT}" \
+nix develop ./slurm --no-pure-eval --command env PYTHONPATH="${PROJECT_DIR}:${PYTHONPATH}" python "${PROJECT_DIR}/${EXPERIMENT}" \
     -p "${dataset}" \
     -j "${SLURM_ARRAY_JOB_ID}" \
     -o "${OPTIMIZER}" \
