@@ -3,7 +3,7 @@
   # Python 3.12 aktivieren
   languages.python = {
     enable = true;
-    version = "3.12";
+    version = "3.12.11";
     
     # Automatische Installation deiner requirements.txt in das venv
     venv = {
