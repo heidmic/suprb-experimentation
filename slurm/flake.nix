@@ -1,11 +1,8 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/5ca65548d7d9e48793b80e6402fc6e736a33719b";
+    # Dieser korrekte Commit enthält exakt Python 3.12.11
+    nixpkgs.url = "github:nixos/nixpkgs/e5f9da4b679b361498b8c2be783ff3021966a938";
     devenv.url = "github:cachix/devenv";
-    
-    # Diese beiden Zeilen lösen den Fehler:
-    nixpkgs-python.url = "github:cachix/nixpkgs-python";
-    nixpkgs-python.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, devenv, ... } @ inputs:
@@ -15,7 +12,6 @@
     in
     {
       devShells.${system}.default = devenv.lib.mkShell {
-        # Hier wird "inputs" übergeben, wodurch devenv jetzt Zugriff auf nixpkgs-python hat
         inherit inputs pkgs;
         modules = [ (import ./devenv.nix) ];
       };
