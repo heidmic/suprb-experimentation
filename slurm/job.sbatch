@@ -4,17 +4,20 @@
 ###############################################################################
 #SBATCH --time=96:00:00                 # 96h wall‑clock limit
 #SBATCH --partition=cpu                 # Passende Partition für compute05
-#SBATCH --nodelist=oc-compute05         # Ziel-Node auf compute05 geändert
+#SBATCH --nodelist=oc-compute03         # Ziel-Node auf compute05 geändert
 #SBATCH --cpus-per-task=5              # 5 CPUs per array task
-#SBATCH --mem=20G                      # 20GiB RAM per array task
+#SBATCH --mem=50G                      # 50 GiB RAM per array task
 #SBATCH --output=output/%A_%a.out      # stdout file
 #SBATCH --error=output/%A_%a.err       # stderr file
 #SBATCH --array=0-4                    # ----  five array tasks  ----
 #
-# Submit: sbatch slurm/moo_experiment.sbatch
+# Submit: sbatch slurm/job.sbatch
 ###############################################################################
 
 source /projects/shared/lib/slurm-utils.sh
+
+
+trap 'echo "[$(date)] Trap ausgelöst..."; save_results "$SCRATCH" ~"/results/sweep-$SLURM_ARRAY_JOB_ID/task-$SLURM_ARRAY_TASK_ID"' EXIT ERR SIGTERM
 
 PROJECT_DIR="/home/$USER/suprb-experimentation"
 export PYTHONPATH="${PYTHONPATH}:${PROJECT_DIR}"
