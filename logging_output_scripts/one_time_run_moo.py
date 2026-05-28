@@ -163,7 +163,7 @@ def run_main():
     config["reference_heuristics"] = setting[5] if len(setting) > 5 else {}
     config["data_directory"] = setting[4]
 
-    with open("logging_output_scripts/config.json", "w") as f:
+    with open("logging_output_scripts/config_felix.json", "w") as f:
         json.dump(config, f)
 
     time.sleep(10)
