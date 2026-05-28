@@ -21,6 +21,7 @@ from suprb.logging.stdout import StdoutLogger
 from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import es, origin, mutation
 from suprb.solution.initialization import RandomInit
+import suprb.solution.mixing_model as mixing_model
 
 random_state = 42
 
