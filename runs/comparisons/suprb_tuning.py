@@ -104,7 +104,7 @@ def run(
         if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
+        params.solution_composition__mutation_rate = trial.suggest_float(
             "solution_composition__mutation_rate", 0, 0.1
         )
 
