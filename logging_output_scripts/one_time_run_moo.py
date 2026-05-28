@@ -145,7 +145,7 @@ more_rules = {
 
 
 def run_main():
-    with open("logging_output_scripts/config.json", "r") as f:
+    with open("logging_output_scripts/config_felix.json", "r") as f:
         config = json.load(f)
 
     config["datasets"] = saga_datasets if setting is not test else {"parkinson_total": "Parkinson's Telemonitoring"}

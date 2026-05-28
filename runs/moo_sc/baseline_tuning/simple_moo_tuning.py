@@ -51,7 +51,7 @@ def run(problem: str, job_id: str, optimizer: str):
     print(f"Problem is {problem}, with job id {job_id} and optimizer {optimizer}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
-    X, y = scale_X_y(X, y)
+    X, y, _ = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
@@ -79,7 +79,7 @@ def run(problem: str, job_id: str, optimizer: str):
         cv=4,
         n_jobs_cv=4,
         n_jobs=4,
-        n_calls=1000,
+        n_calls=10,
         timeout=60 * 60 * 24 * 3 if not sys.gettrace() else 60,
         scoring="test_hypervolume",
         verbose=10,
@@ -163,8 +163,8 @@ def run(problem: str, job_id: str, optimizer: str):
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(space_dict[optimizer], tuner=tuner)
 
-    random_states = np.random.SeedSequence(random_state).generate_state(8)
-    experiment.with_random_states(random_states, n_jobs=8)
+    #random_states = np.random.SeedSequence(random_state).generate_state(8)
+    #experiment.with_random_states(random_states, n_jobs=8)
 
     evaluation = MOOCrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
 
