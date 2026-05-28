@@ -15,6 +15,6 @@ study_name="SupRB-Airfoil"
 
 cd "${PROJECT_DIR}"
 
-nix develop ./slurm --no-pure-eval --command python "${PROJECT_DIR}/${EXPERIMENT}" \
+nix develop ./slurm --no-pure-eval --command env PYTHONPATH="${PROJECT_DIR}:${PYTHONPATH}" python "${PROJECT_DIR}/${EXPERIMENT}" \
     --problem "$dataset" \
     --job_id "$SLURM_JOB_ID" 

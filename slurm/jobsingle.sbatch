@@ -16,7 +16,7 @@
 source /projects/shared/lib/slurm-utils.sh
 
 
-trap 'echo "[$(date)] Trap ausgelöst..."; save_results "$SCRATCH" ~"/results/
+trap 'echo "[$(date)] Trap ausgelöst..."; save_results "$SCRATCH" ~"/results/" 
 
 PROJECT_DIR="/home/$USER/suprb-experimentation"
 export PYTHONPATH="${PYTHONPATH}:${PROJECT_DIR}"
