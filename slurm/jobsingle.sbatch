@@ -16,7 +16,7 @@
 source /projects/shared/lib/slurm-utils.sh
 
 
-trap 'echo "[$(date)] Trap ausgelöst..."; save_results "$SCRATCH" ~"/results/sweep-$SLURM_ARRAY_JOB_ID/task-$SLURM_ARRAY_TASK_ID"' EXIT ERR SIGTERM
+trap 'echo "[$(date)] Trap ausgelöst..."; save_results "$SCRATCH" ~"/results/
 
 PROJECT_DIR="/home/$USER/suprb-experimentation"
 export PYTHONPATH="${PYTHONPATH}:${PROJECT_DIR}"
@@ -26,7 +26,7 @@ EXPERIMENT="runs/comparisons/suprb_tuning.py"
 cd "${PROJECT_DIR}"
 
 
-echo "[$(date)] Task 0 baut die Devenv-Umgebung exklusiv vor..."
+echo "[$(date)] Task baut die Devenv-Umgebung exklusiv vor..."
     # Initialisiert die Umgebung einmal komplett isoliert
 nix develop ./slurm --no-pure-eval --command python --version
 
