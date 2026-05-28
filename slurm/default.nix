@@ -1,7 +1,6 @@
 with import (builtins.fetchGit {
   url = "https://github.com/NixOS/nixpkgs";
-  # Pick a recent commit that includes Python 3.12
-  ref = "nixos-unstable";GIT
+  rev = "8cbadfa068534bdd8238eea362d2bf0b1d46b7e8"; # commit with Python 3.12.11
 }) { config.allowUnfree = true; };
 
 mkShell {
