@@ -5,8 +5,8 @@
 #SBATCH --time=96:00:00                 # 96h wall‑clock limit
 #SBATCH --partition=cpu                 # Passende Partition für compute05
 #SBATCH --nodelist=oc-compute04         # Ziel-Node auf compute05 geändert
-#SBATCH --cpus-per-task=5              # 5 CPUs per array task
-#SBATCH --mem=50G                      # 50 GiB RAM per array task
+#SBATCH --cpus-per-task=8              # 8 CPUs per array task
+#SBATCH --mem=20G                      # 20 GiB RAM per array task
 #SBATCH --output=output/%A_%a.out      # stdout file
 #SBATCH --error=output/%A_%a.err       # stderr file
 #SBATCH --array=0-4                    # ----  five array tasks  ----
