@@ -22,7 +22,7 @@ trap 'echo "[$(date)] Trap ausgelöst..."; save_results "$SCRATCH" ~"/results/sw
 PROJECT_DIR="/home/$USER/suprb-experimentation"
 export PYTHONPATH="${PYTHONPATH}:${PROJECT_DIR}"
 EXPERIMENT="runs/moo_sc/baseline_tuning/simple_moo_tuning.py"
-OPTIMIZER="nsga2"
+OPTIMIZER="spea2"
 
 datasets=(
   airfoil_self_noise
