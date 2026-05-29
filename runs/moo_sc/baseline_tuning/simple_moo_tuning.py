@@ -79,7 +79,7 @@ def run(problem: str, job_id: str, optimizer: str):
         cv=4,
         n_jobs_cv=4,
         n_jobs=4,
-        n_calls=10,
+        n_calls=1000,
         timeout=60 * 60 * 24 * 3 if not sys.gettrace() else 60,
         scoring="test_hypervolume",
         verbose=10,
