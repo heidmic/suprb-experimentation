@@ -148,7 +148,7 @@ def log_results_multi_seed(
     tuned_params: dict,
     seed_results: list[tuple[list, dict]],   # [(estimators, cv_results), ...]
     random_states: list,
-     walltime_metrics: dict | None = None,
+    walltime_metrics: Optional[dict],
 ) -> None:
     n_seeds = len(seed_results)
 
@@ -197,13 +197,15 @@ def log_results_multi_seed(
                         _log_estimator_run(estimator)
                         _log_scalar_metrics(fold_result)
 
-                # Gemittelte CV-Scores für diesen Seed
-                seed_avg = {
-                    k: float(np.mean(np.asarray(v, dtype=float)))
-                    for k, v in cv_results.items()
-                }
-                _log_scalar_metrics(seed_avg)
-                seed_averages.append(seed_avg)
+                # Gemittelte CV-Scores für diesen Seed + std
+                seed_metrics = {}
+                for k, v in cv_results.items():
+                    arr = np.asarray(v, dtype=float)
+                    seed_metrics[f"{k}_mean"] = float(np.mean(arr))
+                    if arr.size > 1:
+                        seed_metrics[f"{k}_std"] = float(np.std(arr))
+                _log_scalar_metrics(seed_metrics)
+                seed_averages.append(seed_metrics)
 
         # Über alle Seeds mitteln → Parent Run
         all_keys = set().union(*seed_averages)

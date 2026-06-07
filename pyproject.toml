@@ -23,7 +23,7 @@ dependencies = [
   # Git-Pakete (nicht auf PyPI)
   "suprb @ git+https://github.com/heidmic/suprb@master",
   "cmpbayes @ git+https://github.com/dpaetzel/cmpbayes@main",
-  # Aus setup.cfg (jetzt mit gepinnten Versionen)
+  # Aus setup.cfg 
   "numpy>=1.20.0",
   "scipy>=1.7.0",
   "scikit-learn==1.7.0",
@@ -43,7 +43,7 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]  # entspricht find: aus setup.cfg
+packages = ["."] 
 
 [tool.hatch.metadata]
 allow-direct-references = true

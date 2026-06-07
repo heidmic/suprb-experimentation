@@ -76,8 +76,8 @@ def run(
         random_state=random_state,
         cv=4,
         n_jobs_cv=4,
-        n_jobs=4,
-        n_calls=1000,
+        n_jobs=4, #n_jobs 
+        n_calls=1000, # n_trials 
         timeout=60 * 60 * 24,  # 24 hours
         scoring="neg_mean_squared_error",
         verbose=10,
@@ -112,7 +112,7 @@ def run(
     random_states = np.random.SeedSequence(random_state).generate_state(8)
     experiment.with_random_states(random_states, n_jobs=8)
 
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10)
+    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10) 
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=8, test_size=0.25, random_state=random_state), n_jobs=8)
 

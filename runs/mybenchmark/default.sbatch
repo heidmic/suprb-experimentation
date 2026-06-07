@@ -16,16 +16,17 @@ export PYTHONPATH=${PYTHONPATH}:${JOB_DIR}
 
 experiment="runs/mybenchmark/suprb_default.py" #path 
 
+TUNE_ARG="--tune"
+[[ "${TUNE_FLAG:-1}" == "0" ]] && TUNE_ARG="--no-tune"
 
 srun nix develop --no-pure-eval --command \
-  "PYTHONPATH=${JOB_DIR}:${PYTHONPATH} \
-  python ${JOB_DIR}/${experiment} \
+  "python ${JOB_DIR}/${experiment} \
     -p ${DATASET} \
     -j ${SLURM_JOB_ID} \
     -n ${N_ITER} \
     -r ${N_RULES} \
     -i ${N_INITIAL_RULES} \
-    ${TUNE_FLAG:-"--tune"}"
+    ${TUNE_ARG}"
 
 
 #save_results results  

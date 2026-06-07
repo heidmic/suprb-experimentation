@@ -4,7 +4,7 @@ from numbers import Integral
 
 import numpy as np
 from sklearn.base import BaseEstimator, clone
-from sklearn.model_selection import KFold, cross_validate
+from sklearn.model_selection import KFold, ShuffleSplit, cross_validate
 
 
 
@@ -14,10 +14,6 @@ def _check_scoring(extra: Optional[str | list[str]] = None) -> list[str]:
         base.update([extra] if isinstance(extra, str) else extra)
     return list(base)
 
-def _check_cv(cv, random_state: Optional[int] = None):
-    if isinstance(cv, Integral):
-        return KFold(n_splits=int(cv), shuffle=True, random_state=random_state)
-    return cv
  
 
 def run_evaluation(
@@ -25,13 +21,13 @@ def run_evaluation(
     X: np.ndarray,
     y: np.ndarray,
     tuned_params: Optional[dict] = None,
-    cv=8,
+    cv: Optional[ShuffleSplit | KFold] = None,
     n_jobs: int = 1,
-    random_state: Optional[int] = None, #TODO
+    random_state: Optional[int] = None,
     scoring: Optional[str | list[str]] = None,
     verbose: int = 0,
 ) -> tuple[list[BaseEstimator], dict]:
-    cv_obj = _check_cv(cv, random_state=random_state)
+    
     scoring_list = _check_scoring(scoring)
         
     est = clone(estimator)
@@ -41,13 +37,13 @@ def run_evaluation(
         est.set_params(**tuned_params)
 
 
-    print(f"[evaluation] Start cross_validate | cv={cv_obj} | scoring={scoring_list} | n_jobs={n_jobs}")
+    print(f"[evaluation] Start cross_validate | cv={cv} | scoring={scoring_list} | n_jobs={n_jobs}")
 
     raw_scores = cross_validate(
         estimator=est,
         X=X,
         y=y,
-        cv=cv_obj,
+        cv=cv,
         scoring=scoring_list,
         n_jobs=n_jobs,
         return_estimator=True,

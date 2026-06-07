@@ -58,5 +58,9 @@
     pkgs.zlib
     #"/run/opengl-driver" # libcuda.so, libnvidia-*.so from host driver, only necessary for PyTorch/CUDA
   ];
+
+  enterShell=''
+	export PYTHONPATH="${PYTHONPATH:+$PYTHONPATH:}$DEVENV_ROOT"; # avoid issues with empty path
+  '';
 }
 

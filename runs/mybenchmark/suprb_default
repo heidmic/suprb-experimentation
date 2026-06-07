@@ -52,6 +52,11 @@ from joblib import Parallel, delayed
 RANDOM_STATE = 42
 N_CPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 5))  # aus SLURM-Env, sonst Fallback
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+MLFLOW_URI    = os.path.join(_HERE, "mlruns")
+OPTUNA_DB_DIR = os.path.join(_HERE, "optuna_dbs")
+os.makedirs(OPTUNA_DB_DIR, exist_ok=True)
+
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
@@ -89,6 +94,17 @@ def build_estimator(n_iter: int, n_rules: int, n_initial_rules: int) -> SupRB:
         ),
     )
 
+def _evaluate_one_seed(estimator, X, y, tuned_params, rs):
+        cv_splitter = ShuffleSplit(n_splits=8, test_size=0.25, random_state=int(rs))
+        return run_evaluation(
+            estimator=estimator,
+            X=X, y=y,
+            tuned_params=tuned_params,
+            cv=cv_splitter,
+            n_jobs=1,          
+            random_state=int(rs),
+        )
+
 
 @click.command()
 @click.option("-p", "--problem",          type=str, default="airfoil_self_noise", show_default=True)
@@ -97,8 +113,6 @@ def build_estimator(n_iter: int, n_rules: int, n_initial_rules: int) -> SupRB:
 @click.option("-r", "--n_rules",          type=int, default=4,                    show_default=True)
 @click.option("-i", "--n_initial_rules",  type=int, default=4,                    show_default=True)
 @click.option("--tune/--no-tune",                   default=True,                 show_default=True)
-@click.option("--mlflow-uri",             type=str, default="./mlruns",           show_default=True)
-
 def run(
     problem: str,
     job_id: str,
@@ -106,8 +120,6 @@ def run(
     n_rules: int,
     n_initial_rules: int,
     tune: bool,
-    mlflow_uri: str,
-
 ):
 
     print(f"[run] Problem={problem}  job_id={job_id}  n_iter={n_iter}  "
@@ -135,13 +147,15 @@ def run(
     # trails sequentiell, cv parallel (innerhalb jedes trials)
     #--------------------------------------------------------------------------
     tuned_params: dict = {}
-    study_name = (
-        f"{problem}__n_iter={n_iter}__n_rules={n_rules}__n_init={n_initial_rules}"
-    )
     tuning_walltime: float = 0.0
 
+    study_name = f"{problem}__ni{n_iter}__nr{n_rules}__nir{n_initial_rules}"
+    
     if tune: 
-        db_url = f"sqlite:///optuna_studies.db" #TODO
+        #db_dir = os.path.join(os.path.dirname(__file__), "optuna_dbs")
+        #os.makedirs(db_dir, exist_ok=True)
+        db_url = f"sqlite:///{OPTUNA_DB_DIR}/{study_name}.db"
+        #db_url = f"sqlite:///optuna_{study_name}.db" #keine gemeinsame DB der SLURM jobs, da parallele Optuna-Trials zu Konflikten führen würden. Stattdessen: separate DB pro Job/Studie.
 
         print(f"Starting tuning for {study_name}")
         tuned_params = run_tuning(
@@ -173,23 +187,11 @@ def run(
     t1 = time.perf_counter()
 
     random_states = np.random.SeedSequence(RANDOM_STATE).generate_state(8)
-    cv_splitter = ShuffleSplit(n_splits=8, test_size=0.25, random_state=RANDOM_STATE)
     
     seed_results: list[tuple] = []
 
-
-    def _evaluate_one_seed(estimator, X, y, tuned_params, cv_splitter, rs):
-        return run_evaluation(
-            estimator=estimator,
-            X=X, y=y,
-            tuned_params=tuned_params,
-            cv=cv_splitter,
-            n_jobs=1,          
-            random_state=int(rs),
-        )
-
     seed_results = Parallel(n_jobs=N_CPU)(
-        delayed(_evaluate_one_seed)(estimator, X, y, tuned_params, cv_splitter, rs)
+        delayed(_evaluate_one_seed)(estimator, X, y, tuned_params, rs)
         for rs in random_states
     )
 
@@ -222,7 +224,7 @@ def run(
     # MLflow Logging
     #--------------------------------------------------------------------------
     experiment_name = f"SupRB | problem={problem}"
-    mlflow.set_tracking_uri(mlflow_uri)
+    mlflow.set_tracking_uri(MLFLOW_URI)
     mlflow.set_experiment(experiment_name)
  
     """ log_results(
@@ -243,9 +245,6 @@ def run(
     )
     print(f"[run] MLflow-Ergebnisse geloggt unter Experiment '{experiment_name}'")
 
-
-
-    
 
 if __name__ == "__main__":
     run()
