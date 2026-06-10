@@ -12,21 +12,25 @@
 source /projects/shared/lib/slurm-utils.sh
 
 JOB_DIR=/home/huettiju/data/oc-compute03/suprb-experimentation
-export PYTHONPATH=${PYTHONPATH}:${JOB_DIR} 
+#export PYTHONPATH=${PYTHONPATH}:${JOB_DIR} 
+#export PYTHONPATH=${JOB_DIR}/runs/mybenchmark:${PYTHONPATH}:${JOB_DIR} # to find lokal evaluation file
 
-experiment="runs/mybenchmark/suprb_default.py" #path 
+experiment="runs/mybenchmark/suprb_default" #path 
 
 TUNE_ARG="--tune"
 [[ "${TUNE_FLAG:-1}" == "0" ]] && TUNE_ARG="--no-tune"
 
-srun nix develop --no-pure-eval --command \
-  "python ${JOB_DIR}/${experiment} \
+cd ${JOB_DIR} #where the nix flake is
+
+nix develop --no-pure-eval --command \
+  env PYTHONPATH=${JOB_DIR}/runs/mybenchmark:${JOB_DIR} \
+  uv run python ${JOB_DIR}/${experiment} \
     -p ${DATASET} \
     -j ${SLURM_JOB_ID} \
     -n ${N_ITER} \
     -r ${N_RULES} \
     -i ${N_INITIAL_RULES} \
-    ${TUNE_ARG}"
+    ${TUNE_ARG}
 
 
 #save_results results  
