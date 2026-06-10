@@ -47,6 +47,10 @@ from tuning import run_tuning, suprb_param_space
 import os
 from joblib import Parallel, delayed
 
+#TODO: SquaredError origin, weil in den ersten Iterationen noch kein Elitist existiert
+#import warnings
+#warnings.filterwarnings("ignore", category=UserWarning, module="suprb")
+
 
 RANDOM_STATE = 42
 N_CPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 5))  # aus SLURM-Env, sonst Fallback
@@ -87,7 +91,7 @@ def build_estimator(n_iter: int, n_rules: int, n_initial_rules: int) -> SupRB:
         n_iter=n_iter,
         n_rules=n_rules,
         n_initial_rules=n_initial_rules,
-        verbose=10,
+        verbose=1, 
         logger=CombinedLogger(
             [("stdout", StdoutLogger()), ("default", DefaultLogger())]
         ),

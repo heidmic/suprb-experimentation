@@ -10,11 +10,14 @@ set -euo pipefail
 
 DATASET=${1:-"airfoil_self_noise"}  # erstes Argument, default airfoil
 TUNE_FLAG="${2:-1}"   # zweites Argument, 1 tune, 0 no_tune
+
+TUNE_LABEL="tune"
+[[ "${TUNE_FLAG}" == "0" ]] && TUNE_LABEL="notune"
             
 
-N_ITER_VALUES=(32 64 128)
-N_RULES_VALUES=(4 8 16)
-N_INITIAL_RULES_VALUES=(0 8 16 32)
+N_ITER_VALUES=(4 32)
+N_RULES_VALUES=(4 8)
+N_INITIAL_RULES_VALUES=(0 8)
 
 mkdir -p stdout
 
@@ -27,7 +30,7 @@ for n_iter in "${N_ITER_VALUES[@]}"; do
   for n_rules in "${N_RULES_VALUES[@]}"; do
     for n_initial_rules in "${N_INITIAL_RULES_VALUES[@]}"; do
       
-      job_name="suprb_ni${n_iter}_nr${n_rules}_nir${n_initial_rules}"
+      job_name="suprb_ni${n_iter}_nr${n_rules}_nir${n_initial_rules}_${TUNE_LABEL}"
       
       sbatch \
         --job-name="${job_name}" \
