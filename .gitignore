@@ -10,6 +10,11 @@ logging_output_scripts/outputs/
 output/**
 */output/**
 diss-graphs/
+**/stdout/**
+
+# Optuna db
+*.db
+
 # PyCharm
 .idea
 new_data/**

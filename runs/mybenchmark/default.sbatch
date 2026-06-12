@@ -3,9 +3,9 @@
 # called by launch_grid.sh, which sets DATASET, N_ITER, N_RULES, N_INITIAL_RULES via --export
 
 #SBATCH --partition=cpu
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
-#SBATCH --time=26:00:00             # 26 hours, format: HH:MM:SS, tunings can take up to 24h 
+#SBATCH --time=48:00:00             #format: HH:MM:SS, tuning 24h + evaluation 24h
 #SBATCH --job-name=suprb_default   # Job-Name, %x in --output
 #SBATCH --output=stdout/%x-%j.out                      # %x = job-name, %j = job-id
 

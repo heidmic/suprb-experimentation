@@ -47,13 +47,13 @@ from tuning import run_tuning, suprb_param_space
 import os
 from joblib import Parallel, delayed
 
-#TODO: SquaredError origin, weil in den ersten Iterationen noch kein Elitist existiert
-#import warnings
-#warnings.filterwarnings("ignore", category=UserWarning, module="suprb")
+#TODO: predict error
+
+
 
 
 RANDOM_STATE = 42
-N_CPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 5))  # aus SLURM-Env, sonst Fallback
+N_CPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 4))  # aus SLURM-Env, sonst Fallback
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 MLFLOW_URI    = os.path.join(_HERE, "mlruns")
@@ -98,7 +98,7 @@ def build_estimator(n_iter: int, n_rules: int, n_initial_rules: int) -> SupRB:
     )
 
 def _evaluate_one_seed(estimator, X, y, tuned_params, rs):
-        cv_splitter = ShuffleSplit(n_splits=8, test_size=0.25, random_state=int(rs))
+        cv_splitter = ShuffleSplit(n_splits=16, test_size=0.25, random_state=int(rs)) #more splits for better evaluation
         return run_evaluation(
             estimator=estimator,
             X=X, y=y,
