@@ -16,7 +16,7 @@ if __name__ == '__main__':
     random_state = 42
 
     X, y = load_gas_turbine()
-    X, y = scale_X_y(X, y)
+    X, y, _ = scale_X_y(X, y)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=random_state)
 
     estimator = suprb.SupRB(
