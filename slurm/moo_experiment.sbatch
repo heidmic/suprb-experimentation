@@ -6,7 +6,7 @@
 #SBATCH --partition=cpu                # queue / partition
 #SBATCH --nodelist=oc-compute03        # stay on this node
 #SBATCH --cpus-per-task=5              # 5 CPUs per array task
-#SBATCH --mem=20G                      # 20GiB RAM per array task
+#SBATCH --mem=40G                      # 20GiB RAM per array task
 #SBATCH --output=output/%A_%a.out      # stdout file  (%A=array‑id, %a=task‑id)
 #SBATCH --error=output/%A_%a.err       # stderr file
 #SBATCH --array=0-4                    # ----  five array tasks  ----
