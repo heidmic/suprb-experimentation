@@ -53,7 +53,7 @@ from joblib import Parallel, delayed
 
 
 RANDOM_STATE = 42
-N_CPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 4))  # aus SLURM-Env, sonst Fallback
+N_CPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 4)) 
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 MLFLOW_URI    = os.path.join(_HERE, "mlruns")
@@ -98,15 +98,19 @@ def build_estimator(n_iter: int, n_rules: int, n_initial_rules: int) -> SupRB:
     )
 
 def _evaluate_one_seed(estimator, X, y, tuned_params, rs):
-        cv_splitter = ShuffleSplit(n_splits=16, test_size=0.25, random_state=int(rs)) #more splits for better evaluation
-        return run_evaluation(
+        cv_splitter = ShuffleSplit(n_splits=30, test_size=0.25, random_state=int(rs)) #more splits
+        print(f"[evaluation] Seed {rs} gestartet", flush=True)
+        result = run_evaluation(
             estimator=estimator,
             X=X, y=y,
             tuned_params=tuned_params,
             cv=cv_splitter,
             n_jobs=1,          
             random_state=int(rs),
+            verbose=2, 
         )
+        print(f"[evaluation] Seed {rs} abgeschlossen", flush=True)
+        return result
 
 
 @click.command()
@@ -144,6 +148,34 @@ def run(
 
     grid_params = dict(n_iter=n_iter, n_rules=n_rules, n_initial_rules=n_initial_rules)
     estimator = build_estimator(**grid_params)
+
+
+
+    # # --- TEMPORÄRER DEBUG-TEST ---
+    # print("[debug] Starte manuelles fit zum Testen...")
+    # from sklearn.base import clone
+    # test_est = clone(estimator)
+    # test_est.fit(X[:200], y[:200])
+
+    # print(f"[debug] pool_ size: {len(test_est.pool_)}")
+    # for i, r in enumerate(test_est.pool_):
+    #     print(f"[debug] rule {i}: model={r.model}  is_fitted={getattr(r, 'is_fitted_', 'N/A')}")
+    #     print(f"[debug] rule {i}: experience={getattr(r, 'experience_', 'N/A')}  fitness={getattr(r, 'fitness_', 'N/A')}")
+
+    # elitist = test_est.elitist_
+    # print(f"[debug] elitist_ type: {type(elitist)}")
+    # print(f"[debug] elitist_ is None: {elitist is None}")
+    # if elitist is not None:
+    #     print(f"[debug] elitist_ attrs: {vars(elitist)}") #
+
+    #     print(f"[debug] elitist_.genome: {getattr(elitist, 'genome_', 'N/A')}")
+    #     print(f"[debug] elitist_.fitness: {getattr(elitist, 'fitness_', 'N/A')}")
+    #     rules = getattr(elitist, 'rules_', None) or getattr(elitist, 'subpopulation_', None)
+    #     print(f"[debug] elitist_ rules/subpopulation: {rules}")
+    #     if rules is not None:
+    #         for j, r in enumerate(rules):
+    #             print(f"[debug]   elitist rule {j}: {type(r)}  model={getattr(r, 'model', 'N/A')}")
+    # # --- ENDE DEBUG ---
 
     #-------------------------------------------------------------------------
     # Optinal Tuning (optional)

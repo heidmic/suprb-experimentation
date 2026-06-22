@@ -3,7 +3,7 @@ revision = 3
 requires-python = "==3.12.11"
 
 [manifest]
-overrides = [{ name = "suprb", marker = "python_full_version >= '3.12'", git = "https://github.com/heidmic/suprb?rev=master" }]
+overrides = [{ name = "suprb", marker = "python_full_version >= '3.12'", git = "https://github.com/heidmic/suprb?rev=Fix_issue_199" }]
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -1567,7 +1567,7 @@ wheels = [
 [[package]]
 name = "suprb"
 version = "1.0.15"
-source = { git = "https://github.com/heidmic/suprb?rev=master#ab9f37231173f94fffddaa127554c8d39e0eb689" }
+source = { git = "https://github.com/heidmic/suprb?rev=Fix_issue_199#443296f7f1aad81a231e2df72a4129b612bcd6c6" }
 dependencies = [
     { name = "matplotlib" },
     { name = "pandas" },
@@ -1616,7 +1616,7 @@ requires-dist = [
     { name = "scikit-learn", specifier = "==1.7.0" },
     { name = "scipy", specifier = ">=1.7.0" },
     { name = "seaborn", specifier = "==0.13.2" },
-    { name = "suprb", git = "https://github.com/heidmic/suprb?rev=master" },
+    { name = "suprb", git = "https://github.com/heidmic/suprb?rev=Fix_issue_199" },
     { name = "tabulate", specifier = "==0.9.0" },
     { name = "tqdm", specifier = "==4.67.1" },
 ]

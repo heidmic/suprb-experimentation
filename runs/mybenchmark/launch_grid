@@ -15,9 +15,9 @@ TUNE_LABEL="tune"
 [[ "${TUNE_FLAG}" == "0" ]] && TUNE_LABEL="notune"
             
 
-N_ITER_VALUES=(4 32)
-N_RULES_VALUES=(4 8)
-N_INITIAL_RULES_VALUES=(0 8)
+N_ITER_VALUES=(4 8 16 24 32 48 64 96 128)
+N_RULES_VALUES=(2 4 8 16)
+N_INITIAL_RULES_VALUES=(0 8 16 24 32)
 
 mkdir -p stdout
 
