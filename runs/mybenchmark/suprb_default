@@ -136,6 +136,8 @@ def run(
 
     print(f"[run] Problem={problem}  job_id={job_id}  n_iter={n_iter}  "
         f"n_rules={n_rules}  n_initial_rules={n_initial_rules}  tune={tune}")
+
+    tune_label = "tune" if tune else "notune"
     
     t0 = time.perf_counter()
 
@@ -161,7 +163,7 @@ def run(
     tuned_params: dict = {}
     tuning_walltime: float = 0.0
 
-    study_name = f"{problem}__ni{n_iter}__nr{n_rules}__nir{n_initial_rules}"
+    study_name = f"{problem}__ni{n_iter}__nr{n_rules}__nir{n_initial_rules}__{tune_label}"
     
     if tune: 
         db_url = f"sqlite:///{OPTUNA_DB_DIR}/{study_name}.db" #keine gemeinsame DB der SLURM jobs, da parallele Optuna-Trials zu Konflikten führen würden. Stattdessen: separate DB pro Job/Studie.
@@ -222,7 +224,7 @@ def run(
     #-------------------------------------------------------------------------
     # MLflow Logging
     #--------------------------------------------------------------------------
-    tune_label = "tune" if tune else "notune"
+    
     experiment_name = f"SupRB | problem={problem} | {tune_label}"
     mlflow.set_tracking_uri(MLFLOW_URI)
     mlflow.set_experiment(experiment_name)
