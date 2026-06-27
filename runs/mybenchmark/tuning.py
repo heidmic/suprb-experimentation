@@ -57,12 +57,12 @@ def run_tuning(
     y: np.ndarray,
     param_space_fn: Callable[[Trial, np.ndarray], dict],
     study_name: str,
-    storage_url: str,   # if sqlte, n_jobs must be 1
+    storage_url,   
     n_trials: int = 200,
     timeout: Optional[float] = None,
     cv: int = 4,
     n_jobs_cv: int = 1,
-    n_jobs: int = 1,
+    n_jobs: int = 1,    # if sqlte, n_jobs must be 1
     random_state: int = 42,
     scoring: str = "neg_mean_squared_error",
     verbose: int = 0,

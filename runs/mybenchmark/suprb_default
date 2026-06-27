@@ -19,7 +19,12 @@ import numpy as np
 import click
 import time
 import mlflow
+
+from datetime import datetime
+
 from optuna import Trial
+from optuna.storages import JournalStorage
+from optuna.storages.journal import JournalFileBackend
 
 from sklearn.linear_model import Ridge
 from sklearn.utils import Bunch, shuffle
@@ -47,19 +52,19 @@ from tuning import run_tuning, suprb_param_space
 import os
 from joblib import Parallel, delayed
 
-#TODO: predict error
-
-
-
 
 RANDOM_STATE = 42
 N_CPU = int(os.environ.get("SLURM_CPUS_PER_TASK", 4)) 
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
+
 MLFLOW_URI    = os.path.join(_HERE, "mlruns")
 OPTUNA_DB_DIR = os.path.join(_HERE, "optuna_dbs")
 os.makedirs(OPTUNA_DB_DIR, exist_ok=True)
 
+#TODO Journal Storage
+#JOURNAL_PATH = os.path.join(_HERE, "optuna_journals") 
+#os.makedirs(JOURNAL_PATH, exist_ok=True)
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
@@ -98,8 +103,8 @@ def build_estimator(n_iter: int, n_rules: int, n_initial_rules: int) -> SupRB:
     )
 
 def _evaluate_one_seed(estimator, X, y, tuned_params, rs):
-        cv_splitter = ShuffleSplit(n_splits=30, test_size=0.25, random_state=int(rs)) #more splits
-        print(f"[evaluation] Seed {rs} gestartet", flush=True)
+        cv_splitter = ShuffleSplit(n_splits=30, test_size=0.25, random_state=int(rs))
+        print(f"[evaluation] [{datetime.now():%Y-%m-%d %H:%M:%S}] Seed {rs} gestartet", flush=True)
         result = run_evaluation(
             estimator=estimator,
             X=X, y=y,
@@ -109,7 +114,7 @@ def _evaluate_one_seed(estimator, X, y, tuned_params, rs):
             random_state=int(rs),
             verbose=2, 
         )
-        print(f"[evaluation] Seed {rs} abgeschlossen", flush=True)
+        print(f"[evaluation] [{datetime.now():%Y-%m-%d %H:%M:%S}] Seed {rs} abgeschlossen", flush=True)
         return result
 
 
@@ -149,34 +154,6 @@ def run(
     grid_params = dict(n_iter=n_iter, n_rules=n_rules, n_initial_rules=n_initial_rules)
     estimator = build_estimator(**grid_params)
 
-
-
-    # # --- TEMPORÄRER DEBUG-TEST ---
-    # print("[debug] Starte manuelles fit zum Testen...")
-    # from sklearn.base import clone
-    # test_est = clone(estimator)
-    # test_est.fit(X[:200], y[:200])
-
-    # print(f"[debug] pool_ size: {len(test_est.pool_)}")
-    # for i, r in enumerate(test_est.pool_):
-    #     print(f"[debug] rule {i}: model={r.model}  is_fitted={getattr(r, 'is_fitted_', 'N/A')}")
-    #     print(f"[debug] rule {i}: experience={getattr(r, 'experience_', 'N/A')}  fitness={getattr(r, 'fitness_', 'N/A')}")
-
-    # elitist = test_est.elitist_
-    # print(f"[debug] elitist_ type: {type(elitist)}")
-    # print(f"[debug] elitist_ is None: {elitist is None}")
-    # if elitist is not None:
-    #     print(f"[debug] elitist_ attrs: {vars(elitist)}") #
-
-    #     print(f"[debug] elitist_.genome: {getattr(elitist, 'genome_', 'N/A')}")
-    #     print(f"[debug] elitist_.fitness: {getattr(elitist, 'fitness_', 'N/A')}")
-    #     rules = getattr(elitist, 'rules_', None) or getattr(elitist, 'subpopulation_', None)
-    #     print(f"[debug] elitist_ rules/subpopulation: {rules}")
-    #     if rules is not None:
-    #         for j, r in enumerate(rules):
-    #             print(f"[debug]   elitist rule {j}: {type(r)}  model={getattr(r, 'model', 'N/A')}")
-    # # --- ENDE DEBUG ---
-
     #-------------------------------------------------------------------------
     # Optinal Tuning (optional)
     # trails sequentiell, cv parallel (innerhalb jedes trials)
@@ -187,10 +164,11 @@ def run(
     study_name = f"{problem}__ni{n_iter}__nr{n_rules}__nir{n_initial_rules}"
     
     if tune: 
-        #db_dir = os.path.join(os.path.dirname(__file__), "optuna_dbs")
-        #os.makedirs(db_dir, exist_ok=True)
-        db_url = f"sqlite:///{OPTUNA_DB_DIR}/{study_name}.db"
-        #db_url = f"sqlite:///optuna_{study_name}.db" #keine gemeinsame DB der SLURM jobs, da parallele Optuna-Trials zu Konflikten führen würden. Stattdessen: separate DB pro Job/Studie.
+        db_url = f"sqlite:///{OPTUNA_DB_DIR}/{study_name}.db" #keine gemeinsame DB der SLURM jobs, da parallele Optuna-Trials zu Konflikten führen würden. Stattdessen: separate DB pro Job/Studie.
+        
+        #TODO: maybe change to journalStorage 
+        #journal_path = os.path.join(JOURNAL_DIR, f"{problem}.log")
+        #storage = JournalStorage(JournalFileBackend(journal_path))
 
         print(f"Starting tuning for {study_name}")
         tuned_params = run_tuning(
@@ -200,6 +178,7 @@ def run(
             param_space_fn=suprb_param_space,
             study_name=study_name,
             storage_url=db_url,
+            #storage=storage,   #TODO journal storage
             n_trials=1000,
             timeout=60*60*24,  # 24 hours
             cv=4,
@@ -230,21 +209,6 @@ def run(
         for rs in random_states
     )
 
-    #-------------------------------------------------------------------------
-    # Alternative: sequentielle Ausführung 
-    # for rs in random_states:
-    #     estimators, cv_results = run_evaluation(
-    #         estimator=estimator,
-    #         X=X,
-    #         y=y,
-    #         tuned_params=tuned_params,
-    #         cv=cv_splitter,
-    #         n_jobs=N_CPU,
-    #         random_state=int(rs),
-    #     )
-    #     seed_results.append((estimators, cv_results))
-    #--------------------------------------------------------------------------
-
     evaluation_walltime = time.perf_counter() - t1
     print(f"[evaluation] Evaluation completed in {evaluation_walltime:.2f} seconds")
     
@@ -258,17 +222,10 @@ def run(
     #-------------------------------------------------------------------------
     # MLflow Logging
     #--------------------------------------------------------------------------
-    experiment_name = f"SupRB | problem={problem}"
+    tune_label = "tune" if tune else "notune"
+    experiment_name = f"SupRB | problem={problem} | {tune_label}"
     mlflow.set_tracking_uri(MLFLOW_URI)
     mlflow.set_experiment(experiment_name)
- 
-    """ log_results(
-        run_name=study_name,
-        grid_params=grid_params,
-        tuned_params=tuned_params,
-        cv_results=cv_results,
-        estimators=estimators,
-    ) """
 
     log_results_multi_seed(
         run_name=study_name,
