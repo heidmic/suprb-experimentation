@@ -3,6 +3,8 @@ import os
 import mlflow
 import numpy as np
 import time
+import mlflow
+
 
 from logging_output_scripts.violin_and_swarm_plots import create_plots
 from logging_output_scripts.summary_csv import create_summary_csv
@@ -14,10 +16,10 @@ from logging_output_scripts import latex_tabulars
 datasets = {
     "combined_cycle_power_plant": "Combined Cycle Power Plant",
     "airfoil_self_noise": "Airfoil Self-Noise",
-    "concrete_strength": "Concrete Strength",
-    "energy_cool": "Energy Efficiency Cooling",
-    "protein_structure": "Physiochemical Properties of Protein Tertiary Structure",
-    "parkinson_total": "Parkinson's Telemonitoring"
+    #"concrete_strength": "Concrete Strength",
+    #"energy_cool": "Energy Efficiency Cooling",
+    #"protein_structure": "Physiochemical Properties of Protein Tertiary Structure",
+    #"parkinson_total": "Parkinson's Telemonitoring"
 }
 
 saga_datasets = {
@@ -187,24 +189,60 @@ mixing.append(mixing10)
 mixing.append(mixing11)
 mixing.append(mixing12)
 
+def mlruns_to_csv(subdir, normalize): #only for airfoil_self_noise notune bc still has old study name 
+    #all_runs_df = mlflow.search_runs(search_all_experiments=True)
+    all_runs_df = mlflow.search_runs(experiment_ids = ['485440579075042350']) # airfoil_self_noise notune 
 
-def mlruns_to_csv(datasets, subdir, normalize):
-    all_runs_df = mlflow.search_runs(search_all_experiments=True)
+    dataset = "airfoil_self_noise"
+    
+    mse = "metrics.test_neg_mean_squared_error"
+    complexity = "metrics.elitist_complexity"
+
+    df = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(
+        dataset, case=False, na=False) & (all_runs_df["tags.fold"] == 'True')]
+    df = df[["tags.mlflow.runName", mse, complexity]]
+    print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
+
+    df[mse] *= -1
+    if normalize:
+        df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
+        df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
+
+
+    df.to_csv(f"mlruns_csv/{subdir}/{dataset}_notune.csv", index=False)
+
+
+def mlruns_to_csv_new(datasets, subdir, normalize):
+
+    #all_runs_df = mlflow.search_runs(search_all_experiments=True)
+    all_runs_df = mlflow.search_runs(experiment_ids = ['796385774745469510']) # ccpp notune
+    #all_runs_df = mlflow.search_runs(experiment_names = ["SupRB | problem=airfoil_self_noise | tune"])#SupRB | problem=airfoil_self_noise | tune
+
+    os.makedirs(f"mlruns_csv/{subdir}", exist_ok=True)
 
     for dataset in datasets:
-        mse = "metrics.test_neg_mean_squared_error"
-        complexity = "metrics.elitist_complexity"
+        for tune_label in ["_tune", "_notune"]:
+            mse = "metrics.test_neg_mean_squared_error"
+            complexity = "metrics.elitist_complexity"
 
-        df = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(
-            dataset, case=False, na=False) & (all_runs_df["tags.fold"] == 'True')]
-        df = df[["tags.mlflow.runName", mse, complexity]]
-        print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
+            df = all_runs_df[
+                all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False)
+                & all_runs_df["tags.mlflow.runName"].str.contains(tune_label, case=False, na=False)
+                & (all_runs_df["tags.fold"] == "True")
+            ]
+            if df.empty:
+                print(f"Keine Runs für {dataset} _ {tune_label}")
+                continue
 
-        df[mse] *= -1
-        if normalize:
-            df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
-            df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
-        df.to_csv(f"mlruns_csv/{subdir}/{dataset}_all.csv", index=False)
+            df = df[["tags.mlflow.runName", mse, complexity]]
+            print(dataset, tune_label, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
+
+            df[mse] *= -1
+            if normalize:
+                df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
+                df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
+
+            df.to_csv(f"mlruns_csv/{subdir}/{dataset}{tune_label}.csv", index=False)
 
 
 saga = {
@@ -322,6 +360,8 @@ def run_main():
 
 
 if __name__ == '__main__':
+    mlflow.set_tracking_uri("runs/mybenchmark/mlruns")  
+
     rd = ["diss-graphs/graphs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
     sc = ["diss-graphs/graphs/SC_only_GA", solution_composition, "Solution Composition", False, "mlruns_csv/SC_only_GA"]
     xcsf = ["diss-graphs/graphs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]
@@ -330,8 +370,11 @@ if __name__ == '__main__':
     mix_calvo_sub = ["diss-graphs/graphs/MIX/subset", mixing_calvo_subset, "Mixing Variant", True, "mlruns_csv/MIX"]
     sagas = ["diss-graphs/graphs/SAGA", saga, "Solution Composition", False, "mlruns_csv/SAGA"]
     sc_rd = ["diss-graphs/graphs/SC", sc_mix_rd, "Solution Composition", False, "mlruns_csv/SC"]
+    
 
-    # mlruns_to_csv(datasets, "MIX", True)
+
+    mlruns_to_csv("Benchmarks", True)
+    mlruns_to_csv_new(datasets, "Benchmarks", True)
 
     # setting = rd
     # setting = sc
@@ -339,11 +382,11 @@ if __name__ == '__main__':
     # setting = mix_calvo
     # setting = mix_calvo_sub
     # setting = xcsf
-    setting = sc_rd
+    #setting = sc_rd
 
-    run_main()
+    #run_main()
     exit()
 
-    for mixing_num in mixing:
-        setting = ["diss-graphs/graphs/MIX", mixing_num, "Number of rules participating", True, "mlruns_csv/MIX"]
-        run_main()
+    # for mixing_num in mixing:
+    #     setting = ["diss-graphs/graphs/MIX", mixing_num, "Number of rules participating", True, "mlruns_csv/MIX"]
+    #     run_main()

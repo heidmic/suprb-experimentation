@@ -2,9 +2,12 @@
 # launch_grid.sh
 # Startet einen SLURM-Job pro Grid-Kombination.
 #
-# Aufruf:
+# Aufruf Grid:
 #   bash launch_grid.sh [DATASET] [TUNE_FLAG]
 #   bash launch_grid.sh airfoil_self_noise 0
+# 
+# Call single job:
+# sbatch --export=ALL,DATASET="airfoil_self_noise",N_ITER=16,N_RULES=4,N_INITIAL_RULES=4,TUNE_FLAG=1 default.sbatch
 
 set -euo pipefail
 
@@ -15,7 +18,7 @@ TUNE_LABEL="tune"
 [[ "${TUNE_FLAG}" == "0" ]] && TUNE_LABEL="notune"
             
 
-N_ITER_VALUES=(4 8 16 24 32 48 64 96 128)
+N_ITER_VALUES=(4 8 16 24 32 48)      #(4 8 16 24 32 48 64 96 128)
 N_RULES_VALUES=(2 4 8 16)
 N_INITIAL_RULES_VALUES=(0 8 16 24 32)
 
@@ -30,7 +33,7 @@ for n_iter in "${N_ITER_VALUES[@]}"; do
   for n_rules in "${N_RULES_VALUES[@]}"; do
     for n_initial_rules in "${N_INITIAL_RULES_VALUES[@]}"; do
       
-      job_name="suprb_ni${n_iter}_nr${n_rules}_nir${n_initial_rules}_${TUNE_LABEL}"
+      job_name="suprb_${DATASET}_ni${n_iter}_nr${n_rules}_nir${n_initial_rules}_${TUNE_LABEL}"
       
       sbatch \
         --job-name="${job_name}" \

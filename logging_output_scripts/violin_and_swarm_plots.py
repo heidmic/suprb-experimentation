@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import json
-from utils import datasets_map
+from logging_output_scripts.utils import datasets_map
 from sklearn.preprocessing import MinMaxScaler
 
 mse = "metrics.test_neg_mean_squared_error"

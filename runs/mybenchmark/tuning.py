@@ -74,7 +74,7 @@ def run_tuning(
         study = optuna.create_study(
             study_name=study_name,
             storage=storage_url,
-            load_if_exists=True,
+            load_if_exists=False,
             direction="minimize",
             sampler=sampler,
         )

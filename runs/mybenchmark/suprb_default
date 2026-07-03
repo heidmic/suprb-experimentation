@@ -212,7 +212,7 @@ def run(
     )
 
     evaluation_walltime = time.perf_counter() - t1
-    print(f"[evaluation] Evaluation completed in {evaluation_walltime:.2f} seconds")
+    print(f"[evaluation] [{datetime.now():%Y-%m-%d %H:%M:%S}] Evaluation completed in {evaluation_walltime:.2f} seconds")
     
     walltime_metrics = dict(
         tuning_walltime_s=round(tuning_walltime, 2),
