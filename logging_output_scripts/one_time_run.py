@@ -1,9 +1,9 @@
 import json
 import os
+import pandas as pd
 import mlflow
 import numpy as np
 import time
-import mlflow
 
 
 from logging_output_scripts.violin_and_swarm_plots import create_plots
@@ -189,10 +189,46 @@ mixing.append(mixing10)
 mixing.append(mixing11)
 mixing.append(mixing12)
 
+def check_dataframes(df, dataset, tune_label):
+    if tune_label == "":
+        tune_label = "_notune"
+    
+    for n in (4, 8, 16, 24, 32, 48, 64, 96, 128):
+        df_ni = df[df["tags.mlflow.runName"].str.contains(f"_ni{n}_", case=False, na=False)]
+        if len(df_ni) != 4800:
+            print(f"{dataset}{tune_label} _ni{n}_ not finished: {len(df_ni)} runs instead of 4800")
+            continue
+    
+    for x in (4, 8, 16, 24, 32, 48, 64, 96, 128):
+        for y in (2, 4, 8, 16):
+            for z in (0, 8, 16, 24, 32):
+                pattern = rf"_ni{x}__nr{y}__nir{z}_|_ni{x}__nr{y}__nir{z}\." #nix__nry__nirz_ || nix__nry__nirz.
+                df_job = df[df["tags.mlflow.runName"].str.contains(pattern, case=False, na=False, regex=True)]
+                if len(df_job) != 240:
+                    print(f"{dataset}{tune_label} _ni{x}__nr{y}__nir{z}_ not finished: {len(df_job)} runs instead of 240")
+                    continue
+
+    if df[df.columns[2]].count() != len(df):
+        print(f"{dataset}{tune_label} not finished: {df[df.columns[2]].count()} - {len(df)} values missing in column {df.columns[2]}")
+
+    if df[df.columns[3]].count() != len(df):
+        print(f"{dataset}{tune_label} not finished: {df[df.columns[3]].count()} - {len(df)} values missing in column {df.columns[3]}")
+
+
+
 def mlruns_to_csv(subdir, normalize): #only for airfoil_self_noise notune bc still has old study name 
     #all_runs_df = mlflow.search_runs(search_all_experiments=True)
-    all_runs_df = mlflow.search_runs(experiment_ids = ['485440579075042350']) # airfoil_self_noise notune 
+    all_runs_df = mlflow.search_runs(experiment_ids = ['485440579075042350'], 
+                                     order_by=["attributes.start_time DESC", "attributes.run_id"]) # airfoil_self_noise notune 
+    
+    all_runs_df = all_runs_df.drop_duplicates(subset=["run_id"]) #drop dupicates, bc of Pagination sometimes duplicates
 
+    dupes = all_runs_df[all_runs_df.duplicated(subset=["tags.mlflow.runName"], keep=False)]
+    if not dupes.empty:
+        print("WARNUNG: doppelte run_ids gefunden:")
+        with pd.option_context("display.max_colwidth", None, "display.width", None):
+            print(dupes[["run_id", "start_time", "tags.mlflow.runName"]].sort_values("tags.mlflow.runName"))
+    
     dataset = "airfoil_self_noise"
     
     mse = "metrics.test_neg_mean_squared_error"
@@ -200,7 +236,7 @@ def mlruns_to_csv(subdir, normalize): #only for airfoil_self_noise notune bc sti
 
     df = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(
         dataset, case=False, na=False) & (all_runs_df["tags.fold"] == 'True')]
-    df = df[["tags.mlflow.runName", mse, complexity]]
+    df = df[["run_id","tags.mlflow.runName", mse, complexity]]
     print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
 
     df[mse] *= -1
@@ -208,6 +244,7 @@ def mlruns_to_csv(subdir, normalize): #only for airfoil_self_noise notune bc sti
         df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
         df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
 
+    check_dataframes(df, dataset, tune_label="")
 
     df.to_csv(f"mlruns_csv/{subdir}/{dataset}_notune.csv", index=False)
 
@@ -215,10 +252,25 @@ def mlruns_to_csv(subdir, normalize): #only for airfoil_self_noise notune bc sti
 def mlruns_to_csv_new(datasets, subdir, normalize):
 
     #all_runs_df = mlflow.search_runs(search_all_experiments=True)
-    all_runs_df = mlflow.search_runs(experiment_ids = ['796385774745469510']) # ccpp notune
-    #all_runs_df = mlflow.search_runs(experiment_names = ["SupRB | problem=airfoil_self_noise | tune"])#SupRB | problem=airfoil_self_noise | tune
+    all_runs_df = mlflow.search_runs(experiment_ids = [
+        '796385774745469510', #ccpp notune,
+        '514426764301360574', #ccpp tune,
+        '482653026699552589' #airfoil tune, 
+        ], 
+        order_by=["attributes.start_time DESC", "attributes.run_id"]) 
+    
+    all_runs_df = all_runs_df.drop_duplicates(subset=["run_id"]) #drop dupicates, bc of Pagination sometimes duplicates
+   
 
     os.makedirs(f"mlruns_csv/{subdir}", exist_ok=True)
+
+    # einmalig zur Kontrolle, nicht in der Schleife
+    dupes = all_runs_df[all_runs_df.duplicated(subset=["tags.mlflow.runName"], keep=False)]
+    if not dupes.empty:
+        print("WARNUNG: doppelte run_ids gefunden:")
+        with pd.option_context("display.max_colwidth", None, "display.width", None):
+            print(dupes[["run_id", "start_time", "tags.mlflow.runName"]].sort_values("tags.mlflow.runName"))
+
 
     for dataset in datasets:
         for tune_label in ["_tune", "_notune"]:
@@ -231,16 +283,18 @@ def mlruns_to_csv_new(datasets, subdir, normalize):
                 & (all_runs_df["tags.fold"] == "True")
             ]
             if df.empty:
-                print(f"Keine Runs für {dataset} _ {tune_label}")
+                print(f"Keine Runs für {dataset}{tune_label}")
                 continue
 
-            df = df[["tags.mlflow.runName", mse, complexity]]
+            df = df[["run_id", "tags.mlflow.runName", mse, complexity]].copy()
             print(dataset, tune_label, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
 
             df[mse] *= -1
             if normalize:
                 df[mse] = (df[mse] - np.min(df[mse])) / (np.max(df[mse]) - np.min(df[mse]))
                 df[complexity] = (df[complexity] - np.min(df[complexity])) / (np.max(df[complexity]) - np.min(df[complexity]))
+
+            check_dataframes(df, dataset, tune_label)
 
             df.to_csv(f"mlruns_csv/{subdir}/{dataset}{tune_label}.csv", index=False)
 
