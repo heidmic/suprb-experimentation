@@ -11,7 +11,7 @@ from suprb import SupRB
 from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
  
- 
+#MLFLOW_ENABLE_ASYNC_LOGGING = True # async logging for speed 
 # ---------------------------------------------------------------------------
 # Interne Hilfsfunktionen
 # ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ def _safe_float(v) -> Optional[float]:
         return None
  
  
-def _log_estimator_run(estimator: BaseEstimator) -> None:
+""" def _log_estimator_run(estimator: BaseEstimator) -> None:
     try:
         _safe_log_dict(estimator.get_params(), "params.json")
     except Exception as exc:
@@ -61,8 +61,27 @@ def _log_estimator_run(estimator: BaseEstimator) -> None:
             for step, value in values.items():
                 fval = _safe_float(value)
                 if fval is not None:
-                    mlflow.log_metric(key=key, value=fval, step=step)
+                    mlflow.log_metric(key=key, value=fval, step=step) """
  
+def _log_estimator_run(estimator: BaseEstimator) -> None:
+    try:
+        _safe_log_dict(estimator.get_params(), "params.json")
+    except Exception as exc:
+        warnings.warn(f"[mlflow] Estimator-Params-Log fehlgeschlagen: {exc}")
+
+    logger = _get_default_logger(estimator)
+    if logger is None:
+        return
+
+    by_step: dict[int, dict[str, float]] = {} # pro step: {key: value}
+    for key, values in logger.metrics_.items():
+        for step, value in values.items():
+            fval = _safe_float(value)
+            if fval is not None:
+                by_step.setdefault(step, {})[key] = fval
+
+    for step, metrics in sorted(by_step.items()):
+        mlflow.log_metrics(metrics, step=step, synchronous=False) # log_metrics per step, not per (key, step) pair, asnc :synchronous=False
  
 def _log_scalar_metrics(results: dict) -> None:
     metrics = {}
@@ -71,7 +90,7 @@ def _log_scalar_metrics(results: dict) -> None:
         if fval is not None:
             metrics[key] = fval
     if metrics:
-        mlflow.log_metrics(metrics)
+        mlflow.log_metrics(metrics, synchronous=False)  #sync/asnc :synchronous=False
  
  
 # ---------------------------------------------------------------------------
