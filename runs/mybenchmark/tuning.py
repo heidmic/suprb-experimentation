@@ -71,6 +71,13 @@ def run_tuning(
         cv_splitter = KFold(n_splits=cv, shuffle=True, random_state=random_state)
         sampler = optuna.samplers.TPESampler(seed=random_state)
 
+        # Falls die Study schon existiert: löschen, statt fortzusetzen
+        try:
+            optuna.delete_study(study_name=study_name, storage=storage_url)
+            print(f"[tuning] Existing study '{study_name}' found and deleted, starting fresh.")
+        except KeyError:
+            pass  # Study existierte noch nicht -> nichts zu tun
+
         study = optuna.create_study(
             study_name=study_name,
             storage=storage_url,
