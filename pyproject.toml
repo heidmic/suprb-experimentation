@@ -21,8 +21,7 @@ classifiers = [
 
 dependencies = [
   # Git-Pakete (nicht auf PyPI)
-  #"suprb @ git+https://github.com/heidmic/suprb@master",
-  "suprb @ git+https://github.com/heidmic/suprb@Fix_issue_199",
+  "suprb @ git+https://github.com/heidmic/suprb@master",
   "cmpbayes @ git+https://github.com/dpaetzel/cmpbayes@main",
   # Aus setup.cfg
   "numpy>=1.20.0",
@@ -52,7 +51,7 @@ allow-direct-references = true
 
 [tool.uv]
 override-dependencies = [
-  "suprb @ git+https://github.com/heidmic/suprb@Fix_issue_199 ; python_version >= '3.12'",
+  "suprb @ git+https://github.com/heidmic/suprb@master ; python_version >= '3.12'",
 ]
 
 [tool.black]
