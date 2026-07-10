@@ -81,7 +81,7 @@ def _log_estimator_run(estimator: BaseEstimator) -> None:
                 by_step.setdefault(step, {})[key] = fval
 
     for step, metrics in sorted(by_step.items()):
-        mlflow.log_metrics(metrics, step=step, synchronous=False) # log_metrics per step, not per (key, step) pair, asnc :synchronous=False
+        mlflow.log_metrics(metrics, step=step) # log_metrics per step, not per (key, step) pair, asnc :synchronous=False
  
 def _log_scalar_metrics(results: dict) -> None:
     metrics = {}
@@ -90,7 +90,7 @@ def _log_scalar_metrics(results: dict) -> None:
         if fval is not None:
             metrics[key] = fval
     if metrics:
-        mlflow.log_metrics(metrics, synchronous=False)  #sync/asnc :synchronous=False
+        mlflow.log_metrics(metrics)  #sync/asnc :synchronous=False
  
  
 # ---------------------------------------------------------------------------
@@ -143,6 +143,7 @@ def log_results(
                 mlflow.set_tag("fold_index", i + 1)
                 _log_estimator_run(estimator)
                 _log_scalar_metrics(fold_result)
+                #mlflow.flush_async_logging() #async logging flush
  
         # Aggregierte Metriken im Parent-Run
         aggregated: dict[str, float] = {}

@@ -166,7 +166,9 @@ def run(
     study_name = f"{problem}__ni{n_iter}__nr{n_rules}__nir{n_initial_rules}__{tune_label}"
     
     if tune: 
-        db_url = f"sqlite:///{OPTUNA_DB_DIR}/{study_name}.db" #keine gemeinsame DB der SLURM jobs, da parallele Optuna-Trials zu Konflikten führen würden. Stattdessen: separate DB pro Job/Studie.
+        sub_dir = f"{problem}"
+        os.makedirs(os.path.join(OPTUNA_DB_DIR, sub_dir), exist_ok=True)
+        db_url = f"sqlite:///{OPTUNA_DB_DIR}/{sub_dir}/{study_name}.db" #keine gemeinsame DB der SLURM jobs, da parallele Optuna-Trials zu Konflikten führen würden. Stattdessen: separate DB pro Job/Studie.
         
         #TODO: maybe change to journalStorage 
         #journal_path = os.path.join(JOURNAL_DIR, f"{problem}.log")
@@ -225,7 +227,7 @@ def run(
     # MLflow Logging
     #--------------------------------------------------------------------------
     
-    experiment_name = f"SupRB | problem={problem} | {tune_label}"
+    experiment_name = f"SupRB | problem={problem} | {tune_label}" #for airfoil ds, label entfernen-> renamed airfoil mlflow experiment
     mlflow.set_tracking_uri(MLFLOW_URI)
     mlflow.set_experiment(experiment_name)
 
