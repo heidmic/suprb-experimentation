@@ -5,7 +5,7 @@
 #SBATCH --partition=cpu
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
-#SBATCH --time=48:00:00             #format: HH:MM:SS, tuning 24h + evaluation 24h
+#SBATCH --time=72:00:00             #format: HH:MM:SS, tuning 24h + evaluation 48h + mlflow 24h = 96h, eval für 96,128_16_*: 48h pro seed
 #SBATCH --job-name=suprb_default   # Job-Name, %x in --output
 #SBATCH --output=stdout/%x-%j.out                      # %x = job-name, %j = job-id
 
@@ -17,8 +17,8 @@ JOB_DIR=/home/huettiju/data/oc-compute03/suprb-experimentation
 
 experiment="runs/mybenchmark/suprb_default" #path 
 
-TUNE_ARG="--tune"
-[[ "${TUNE_FLAG:-1}" == "0" ]] && TUNE_ARG="--no-tune"
+TUNE_ARG="--no-tune"
+[[ "${FLAG:-0}" == "1" ]] && TUNE_ARG="--tune"
 
 cd ${JOB_DIR} #where the nix flake is
 
