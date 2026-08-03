@@ -3,24 +3,26 @@
 # Startet einen SLURM-Job pro Grid-Kombination.
 #
 # Aufruf Grid:
-#   bash launch_grid.sh [DATASET] [TUNE_FLAG]
+#   bash launch_grid.sh [DATASET] [FLAG]
 #   bash launch_grid.sh airfoil_self_noise 0
 # 
 # Call single job:
-# sbatch --export=ALL,DATASET="airfoil_self_noise",N_ITER=16,N_RULES=4,N_INITIAL_RULES=4,TUNE_FLAG=1 default.sbatch
+# sbatch --export=ALL,DATASET="airfoil_self_noise",N_ITER=16,N_RULES=4,N_INITIAL_RULES=4,FLAG=1 default.sbatch
 
 set -euo pipefail
 
 DATASET=${1:-"airfoil_self_noise"}  # erstes Argument, default airfoil
-TUNE_FLAG="${2:-1}"   # zweites Argument, 1 tune, 0 no_tune
+FLAG="${2:-0}"   # zweites Argument, 0 notune, 1 tune, 2 moo, 3 ns
 
-TUNE_LABEL="tune"
-[[ "${TUNE_FLAG}" == "0" ]] && TUNE_LABEL="notune"
+LABEL="notune"
+[[ "${FLAG}" == "1" ]] && LABEL="tune"
+[[ "${FLAG}" == "2" ]] && LABEL="moo"
+[[ "${FLAG}" == "3" ]] && LABEL="ns"
             
 
-N_ITER_VALUES=(4 8 16 24 32 48)      #(4 8 16 24 32 48 64 96 128)
-N_RULES_VALUES=(2 4 8 16)
-N_INITIAL_RULES_VALUES=(0 8 16 24 32)
+N_ITER_VALUES=(32 48 64)       #(4 8 16 24 32 48 64 96 128)
+N_RULES_VALUES=(2 4 8 16)       #(2 4 8 16)
+N_INITIAL_RULES_VALUES=(0 8 16 24 32) #(0 8 16 24 32)
 
 mkdir -p stdout
 
@@ -33,11 +35,11 @@ for n_iter in "${N_ITER_VALUES[@]}"; do
   for n_rules in "${N_RULES_VALUES[@]}"; do
     for n_initial_rules in "${N_INITIAL_RULES_VALUES[@]}"; do
       
-      job_name="suprb_${DATASET}_ni${n_iter}_nr${n_rules}_nir${n_initial_rules}_${TUNE_LABEL}"
+      job_name="suprb_${DATASET}_ni${n_iter}_nr${n_rules}_nir${n_initial_rules}_${LABEL}"
       
       sbatch \
         --job-name="${job_name}" \
-        --export=ALL,DATASET="${DATASET}",N_ITER="${n_iter}",N_RULES="${n_rules}",N_INITIAL_RULES="${n_initial_rules}",TUNE_FLAG="${TUNE_FLAG}" \
+        --export=ALL,DATASET="${DATASET}",N_ITER="${n_iter}",N_RULES="${n_rules}",N_INITIAL_RULES="${n_initial_rules}",FLAG="${FLAG}" \
         default.sbatch
 
       echo "  Submitted: ${job_name}"
