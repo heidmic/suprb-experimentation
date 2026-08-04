@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
 # called by launch_grid.sh, which sets DATASET, N_ITER, N_RULES, N_INITIAL_RULES via --export
+# FLAG selects which script/mode to run:
+#   0 -> suprb_default --no-tune
+#   1 -> suprb_default --tune
+#   2 -> suprb_moo
+#   3 -> suprb_ns --use_current_population true
+#   4 -> suprb_ns --use_current_population false
+
 
 #SBATCH --partition=cpu
 #SBATCH --cpus-per-task=4
@@ -12,14 +19,38 @@
 source /projects/shared/lib/slurm-utils.sh
 
 JOB_DIR=/home/huettiju/data/oc-compute03/suprb-experimentation
-#export PYTHONPATH=${PYTHONPATH}:${JOB_DIR} 
-#export PYTHONPATH=${JOB_DIR}/runs/mybenchmark:${PYTHONPATH}:${JOB_DIR} # to find lokal evaluation file
+FLAG="${FLAG:-0}" #default 0 if not set
 
+case "${FLAG}" in
+  0) 
+    echo "Running suprb_default --no-tune" 
+    experiment="runs/mybenchmark/suprb_default" #path 
+    EXTRA_ARGS="--no-tune"
+    ;;
+  1) 
+    echo "Running suprb_default --tune" 
+    experiment="runs/mybenchmark/suprb_default" #path 
+    EXTRA_ARGS="--tune"
+    ;;
+  2) 
+    echo "Running suprb_moo" 
+    experiment="runs/mybenchmark/suprb_moo" #path 
+    EXTRA_ARGS=""
+    ;;
+  3) 
+    echo "Running suprb_ns --use_current_population true" 
+    experiment="runs/mybenchmark/suprb_ns" #path 
+    EXTRA_ARGS="-a true" #use_current_population true
+    ;;
+  4) 
+    echo "Running suprb_ns --use_current_population false" 
+    experiment="runs/mybenchmark/suprb_ns" #path 
+    EXTRA_ARGS="-a false" #use_current_population false
+    ;;
+  *) echo "Unknown FLAG: ${FLAG}" ; exit 1 ;;
+esac
 
-experiment="runs/mybenchmark/suprb_default" #path 
-
-TUNE_ARG="--no-tune"
-[[ "${FLAG:-0}" == "1" ]] && TUNE_ARG="--tune"
+echo "FLAG=${FLAG} -> experiment=${experiment} args='${EXTRA_ARGS}'"
 
 cd ${JOB_DIR} #where the nix flake is
 
@@ -31,7 +62,7 @@ nix develop --no-pure-eval --command \
     -n ${N_ITER} \
     -r ${N_RULES} \
     -i ${N_INITIAL_RULES} \
-    ${TUNE_ARG}
+    ${EXTRA_ARGS}
 
 
 #save_results results  

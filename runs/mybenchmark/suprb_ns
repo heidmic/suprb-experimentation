@@ -47,7 +47,7 @@ from suprb.solution.initialization import RandomInit
 
 from evaluation import run_evaluation
 from mlflow_logging import log_results, log_results_multi_seed
-from tuning import run_tuning, suprb_param_space
+from tuning import run_tuning, suprb_param_space, suprb_param_space_ns
 
 import os
 from joblib import Parallel, delayed
@@ -81,7 +81,7 @@ def build_estimator(n_iter: int, n_rules: int, n_initial_rules: int, use_current
                                               model=Ridge(alpha=0.01,
                                                           random_state=RANDOM_STATE)),
             origin_generation=origin.SquaredError(),
-            mutation=mutation.HalfnormIncrease()
+            mutation=mutation.HalfnormIncrease(),
             use_population_for_archive=use_current_population,
         ),
         #solution_composition=ga.GeneticAlgorithm(n_iter=32, population_size=32, selection=ga.selection.Tournament()),
@@ -190,7 +190,7 @@ def run(
 
     study_name = f"{problem}__ni{n_iter}__nr{n_rules}__nir{n_initial_rules}__{ns_type}__{label}"
     
-    if tune: 
+    if True: 
         sub_dir = f"{problem}_{ns_type}"
         os.makedirs(os.path.join(OPTUNA_DB_DIR, sub_dir), exist_ok=True)
         db_url = f"sqlite:///{OPTUNA_DB_DIR}/{sub_dir}/{study_name}.db" #keine gemeinsame DB der SLURM jobs, da parallele Optuna-Trials zu Konflikten führen würden. Stattdessen: separate DB pro Job/Studie.
@@ -253,7 +253,7 @@ def run(
     # MLflow Logging
     #--------------------------------------------------------------------------
     
-    experiment_name = f"SupRB | problem={problem} | {ns_type} | {label}" #for airfoil ds, label entfernen-> renamed airfoil mlflow experiment
+    experiment_name = f"SupRB | problem={problem} | {ns_type} | {label}" 
     mlflow.set_tracking_uri(MLFLOW_URI)
     mlflow.set_experiment(experiment_name)
 

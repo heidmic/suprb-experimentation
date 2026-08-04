@@ -8,6 +8,13 @@
 # 
 # Call single job:
 # sbatch --export=ALL,DATASET="airfoil_self_noise",N_ITER=16,N_RULES=4,N_INITIAL_RULES=4,FLAG=1 default.sbatch
+#
+# FLAG selects which script/mode to run:
+#   0 -> suprb_default --no-tune
+#   1 -> suprb_default --tune
+#   2 -> suprb_moo
+#   3 -> suprb_ns --use_current_population true
+#   4 -> suprb_ns --use_current_population false
 
 set -euo pipefail
 
@@ -17,11 +24,12 @@ FLAG="${2:-0}"   # zweites Argument, 0 notune, 1 tune, 2 moo, 3 ns
 LABEL="notune"
 [[ "${FLAG}" == "1" ]] && LABEL="tune"
 [[ "${FLAG}" == "2" ]] && LABEL="moo"
-[[ "${FLAG}" == "3" ]] && LABEL="ns"
+[[ "${FLAG}" == "3" ]] && LABEL="ns_population_true"
+[[ "${FLAG}" == "4" ]] && LABEL="ns_population_false"
             
 
-N_ITER_VALUES=(32 48 64)       #(4 8 16 24 32 48 64 96 128)
-N_RULES_VALUES=(2 4 8 16)       #(2 4 8 16)
+N_ITER_VALUES=(24)       #(4 8 16 24 32 48 64 96 128)
+N_RULES_VALUES=(8)       #(2 4 8 16)
 N_INITIAL_RULES_VALUES=(0 8 16 24 32) #(0 8 16 24 32)
 
 mkdir -p stdout
@@ -44,7 +52,7 @@ for n_iter in "${N_ITER_VALUES[@]}"; do
 
       echo "  Submitted: ${job_name}"
 
-      sleep 50 # wait for 50 seconds 
+      sleep 50 
     done
   done
 done

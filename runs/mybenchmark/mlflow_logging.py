@@ -10,6 +10,7 @@ from sklearn.base import BaseEstimator
 from suprb import SupRB
 from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
+from suprb.logging.multi_objective import MOLogger
  
 #MLFLOW_ENABLE_ASYNC_LOGGING = True # async logging for speed 
 # ---------------------------------------------------------------------------
@@ -30,6 +31,40 @@ def _get_default_logger(estimator: BaseEstimator) -> Optional[DefaultLogger]:
             if isinstance(sublogger, DefaultLogger):
                 return sublogger
     return None
+
+
+def _get_mo_logger(estimator: BaseEstimator) -> Optional[MOLogger]:
+    if not isinstance(estimator, SupRB):
+        return None
+    logger = getattr(estimator, "logger_", None)
+    if logger is None:
+        return None
+    if isinstance(logger, MOLogger):
+        return logger
+    if isinstance(logger, CombinedLogger):
+        for _, sublogger in logger.loggers_:
+            if isinstance(sublogger, MOLogger):
+                return sublogger
+    return None
+
+def _log_mo_run(estimator: BaseEstimator) -> None:
+    mo_logger = _get_mo_logger(estimator)
+    if mo_logger is None:
+        return
+
+    pareto_fronts = getattr(mo_logger, "pareto_fronts_", None)
+    if not pareto_fronts:
+        return
+
+    # Alle Pareto-Fronten (pro Iteration) als Artefakt sichern
+    serialisable = {str(it): front for it, front in pareto_fronts.items()}
+    _safe_log_dict(serialisable, "pareto_fronts.json")
+
+    # Größe der finalen Front zusätzlich als Metrik
+    last_it = max(pareto_fronts.keys())
+    last_front = np.asarray(pareto_fronts[last_it])
+    mlflow.log_metric("mo_final_pareto_front_size", last_front.shape[0])
+
  
  
 def _safe_log_dict(d: dict, artifact_name: str) -> None:
@@ -82,6 +117,8 @@ def _log_estimator_run(estimator: BaseEstimator) -> None:
 
     for step, metrics in sorted(by_step.items()):
         mlflow.log_metrics(metrics, step=step) # log_metrics per step, not per (key, step) pair, asnc :synchronous=False
+    
+    _log_mo_run(estimator)
  
 def _log_scalar_metrics(results: dict) -> None:
     metrics = {}
