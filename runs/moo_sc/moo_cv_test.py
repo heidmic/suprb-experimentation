@@ -51,7 +51,7 @@ def run(problem: str, job_id: str, optimizer: str):
     print(f"Problem is {problem}, with job id {job_id} and optimizer {optimizer}")
 
     X, y = load_dataset(name=problem, return_X_y=True)
-    X, y, _ = scale_X_y(X, y)
+    X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
     estimator = SupRB(
