@@ -6,7 +6,7 @@ from suprb.logging.default import DefaultLogger
 
 from problems import scale_X_y
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     random_state = 42
 
     X, y = make_regression(n_samples=100, n_features=2, noise=5, random_state=random_state)
