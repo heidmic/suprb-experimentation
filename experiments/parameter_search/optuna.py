@@ -15,24 +15,18 @@ class OptunaTuner(ParameterTuner):
     """
 
     def __init__(
-            self,
-            estimator: BaseEstimator,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            scoring: Union[str, Callable] = 'r2',
-            callback: Union[Callable, list[Callable]] = None,
-            tuner: str = 'tpe',
-            timeout: float = None,
-            study_name: str = "NoName",
-            **kwargs
+        self,
+        estimator: BaseEstimator,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        scoring: Union[str, Callable] = "r2",
+        callback: Union[Callable, list[Callable]] = None,
+        tuner: str = "tpe",
+        timeout: float = None,
+        study_name: str = "NoName",
+        **kwargs,
     ):
-        super().__init__(
-            estimator=estimator,
-            X_train=X_train,
-            y_train=y_train,
-            scoring=scoring,
-            **kwargs
-        )
+        super().__init__(estimator=estimator, X_train=X_train, y_train=y_train, scoring=scoring, **kwargs)
 
         self.callback = callback
         self.tuner = tuner
@@ -40,13 +34,13 @@ class OptunaTuner(ParameterTuner):
         self.study_name = study_name
 
     def get_params(self):
-        return super().get_params() | self._get_params(['timeout'])
+        return super().get_params() | self._get_params(["timeout"])
 
     @staticmethod
     def _get_optimizer(tuner: str) -> Callable:
         return {
-            'tpe': optuna.samplers.TPESampler,
-            'cma-es': optuna.samplers.CmaEsSampler,
+            "tpe": optuna.samplers.TPESampler,
+            "cma-es": optuna.samplers.CmaEsSampler,
         }[tuner]
 
     def __call__(self, parameter_space: Callable, local_params: dict) -> tuple[dict, Any]:
@@ -59,10 +53,12 @@ class OptunaTuner(ParameterTuner):
         sampler = self._get_optimizer(self.tuner)(seed=self.random_state)
 
         storage_name = f'sqlite:///suprb_optuna_{datetime.now().strftime("%Y-%m-%d")}.db'
-        study = optuna.create_study(sampler=sampler,
-                                    study_name=self.study_name,
-                                    # storage=storage_name,
-                                    load_if_exists=True)
+        study = optuna.create_study(
+            sampler=sampler,
+            study_name=self.study_name,
+            # storage=storage_name,
+            load_if_exists=True,
+        )
 
         study.optimize(
             func=objective,

@@ -18,36 +18,26 @@ class SkoptTuner(ParameterTuner):
     """
 
     def __init__(
-            self,
-            estimator: BaseEstimator,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            scoring: Union[str, Callable] = 'r2',
-            callback: Union[Callable, list[Callable]] = None,
-            tuner: str = 'gp',
-            **kwargs
+        self,
+        estimator: BaseEstimator,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        scoring: Union[str, Callable] = "r2",
+        callback: Union[Callable, list[Callable]] = None,
+        tuner: str = "gp",
+        **kwargs
     ):
-        super().__init__(
-            estimator=estimator,
-            X_train=X_train,
-            y_train=y_train,
-            scoring=scoring,
-            **kwargs
-        )
+        super().__init__(estimator=estimator, X_train=X_train, y_train=y_train, scoring=scoring, **kwargs)
 
         self.callback = callback
         self.tuner = tuner
 
     def get_params(self):
-        return super().get_params() | self._get_params(['tuner'])
+        return super().get_params() | self._get_params(["tuner"])
 
     @staticmethod
     def _get_optimizer(tuner: str) -> Callable:
-        return {
-            'forest': forest_minimize,
-            'gbrt': gbrt_minimize,
-            'gp': gp_minimize
-        }[tuner]
+        return {"forest": forest_minimize, "gbrt": gbrt_minimize, "gp": gp_minimize}[tuner]
 
     def __call__(self, parameter_space: dict[str, Any], local_params: dict) -> tuple[dict, Any]:
         # Sets the key of the dict as name, because `skopt` handles this weirdly
@@ -73,7 +63,6 @@ class SkoptTuner(ParameterTuner):
 
         self.tuning_result_ = Bunch()
         self.tuning_result_.objective_history = result.func_vals
-        self.tuning_result_.params_history = [point_asdict(parameter_space, params_list) for params_list in
-                                              result.x_iters]
+        self.tuning_result_.params_history = [point_asdict(parameter_space, params_list) for params_list in result.x_iters]
 
         return self.tuned_params_, self.tuning_result_

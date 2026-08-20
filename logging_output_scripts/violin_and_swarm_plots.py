@@ -17,34 +17,29 @@ def create_plots():
     on multiple datasets
     """
     sns.set_style("whitegrid")
-    sns.set_theme(style="whitegrid",
-                  font="Times New Roman",
-                  font_scale=1.7,
-                  rc={
-                      "lines.linewidth": 1,
-                      "pdf.fonttype": 42,
-                      "ps.fonttype": 42
-                  })
+    sns.set_theme(
+        style="whitegrid", font="Times New Roman", font_scale=1.7, rc={"lines.linewidth": 1, "pdf.fonttype": 42, "ps.fonttype": 42}
+    )
 
-    plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-    plt.rcParams['figure.dpi'] = 200
+    plt.rcParams["font.family"] = "serif"
+    plt.rcParams["font.serif"] = ["Times New Roman"] + plt.rcParams["font.serif"]
+    plt.rcParams["figure.dpi"] = 200
 
     plt.tight_layout()
 
-    with open('logging_output_scripts/config.json') as f:
+    with open("logging_output_scripts/config.json") as f:
         config = json.load(f)
 
     final_output_dir = f"{config['output_directory']}"
     scaler = MinMaxScaler()
 
-    for problem in config['datasets']:
+    for problem in config["datasets"]:
         first = True
         res_var = 0
         counter = 0
         fold_df = None
 
-        for heuristic, renamed_heuristic in config['heuristics'].items():
+        for heuristic, renamed_heuristic in config["heuristics"].items():
             if config["normalize_datasets"]:
                 fold_df = get_normalized_df(heuristic, "mlruns_csv/MIX")
             else:
@@ -70,7 +65,7 @@ def create_plots():
         def ax_config(axis, y_label):
             x_lab = ""
             ax.set_ylabel(y_label, weight="bold")
-            ax.set_title(config['datasets'][problem], style="italic", fontsize=14)
+            ax.set_title(config["datasets"][problem], style="italic", fontsize=14)
             ax.set_xlabel(x_lab, weight="bold", labelpad=10)
 
             # Change this to adjust y_axis ticks
@@ -84,7 +79,7 @@ def create_plots():
             y_tick_positions = np.linspace(y_min, y_max, num_ticks)
             y_tick_positions = np.round(y_tick_positions, 3)
 
-            plt.yticks(y_tick_positions, [f'{x:.3g}' for x in y_tick_positions])
+            plt.yticks(y_tick_positions, [f"{x:.3g}" for x in y_tick_positions])
 
         ################### MSE ###########################
         plots = {  # "violin": sns.violinplot,
@@ -92,18 +87,16 @@ def create_plots():
             #  "box": sns.boxplot
         }
 
-        y_axis_label = {"MSE": mse,
-                        "Complexity": complexity
-                        }
+        y_axis_label = {"MSE": mse, "Complexity": complexity}
 
-        f_index = heuristic.find('f:')
-        result = heuristic[f_index+2:]
+        f_index = heuristic.find("f:")
+        result = heuristic[f_index + 2 :]
 
         for name, function in plots.items():
             for y_label, y_axis in y_axis_label.items():
                 fig, ax = plt.subplots(dpi=400)
                 plt.subplots_adjust(left=0.2, right=0.95, top=0.92, bottom=0.22)
-                ax = function(x='Used_Representation', y=y_axis, data=res_var, size=3)
+                ax = function(x="Used_Representation", y=y_axis, data=res_var, size=3)
                 ax_config(ax, y_label)
 
                 fig.savefig(f"{final_output_dir}/{name}_{datasets_map[problem]}_{y_label}.png")
@@ -113,5 +106,5 @@ def create_plots():
             return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     create_plots()

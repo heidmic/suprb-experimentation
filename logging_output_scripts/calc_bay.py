@@ -4,7 +4,6 @@ from baycomp import SignedRankTest
 from itertools import combinations
 from logging_output_scripts.utils import get_dataframe, create_output_dir, config
 
-
 """
 Uses baycomp-package to calculate probabilities of one model performing
 better than another (based on MSE). Comparisons are performed on all
@@ -14,12 +13,12 @@ NOTE: If you need to compare more than two models at once please refer to: https
 """
 
 final_output_dir = f"{config['output_directory']}/calc_bay"
-create_output_dir(config['output_directory'])
+create_output_dir(config["output_directory"])
 create_output_dir(final_output_dir)
 
-if config['filetype'] == 'csv':
+if config["filetype"] == "csv":
     test_neg_mean_squared_error = "test_neg_mean_squared_error"
-elif config['filetype'] == 'mlflow':
+elif config["filetype"] == "mlflow":
     test_neg_mean_squared_error = "metrics.test_neg_mean_squared_error"
 
 # Returns dictionary where keys respond to the used model and items are array of MSE for all problems
@@ -28,9 +27,9 @@ elif config['filetype'] == 'mlflow':
 def load_error_list():
     dict_list = {}
 
-    for heuristic in config['heuristics']:
+    for heuristic in config["heuristics"]:
         res_var = []
-        for problem in config['datasets']:
+        for problem in config["datasets"]:
             fold_df = get_dataframe(heuristic, problem)
             if not fold_df.empty:
                 mse_df = -fold_df[test_neg_mean_squared_error].mean()
@@ -59,7 +58,7 @@ def calc_bayes(save_csv: bool = True, save_plots: bool = True, rope: float = 0.1
         # Plot simplex, histogram doesnt work properly
         simplex_plot = posterior.plot_simplex(names=(dir_1, "rope", dir_2))
         if save_plots:
-            simplex_plot.savefig(f'{final_output_dir}/{comparison_title}.png')
+            simplex_plot.savefig(f"{final_output_dir}/{comparison_title}.png")
 
         # Store probabilities for each comparison as a row
         header += f"{comparison_title}, {probabilities[0]}, {probabilities[1]}, {probabilities[2]}\n"
@@ -69,5 +68,5 @@ def calc_bayes(save_csv: bool = True, save_plots: bool = True, rope: float = 0.1
             file.write(header)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     calc_bayes()
