@@ -24,7 +24,6 @@ from suprb.optimizer.solution import nsga2, nsga3, spea2, ga, ts
 from suprb.optimizer.rule import es, origin, mutation
 from suprb.solution.initialization import RandomInit
 
-
 random_state = 42
 
 opt_dict = {
@@ -59,9 +58,7 @@ def run(problem: str, job_id: str, optimizer: str):
             operator="&",
             n_iter=1000,
             delay=30,
-            init=rule.initialization.MeanInit(
-                fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
-            ),
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
@@ -91,22 +88,16 @@ def run(problem: str, job_id: str, optimizer: str):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-            "rule_discovery__init__fitness__alpha", 0.01, 0.2
-        )
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
 
         # SC
-        params.solution_composition__crossover = trial.suggest_categorical(
-            "solution_composition__crossover", ["NPoint", "Uniform"]
-        )
+        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
         params.solution_composition__crossover = getattr(nsga2.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, nsga2.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
-            "solution_composition__mutation_rate", 0, 0.1
-        )
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
 
     @param_space()
     def suprb_ES_NSGA3_space(trial: Trial, params: Bunch):
@@ -114,22 +105,16 @@ def run(problem: str, job_id: str, optimizer: str):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-            "rule_discovery__init__fitness__alpha", 0.01, 0.2
-        )
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
 
         # SC
-        params.solution_composition__crossover = trial.suggest_categorical(
-            "solution_composition__crossover", ["NPoint", "Uniform"]
-        )
+        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
         params.solution_composition__crossover = getattr(nsga3.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, nsga3.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
-            "solution_composition__mutation_rate", 0, 0.1
-        )
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
 
     @param_space()
     def suprb_ES_SPEA2_space(trial: Trial, params: Bunch):
@@ -137,22 +122,16 @@ def run(problem: str, job_id: str, optimizer: str):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-            "rule_discovery__init__fitness__alpha", 0.01, 0.2
-        )
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
 
         # SC
-        params.solution_composition__crossover = trial.suggest_categorical(
-            "solution_composition__crossover", ["NPoint", "Uniform"]
-        )
+        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
         params.solution_composition__crossover = getattr(spea2.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, spea2.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
-            "solution_composition__mutation_rate", 0, 0.1
-        )
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
 
     @param_space()
     def suprb_ES_GA_space(trial: Trial, params: Bunch):
@@ -160,26 +139,18 @@ def run(problem: str, job_id: str, optimizer: str):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-            "rule_discovery__init__fitness__alpha", 0.01, 0.2
-        )
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
 
         # SC
-        params.solution_composition__algorithm_1__selection__k = trial.suggest_int(
-            "solution_composition__selection__k", 3, 10
-        )
+        params.solution_composition__algorithm_1__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)
 
         params.solution_composition__algorithm_1__crossover = trial.suggest_categorical(
             "solution_composition_algorithm_1__crossover", ["NPoint", "Uniform"]
         )
-        params.solution_composition__algorithm_1__crossover = getattr(
-            ga.crossover, params.solution_composition__algorithm_1__crossover
-        )()
+        params.solution_composition__algorithm_1__crossover = getattr(ga.crossover, params.solution_composition__algorithm_1__crossover)()
 
         if isinstance(params.solution_composition__algorithm_1__crossover, ga.crossover.NPoint):
-            params.solution_composition__algorithm_1__crossover__n = trial.suggest_int(
-                "solution_composition__crossover__n", 1, 10
-            )
+            params.solution_composition__algorithm_1__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
         params.solution_composition__algorithm_1__mutation_rate = trial.suggest_float(
             "solution_composition_algorithm_1__mutation_rate", 0, 0.1

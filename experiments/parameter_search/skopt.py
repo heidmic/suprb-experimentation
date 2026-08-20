@@ -63,8 +63,6 @@ class SkoptTuner(ParameterTuner):
 
         self.tuning_result_ = Bunch()
         self.tuning_result_.objective_history = result.func_vals
-        self.tuning_result_.params_history = [
-            point_asdict(parameter_space, params_list) for params_list in result.x_iters
-        ]
+        self.tuning_result_.params_history = [point_asdict(parameter_space, params_list) for params_list in result.x_iters]
 
         return self.tuned_params_, self.tuning_result_

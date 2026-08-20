@@ -81,9 +81,7 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
 
     estimator = SupRB(
         rule_discovery=ns.NoveltySearch(
-            init=rule.initialization.MeanInit(
-                fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
-            ),
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
             origin_generation=origin.SquaredError(),
             mutation=HalfnormIncrease(),
         ),
@@ -121,9 +119,7 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
         params.rule_discovery__origin_generation = trial.suggest_categorical(
             "origin_generation", ["UniformSamplesOrigin", "Matching", "SquaredError"]
         )
-        params.rule_discovery__origin_generation = getattr(
-            suprb.optimizer.rule.origin, params.rule_discovery__origin_generation
-        )()
+        params.rule_discovery__origin_generation = getattr(suprb.optimizer.rule.origin, params.rule_discovery__origin_generation)()
 
         params.rule_discovery__init = trial.suggest_categorical("init", ["MeanInit", "NormalInit", "HalfnormInit"])
         params.rule_discovery__init = getattr(rule.initialization, params.rule_discovery__init)()
@@ -190,14 +186,10 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
             suprb.optimizer.rule.ns.novelty_calculation, params.rule_discovery__novelty_calculation
         )()
 
-        if not isinstance(
-            params.rule_discovery__novelty_calculation, suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased
-        ):
+        if not isinstance(params.rule_discovery__novelty_calculation, suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
             params.rule_discovery__novelty_calculation__k_neighbor = trial.suggest_int("k_neighbor", 10, 20)
 
-        if isinstance(
-            params.rule_discovery__novelty_calculation, suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased
-        ):
+        if isinstance(params.rule_discovery__novelty_calculation, suprb.optimizer.rule.ns.novelty_calculation.NoveltyFitnessBiased):
             params.rule_discovery__novelty_calculation__novelty_bias = trial.suggest_float("novelty_bias", 0.3, 0.7)
 
         params.rule_discovery__use_population_for_archive = use_current_population
@@ -211,17 +203,13 @@ def run(problem: str, ns_type: str, use_current_population: bool, job_id: int):
         if isinstance(params.solution_composition__selection, ga.selection.Tournament):
             params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)
 
-        params.solution_composition__crossover = trial.suggest_categorical(
-            "solution_composition__crossover", ["NPoint", "Uniform"]
-        )
+        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
         params.solution_composition__crossover = getattr(ga.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
-            "solution_composition__mutation_rate", 0, 0.1
-        )
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
 
     experiment = Experiment(
         name=(

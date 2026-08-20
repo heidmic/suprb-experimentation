@@ -70,9 +70,7 @@ def run(problem: str, job_id: str, study_name: str):
 
     @param_space()
     def suprb_space(trial: Trial, params: Bunch):
-        params.rule_discovery = trial.suggest_categorical(
-            "rule_discovery", ["ES1xLambda", "NoveltySearch", "RandomSearch"]
-        )  # nopep8
+        params.rule_discovery = trial.suggest_categorical("rule_discovery", ["ES1xLambda", "NoveltySearch", "RandomSearch"])  # nopep8
 
         if params.rule_discovery == "ES1xLambda":
             # ES base
@@ -136,19 +134,15 @@ def run(problem: str, job_id: str, study_name: str):
                 params.rule_discovery__novelty_calculation__novelty_search_type,
                 suprb.optimizer.rule.ns.novelty_search_type.MinimalCriteria,
             ):  # nopep8
-                params.rule_discovery__novelty_calculation__novelty_search_type__min_examples_matched = (
-                    trial.suggest_int(
-                        "rule_discovery__novelty_calculation__novelty_search_type__min_examples_matched", 10, 20
-                    )
+                params.rule_discovery__novelty_calculation__novelty_search_type__min_examples_matched = trial.suggest_int(
+                    "rule_discovery__novelty_calculation__novelty_search_type__min_examples_matched", 10, 20
                 )  # nopep8
             elif isinstance(
                 params.rule_discovery__novelty_calculation__novelty_search_type,
                 suprb.optimizer.rule.ns.novelty_search_type.LocalCompetition,
             ):  # nopep8
-                params.rule_discovery__novelty_calculation__novelty_search_type__max_neighborhood_range = (
-                    trial.suggest_int(
-                        "rule_discovery__novelty_calculation__novelty_search_type__max_neighborhood_range", 10, 20
-                    )
+                params.rule_discovery__novelty_calculation__novelty_search_type__max_neighborhood_range = trial.suggest_int(
+                    "rule_discovery__novelty_calculation__novelty_search_type__max_neighborhood_range", 10, 20
                 )  # nopep8
             params.rule_discovery__crossover__crossover_rate = trial.suggest_float(
                 "rule_discovery__crossover__crossover_rate", 0.1, 0.5
@@ -161,12 +155,8 @@ def run(problem: str, job_id: str, study_name: str):
             params.rule_discovery__rules_generated = trial.suggest_int("rule_discovery__rules_generated", 5, 10)
 
         # Acceptance
-        params.rule_discovery__acceptance = trial.suggest_categorical(
-            "rule_discovery__acceptance", ["Variance", "MaxError"]
-        )  # nopep8
-        params.rule_discovery__acceptance = getattr(
-            suprb.optimizer.rule.acceptance, params.rule_discovery__acceptance
-        )()  # nopep8
+        params.rule_discovery__acceptance = trial.suggest_categorical("rule_discovery__acceptance", ["Variance", "MaxError"])  # nopep8
+        params.rule_discovery__acceptance = getattr(suprb.optimizer.rule.acceptance, params.rule_discovery__acceptance)()  # nopep8
 
         if isinstance(params.rule_discovery__acceptance, suprb.optimizer.rule.acceptance.Variance):
             params.rule_discovery__acceptance__beta = trial.suggest_float("rule_discovery__acceptance__beta", 1, 3)
@@ -174,9 +164,7 @@ def run(problem: str, job_id: str, study_name: str):
         params.rule_discovery__constraint = trial.suggest_categorical(
             "rule_discovery__constraint", ["MinRange", "Clip", "CombinedConstraint"]
         )  # nopep8
-        params.rule_discovery__constraint = getattr(
-            suprb.optimizer.rule.constraint, params.rule_discovery__constraint
-        )()  # nopep8
+        params.rule_discovery__constraint = getattr(suprb.optimizer.rule.constraint, params.rule_discovery__constraint)()  # nopep8
 
         if isinstance(params.rule_discovery__constraint, suprb.optimizer.rule.constraint.CombinedConstraint):
             params.rule_discovery__constraint__clip = suprb.optimizer.rule.constraint.Clip()
@@ -193,14 +181,10 @@ def run(problem: str, job_id: str, study_name: str):
         params.rule_discovery__init__fitness = trial.suggest_categorical(
             "rule_discovery__init__fitness", ["PseudoAccuracy", "VolumeEmary", "VolumeWu"]
         )  # nopep8
-        params.rule_discovery__init__fitness = getattr(
-            suprb.rule.fitness, params.rule_discovery__init__fitness
-        )()  # nopep8
+        params.rule_discovery__init__fitness = getattr(suprb.rule.fitness, params.rule_discovery__init__fitness)()  # nopep8
 
         if not isinstance(params.rule_discovery__init__fitness, suprb.rule.fitness.PseudoAccuracy):
-            params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-                "rule_discovery__init__fitness__alpha", 0.5, 1
-            )  # nopep8
+            params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.5, 1)  # nopep8
 
         params.rule_discovery__init__model = Ridge()
 
@@ -208,9 +192,7 @@ def run(problem: str, job_id: str, study_name: str):
         params.rule_discovery__selection = trial.suggest_categorical(
             "rule_discovery__selection", ["Fittest", "RouletteWheel", "NondominatedSort", "Random"]
         )  # nopep8
-        params.rule_discovery__selection = getattr(
-            suprb.optimizer.rule.selection, params.rule_discovery__selection
-        )()  # nopep8
+        params.rule_discovery__selection = getattr(suprb.optimizer.rule.selection, params.rule_discovery__selection)()  # nopep8
 
         if isinstance(params.rule_discovery, suprb.optimizer.rule.es.ES1xLambda) or isinstance(
             params.rule_discovery, suprb.optimizer.rule.ns.NoveltySearch
@@ -220,9 +202,7 @@ def run(problem: str, job_id: str, study_name: str):
                 "rule_discovery__mutation",
                 ["SigmaRange", "Normal", "Halfnorm", "HalfnormIncrease", "Uniform", "UniformIncrease"],
             )  # nopep8
-            params.rule_discovery__mutation = getattr(
-                suprb.optimizer.rule.mutation, params.rule_discovery__mutation
-            )()  # nopep8
+            params.rule_discovery__mutation = getattr(suprb.optimizer.rule.mutation, params.rule_discovery__mutation)()  # nopep8
 
             if isinstance(params.rule_discovery__mutation, suprb.optimizer.rule.mutation.SigmaRange):
                 params.rule_discovery__mutation__mutation = trial.suggest_categorical(
@@ -244,9 +224,7 @@ def run(problem: str, job_id: str, study_name: str):
                     "rule_discovery__mutation__mutation__sigma", 0.05, 0.2
                 )  # nopep8
             else:
-                params.rule_discovery__mutation__sigma = trial.suggest_float(
-                    "rule_discovery__mutation__sigma", 0.05, 0.2
-                )  # nopep8
+                params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", 0.05, 0.2)  # nopep8
 
             # Origin Generation
             params.rule_discovery__origin_generation = trial.suggest_categorical(
@@ -281,20 +259,14 @@ def run(problem: str, job_id: str, study_name: str):
             params.solution_composition = getattr(suprb.optimizer.solution.ga, params.solution_composition)()
 
             params.solution_composition__n_iter = trial.suggest_int("solution_composition__n_iter", 16, 64)
-            params.solution_composition__population_size = trial.suggest_int(
-                "solution_composition__population_size", 16, 64
-            )
-            params.solution_composition__elitist_ratio = trial.suggest_float(
-                "solution_composition__elitist_ratio", 0.0, 0.3
-            )
+            params.solution_composition__population_size = trial.suggest_int("solution_composition__population_size", 16, 64)
+            params.solution_composition__elitist_ratio = trial.suggest_float("solution_composition__elitist_ratio", 0.0, 0.3)
 
             # GA init
             params.solution_composition__init = trial.suggest_categorical(
                 "solution_composition__init", ["ZeroInit", "RandomInit"]
             )  # nopep8
-            params.solution_composition__init = getattr(
-                suprb.solution.initialization, params.solution_composition__init
-            )()
+            params.solution_composition__init = getattr(suprb.solution.initialization, params.solution_composition__init)()
 
             if isinstance(params.solution_composition__init, suprb.solution.initialization.RandomInit):
                 params.solution_composition__init__p = trial.suggest_float("solution_composition__init__p", 0.3, 0.8)
@@ -302,9 +274,7 @@ def run(problem: str, job_id: str, study_name: str):
             params.solution_composition__init__fitness = trial.suggest_categorical(
                 "solution_composition__init__fitness", ["PseudoBIC", "ComplexityEmary", "ComplexityWu"]
             )  # nopep8
-            params.solution_composition__init__fitness = getattr(
-                suprb.solution.fitness, params.solution_composition__init__fitness
-            )()
+            params.solution_composition__init__fitness = getattr(suprb.solution.fitness, params.solution_composition__init__fitness)()
 
             # Don't do this. It will kill your fitness because complexity = 0
             # if not isinstance(params.solution_composition__init__fitness, suprb.solution.fitness.PseudoBIC):
@@ -355,9 +325,7 @@ def run(problem: str, job_id: str, study_name: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__selection, suprb.optimizer.solution.ga.selection.Tournament):
-                params.solution_composition__selection__k = trial.suggest_int(
-                    "solution_composition__selection__k", 3, 10
-                )  # nopep8
+                params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)  # nopep8
 
             params.solution_composition__mutation__mutation_rate = trial.suggest_float(
                 "solution_composition__mutation__mutation_rate", 0.0, 0.1
@@ -372,9 +340,7 @@ def run(problem: str, job_id: str, study_name: str):
             )()  # nopep8
 
             if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
-                params.solution_composition__crossover__n = trial.suggest_int(
-                    "solution_composition__crossover__n", 1, 10
-                )  # nopep8
+                params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)  # nopep8
 
             params.solution_composition__crossover__crossover_rate = trial.suggest_float(
                 "solution_composition__crossover__crossover_rate", 0.7, 1.0
@@ -386,49 +352,29 @@ def run(problem: str, job_id: str, study_name: str):
             params.solution_composition__food = trial.suggest_categorical(
                 "solution_composition__food", ["Sigmoid", "Bitwise", "DimensionFlips"]
             )
-            params.solution_composition__food = getattr(
-                suprb.optimizer.solution.abc.food, params.solution_composition__food
-            )()
+            params.solution_composition__food = getattr(suprb.optimizer.solution.abc.food, params.solution_composition__food)()
 
             params.solution_composition__trials_limit = trial.suggest_int("solution_composition__trials_limit", 1, 32)
 
             if isinstance(params.solution_composition__food, abc.food.DimensionFlips):
-                params.solution_composition__food__flip_rate = trial.suggest_float(
-                    "solution_composition__food__flip_rate", 0.01, 1
-                )
+                params.solution_composition__food__flip_rate = trial.suggest_float("solution_composition__food__flip_rate", 0.01, 1)
 
         elif params.solution_composition == "AntColonyOptimization":
             params.solution_composition = getattr(suprb.optimizer.solution.aco, params.solution_composition)()
 
-            params.solution_composition__builder = trial.suggest_categorical(
-                "solution_composition__builder", ["Binary", "Complete"]
-            )
-            params.solution_composition__builder = getattr(
-                suprb.optimizer.solution.aco.builder, params.solution_composition__builder
-            )()
-            params.solution_composition__builder__alpha = trial.suggest_float(
-                "solution_composition__builder__alpha", 0.5, 5
-            )
-            params.solution_composition__builder__beta = trial.suggest_float(
-                "solution_composition__builder__beta", 0.5, 5
-            )
+            params.solution_composition__builder = trial.suggest_categorical("solution_composition__builder", ["Binary", "Complete"])
+            params.solution_composition__builder = getattr(suprb.optimizer.solution.aco.builder, params.solution_composition__builder)()
+            params.solution_composition__builder__alpha = trial.suggest_float("solution_composition__builder__alpha", 0.5, 5)
+            params.solution_composition__builder__beta = trial.suggest_float("solution_composition__builder__beta", 0.5, 5)
 
-            params.solution_composition__evaporation_rate = trial.suggest_float(
-                "solution_composition__evaporation_rate", 0, 0.9
-            )
-            params.solution_composition__selection__n = trial.suggest_int(
-                "solution_composition__selection__n", 1, 32 // 2
-            )
+            params.solution_composition__evaporation_rate = trial.suggest_float("solution_composition__evaporation_rate", 0, 0.9)
+            params.solution_composition__selection__n = trial.suggest_int("solution_composition__selection__n", 1, 32 // 2)
 
         elif params.solution_composition == "GreyWolfOptimizer":
             params.solution_composition = getattr(suprb.optimizer.solution.gwo, params.solution_composition)()
 
-            params.solution_composition__position = trial.suggest_categorical(
-                "solution_composition__position", ["Sigmoid", "Crossover"]
-            )
-            params.solution_composition__position = getattr(
-                suprb.optimizer.solution.gwo.position, params.solution_composition__position
-            )()
+            params.solution_composition__position = trial.suggest_categorical("solution_composition__position", ["Sigmoid", "Crossover"])
+            params.solution_composition__position = getattr(suprb.optimizer.solution.gwo.position, params.solution_composition__position)()
             params.solution_composition__n_leaders = trial.suggest_int("solution_composition__n_leaders", 1, 32 // 2)
 
         elif params.solution_composition == "ParticleSwarmOptimization":
@@ -437,22 +383,14 @@ def run(problem: str, job_id: str, study_name: str):
             params.solution_composition__movement = trial.suggest_categorical(
                 "solution_composition__movement", ["Sigmoid", "SigmoidQuantum", "BinaryQuantum"]
             )
-            params.solution_composition__movement = getattr(
-                suprb.optimizer.solution.pso.movement, params.solution_composition__movement
-            )()
+            params.solution_composition__movement = getattr(suprb.optimizer.solution.pso.movement, params.solution_composition__movement)()
 
             params.solution_composition__a_min = trial.suggest_float("solution_composition__a_min", 0, 3)
-            params.solution_composition__a_max = trial.suggest_float(
-                "solution_composition__a_max", params.solution_composition__a_min, 3
-            )
+            params.solution_composition__a_max = trial.suggest_float("solution_composition__a_max", params.solution_composition__a_min, 3)
 
             if isinstance(params.solution_composition__movement, suprb.optimizer.solution.pso.movement.Sigmoid):
-                params.solution_composition__movement__b = trial.suggest_float(
-                    "solution_composition__movement__b", 0, 3
-                )
-                params.solution_composition__movement__c = trial.suggest_float(
-                    "solution_composition__movement__c", 0, 3
-                )
+                params.solution_composition__movement__b = trial.suggest_float("solution_composition__movement__b", 0, 3)
+                params.solution_composition__movement__c = trial.suggest_float("solution_composition__movement__c", 0, 3)
             elif isinstance(params.solution_composition__movement, suprb.optimizer.solution.pso.movement.BinaryQuantum):
                 params.solution_composition__movement__p_learning = trial.suggest_float(
                     "solution_composition__movement__p_learning", 0.01, 1
@@ -465,9 +403,7 @@ def run(problem: str, job_id: str, study_name: str):
             params.solution_composition = getattr(suprb.optimizer.solution.rs, params.solution_composition)()
 
             params.solution_composition__n_iter = trial.suggest_int("solution_composition__n_iter", 64, 128)
-            params.solution_composition__population_size = trial.suggest_int(
-                "solution_composition__population_size", 64, 128
-            )
+            params.solution_composition__population_size = trial.suggest_int("solution_composition__population_size", 64, 128)
 
         # print(estimator.get_params())
         # exit()

@@ -18,9 +18,7 @@ def get_rows(input_directory: str, experiment_name: str, dataset_name: str, file
     return row_list
 
 
-def print_mean_stdvar(
-    input_directory: str, experiment_name: str, dataset_name: str, file_line_func_name: str, attribute: str
-):
+def print_mean_stdvar(input_directory: str, experiment_name: str, dataset_name: str, file_line_func_name: str, attribute: str):
     row_list = get_rows(input_directory, experiment_name, dataset_name, file_line_func_name)
     attribute_list = [float(item[attribute]) for item in row_list]
     attribute_list = np.asarray(attribute_list)

@@ -50,10 +50,7 @@ sigma_representations = {"OBR": sigma_obr, "UBR": sigma_ubr, "CSR": sigma_csr, "
 @click.option("-p", "--problem", type=click.STRING, default="airfoil_self_noise")
 @click.option("-c", "--sigma_choice", type=click.INT, default=0)
 def run(problem: str = "airfoil_self_noise", sigma_choice: int = 0):
-    print(
-        f"Problem is {problem}, Representation is {representation},"
-        f" sigma is {sigma_representations[representation][sigma_choice]}"
-    )
+    print(f"Problem is {problem}, Representation is {representation}," f" sigma is {sigma_representations[representation][sigma_choice]}")
     X, y = load_dataset(name=problem, return_X_y=True)
     X, y = scale_X_y(X, y)
 

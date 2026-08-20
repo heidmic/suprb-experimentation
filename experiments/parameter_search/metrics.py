@@ -4,7 +4,6 @@ from suprb.logging.combination import CombinedLogger
 from suprb.logging.multi_objective import MOLogger
 from typing import Optional
 
-
 __all__ = ["fitness", "train_hypervolume"]
 
 

@@ -97,16 +97,12 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
         rule_discovery=ES1xLambda(
             n_jobs=1,
             origin_generation=origin.SquaredError(),
-            init=rule.initialization.MeanInit(
-                fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
-            ),
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
         ),
         solution_composition=GeneticAlgorithm(
             n_iter=64,
             n_jobs=1,
-            init=suprb.solution.initialization.RandomInit(
-                fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight)
-            ),
+            init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight)),
         ),
         logger=CombinedLogger([("stdout", StdoutLogger()), ("default", DefaultLogger())]),
     )
@@ -133,9 +129,7 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
         verbose=10,
     )
 
-    experiment.perform(
-        evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs
-    )
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)

@@ -25,7 +25,6 @@ from suprb.optimizer.solution.base import MOSolutionComposition
 from suprb.optimizer.rule import es
 from suprb.optimizer.solution.sampler import BetaSolutionSampler, DiversitySolutionSampler
 
-
 random_state = 42
 
 
@@ -67,9 +66,7 @@ def run(problem: str, job_id: str, config: str):
             operator="&",
             n_iter=1000,
             delay=30,
-            init=rule.initialization.MeanInit(
-                fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
-            ),
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
@@ -99,27 +96,19 @@ def run(problem: str, job_id: str, config: str):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-            "rule_discovery__init__fitness__alpha", 0.01, 0.2
-        )
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
 
         ############ Solution Composition ##############
         ############ GA First Stage ##############
-        params.solution_composition__algorithm_1__selection__k = trial.suggest_int(
-            "solution_composition__selection__k", 3, 10
-        )
+        params.solution_composition__algorithm_1__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)
 
         params.solution_composition__algorithm_1__crossover = trial.suggest_categorical(
             "solution_composition_algorithm_1__crossover", ["NPoint", "Uniform"]
         )
-        params.solution_composition__algorithm_1__crossover = getattr(
-            ga.crossover, params.solution_composition__algorithm_1__crossover
-        )()
+        params.solution_composition__algorithm_1__crossover = getattr(ga.crossover, params.solution_composition__algorithm_1__crossover)()
 
         if isinstance(params.solution_composition__algorithm_1__crossover, ga.crossover.NPoint):
-            params.solution_composition__algorithm_1__crossover__n = trial.suggest_int(
-                "solution_composition__crossover__n", 1, 10
-            )
+            params.solution_composition__algorithm_1__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
         params.solution_composition__algorithm_1__mutation_rate = trial.suggest_float(
             "solution_composition_algorithm_1__mutation_rate", 0, 0.1
@@ -127,17 +116,11 @@ def run(problem: str, job_id: str, config: str):
 
         ######################## Second Stage ##########################
         if isinstance(estimator.solution_composition.algorithm_2, ga.GeneticAlgorithm):
-            params.solution_composition__algorithm_2__selection__k = (
-                params.solution_composition__algorithm_1__selection__k
-            )
+            params.solution_composition__algorithm_2__selection__k = params.solution_composition__algorithm_1__selection__k
             params.solution_composition__algorithm_2__crossover = params.solution_composition__algorithm_1__crossover
             if isinstance(params.solution_composition__algorithm_2__crossover, ga.crossover.NPoint):
-                params.solution_composition__algorithm_2__crossover__n = (
-                    params.solution_composition__algorithm_1__crossover__n
-                )
-            params.solution_composition__algorithm_2__mutation_rate = (
-                params.solution_composition__algorithm_1__mutation_rate
-            )
+                params.solution_composition__algorithm_2__crossover__n = params.solution_composition__algorithm_1__crossover__n
+            params.solution_composition__algorithm_2__mutation_rate = params.solution_composition__algorithm_1__mutation_rate
 
     experiment_name = f"Baseline c:{config} j:{job_id} p:{problem}"
     print(experiment_name)

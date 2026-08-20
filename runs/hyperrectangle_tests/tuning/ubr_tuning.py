@@ -49,9 +49,7 @@ def ubr_space(trial: Trial, params: Bunch):
     else:
         params.rule_discovery__delay = trial.suggest_int("delay", low=1, high=25)
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
-    params.solution_composition__selection = trial.suggest_categorical(
-        "selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"]
-    )
+    params.solution_composition__selection = trial.suggest_categorical("selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"])
     params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
     if isinstance(params.solution_composition__selection, ga.selection.Tournament):
         params.solution_composition__selection__k = trial.suggest_int("selection__k", 3, 10)

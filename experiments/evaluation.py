@@ -160,9 +160,7 @@ class CrossValidateTest(BaseCrossValidate):
                 scoring = key.removeprefix("test_")
                 new_scores["val_" + scoring] = scores[key]
                 scorer = get_scorer(scoring)
-                new_scores["test_" + scoring] = np.array(
-                    [scorer(estimator, self.X_test, self.y_test) for estimator in estimators]
-                )
+                new_scores["test_" + scoring] = np.array([scorer(estimator, self.X_test, self.y_test) for estimator in estimators])
             else:
                 new_scores[key] = value
 
@@ -202,9 +200,7 @@ class CrossValidate(BaseCrossValidate):
             self.results_["test_neg_mean_squared_error_unscaled"] = (
                 self.results_["test_neg_mean_squared_error"] * self.results_["y_scaler_var"]
             )
-            self.results_["test_neg_mean_absolute_error"] = (
-                self.results_["test_neg_mean_absolute_error"] * self.results_["y_scaler_std"]
-            )
+            self.results_["test_neg_mean_absolute_error"] = self.results_["test_neg_mean_absolute_error"] * self.results_["y_scaler_std"]
 
         return self.estimators_, self.results_
 
@@ -247,9 +243,7 @@ class MOOCrossValidate(BaseCrossValidate):
             self.results_["test_neg_mean_squared_error_unscaled"] = (
                 self.results_["test_neg_mean_squared_error"] * self.results_["y_scaler_var"]
             )
-            self.results_["test_neg_mean_absolute_error"] = (
-                self.results_["test_neg_mean_absolute_error"] * self.results_["y_scaler_std"]
-            )
+            self.results_["test_neg_mean_absolute_error"] = self.results_["test_neg_mean_absolute_error"] * self.results_["y_scaler_std"]
             self.results_["test_neg_mean_absolute_error"] = self.results_["test_neg_mean_absolute_error"] * self.results_["y_scaler_std"]
 
         return self.estimators_, self.results_

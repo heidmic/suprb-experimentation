@@ -29,9 +29,7 @@ def rule_discovery_space(trial: Trial, params: Bunch):
     # Evolution Strategy - Mutation, Mutation_sigma, Initialization, Init_sigma, Delay (delta) and fitness_alpha
     sigma_space = [0, 3]
 
-    params.rule_discovery__mutation = trial.suggest_categorical(
-        "mutation", ["Normal", "HalfnormIncrease", "UniformIncrease"]
-    )
+    params.rule_discovery__mutation = trial.suggest_categorical("mutation", ["Normal", "HalfnormIncrease", "UniformIncrease"])
     params.rule_discovery__mutation = getattr(mutation, params.rule_discovery__mutation)()
     # Unique to MPR
     params.rule_discovery__mutation__sigma = np.array(
@@ -57,9 +55,7 @@ def rule_discovery_space(trial: Trial, params: Bunch):
         params.rule_discovery__delay = trial.suggest_int("delay", low=1, high=25)
 
     # Genetic Algorithm - Selection, TournamentSelection - k, Crossover, Crossover_n, mutation_rate
-    params.solution_composition__selection = trial.suggest_categorical(
-        "selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"]
-    )
+    params.solution_composition__selection = trial.suggest_categorical("selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"])
     params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
     if isinstance(params.solution_composition__selection, ga.selection.Tournament):
         params.solution_composition__selection__k = trial.suggest_int("selection__k", 3, 10)

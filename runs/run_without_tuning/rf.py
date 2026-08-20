@@ -56,9 +56,7 @@ def run():
         verbose=10,
     )
 
-    experiment.perform(
-        evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs
-    )
+    experiment.perform(evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs)
 
     mlflow.set_experiment(experiment_name)
     log_experiment(experiment)

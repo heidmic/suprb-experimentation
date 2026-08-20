@@ -42,7 +42,6 @@ import json
 import math
 from utils import datasets_map
 
-
 pd.options.display.max_rows = 2000
 # If this doesn't work, because you can't fine Time New Roman as a font do the following:
 # sudo apt install msttcorefonts -qq
@@ -197,9 +196,9 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
             model = cmpbayes.Calvo(d.to_numpy(), higher_better=False, algorithm_labels=d.columns.to_list()).fit(
                 num_samples=chosen_sample_num, random_seed=1
             )
-            model1 = cmpbayes.Calvo(
-                d.to_numpy(), higher_better=higher_is_better, algorithm_labels=d.columns.to_list()
-            ).fit(num_samples=chosen_sample_num, random_seed=1)
+            model1 = cmpbayes.Calvo(d.to_numpy(), higher_better=higher_is_better, algorithm_labels=d.columns.to_list()).fit(
+                num_samples=chosen_sample_num, random_seed=1
+            )
 
             if check_mcmc:
                 smart_print(az.summary(model.infdata_), latex=latex)
@@ -238,6 +237,7 @@ def calvo(latex=False, all_variants=False, check_mcmc=False, small_set=False, yl
                 dpi=fig.dpi,
                 bbox_inches="tight",
             )
+
 
 def cohens_pairwise_d(candidate_pairs: List[Tuple[str, str]], candidate_pair_names: List[str]) -> None:
     """
@@ -283,13 +283,10 @@ def cohens_pairwise_d(candidate_pairs: List[Tuple[str, str]], candidate_pair_nam
 
             # Preload all y-values for algorithms that appear in any pair
             alg_ids = {alg for pair in candidate_pairs for alg in pair}
-            y_values = {
-                alg: df[metric].loc[alg, task_key].to_numpy()
-                for alg in alg_ids
-            }
+            y_values = {alg: df[metric].loc[alg, task_key].to_numpy() for alg in alg_ids}
 
             row_vals = []
-            for (alg1, alg2) in candidate_pairs:
+            for alg1, alg2 in candidate_pairs:
                 y1 = y_values[alg1]
                 y2 = y_values[alg2]
                 # dependent-samples Cohen's d_z: mean(diff) / sd(diff)
@@ -303,10 +300,7 @@ def cohens_pairwise_d(candidate_pairs: List[Tuple[str, str]], candidate_pair_nam
             continue
 
         # Build DataFrame: rows = datasets, columns = name combinations
-        data = {
-            comb_labels[k]: [row[1][k] for row in table_rows]
-            for k in range(len(comb_labels))
-        }
+        data = {comb_labels[k]: [row[1][k] for row in table_rows] for k in range(len(comb_labels))}
         index = [row[0] for row in table_rows]
         d_table = pd.DataFrame(data, index=index)
 
@@ -343,6 +337,7 @@ def cohens_pairwise_d(candidate_pairs: List[Tuple[str, str]], candidate_pair_nam
             f_out.write(f"% Metric: {metrics[metric]}\n\n")
             f_out.write(latex_str)
     return
+
 
 def ttest(latex, cand1, cand2, cand1_name, cand2_name):
     with open("logging_output_scripts/config.json") as f:
@@ -413,9 +408,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             if not (i == 1 or i == 3):
                 xlabel = (
-                    f"MSE({cand2_name}) - MSE({cand1_name})"
-                    if metrics[metric] == "MSE"
-                    else (f"COMP({cand2_name}) - COMP({cand1_name})\n")
+                    f"MSE({cand2_name}) - MSE({cand1_name})" if metrics[metric] == "MSE" else (f"COMP({cand2_name}) - COMP({cand1_name})\n")
                 )
 
                 ylabel = "Density"
@@ -483,8 +476,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
                 probs[config["datasets"][task]] = {
                     f"p({cand1_name} practically higher complexity)": (sample < rope[0]).sum() / len(sample),
-                    f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum()
-                    / len(sample),
+                    f"p(practically equivalent)": np.logical_and(rope[0] < sample, sample < rope[1]).sum() / len(sample),
                     f"p({cand2_name} practically higher complexity)": (rope[1] < sample).sum() / len(sample),
                 }
 
@@ -516,9 +508,7 @@ def ttest(latex, cand1, cand2, cand1_name, cand2_name):
 
             fig.align_ylabels()
             fig.tight_layout()
-            fig.savefig(
-                f"{final_output_dir}/ttest_{cand1_name}_{cand2_name}_{nname}.pdf", dpi=fig.dpi, bbox_inches="tight"
-            )
+            fig.savefig(f"{final_output_dir}/ttest_{cand1_name}_{cand2_name}_{nname}.pdf", dpi=fig.dpi, bbox_inches="tight")
 
     # https://stackoverflow.com/a/67575847/6936216
     hdis_ = hdis

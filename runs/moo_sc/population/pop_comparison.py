@@ -24,7 +24,6 @@ from suprb.optimizer.solution import nsga2, nsga3, spea2
 from suprb.optimizer.rule import es, origin, mutation
 from suprb.optimizer.solution.sampler import BetaSolutionSampler, DiversitySolutionSampler
 
-
 random_state = 42
 
 opt_dict = {
@@ -59,15 +58,11 @@ def run(problem: str, job_id: str, optimizer: str, config: int):
             operator="&",
             n_iter=1000,
             delay=30,
-            init=rule.initialization.MeanInit(
-                fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
-            ),
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
-        solution_composition=opt_dict[optimizer](
-            n_iter=32, population_size=config, sampler=BetaSolutionSampler(a=1.5, b=1.5)
-        ),
+        solution_composition=opt_dict[optimizer](n_iter=32, population_size=config, sampler=BetaSolutionSampler(a=1.5, b=1.5)),
         n_iter=32,
         n_rules=4,
         verbose=10,
@@ -93,22 +88,16 @@ def run(problem: str, job_id: str, optimizer: str, config: int):
         sigma_space = [0, np.sqrt(X.shape[1])]
 
         params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-            "rule_discovery__init__fitness__alpha", 0.01, 0.2
-        )
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
 
         # SC
-        params.solution_composition__crossover = trial.suggest_categorical(
-            "solution_composition__crossover", ["NPoint", "Uniform"]
-        )
+        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
         params.solution_composition__crossover = getattr(nsga3.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, nsga3.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float(
-            "solution_composition__mutation_rate", 0, 0.1
-        )
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
 
     experiment_name = f"PopComp {optimizer} c:{config} j:{job_id} p:{problem}"
     print(experiment_name)

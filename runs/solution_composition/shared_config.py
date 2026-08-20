@@ -183,9 +183,7 @@ estimator = SupRB(
     rule_discovery=es.ES1xLambda(
         operator="&",
         n_iter=10_000,
-        init=rule.initialization.MeanInit(
-            fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)
-        ),
+        init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
         mutation=es.mutation.HalfnormIncrease(),
         origin_generation=origin.SquaredError(),
     ),
