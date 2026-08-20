@@ -22,7 +22,6 @@ from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import es, origin, mutation
 from suprb.solution.initialization import RandomInit
 
-
 random_state = 42
 
 

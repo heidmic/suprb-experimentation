@@ -22,13 +22,14 @@ import click
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
     from problems import datasets
+
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
-@click.option('-j', '--job_id', type=click.STRING, default='NA')
+@click.option("-p", "--problem", type=click.STRING, default="airfoil_self_noise")
+@click.option("-j", "--job_id", type=click.STRING, default="NA")
 def run(problem: str, job_id: str):
     random_state = 42
 
@@ -46,7 +47,7 @@ def run(problem: str, job_id: str):
         n_jobs=4,
         n_calls=1000,
         timeout=72 * 60 * 60,  # 72 hours
-        verbose=10
+        verbose=10,
     )
 
     # Add global tuning of the `n_estimators` parameter using optuna.
@@ -56,19 +57,19 @@ def run(problem: str, job_id: str):
     @param_space()
     def optuna_objective(trial: optuna.Trial, params: Bunch):
 
-        params.n_estimators = trial.suggest_int('n_estimators', 1, 400)
+        params.n_estimators = trial.suggest_int("n_estimators", 1, 400)
 
         if params.n_estimators > 100:
-            params.bootstrap = trial.suggest_categorical('bootstrap', [True, False])
+            params.bootstrap = trial.suggest_categorical("bootstrap", [True, False])
 
-        params.max_depth = trial.suggest_int('max_depth', 1, 100)
-        params.min_samples_split = trial.suggest_int('min_samples_split', 2, 20)
-        params.min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 4)
+        params.max_depth = trial.suggest_int("max_depth", 1, 100)
+        params.min_samples_split = trial.suggest_int("min_samples_split", 2, 20)
+        params.min_samples_leaf = trial.suggest_int("min_samples_leaf", 1, 4)
 
-        params.max_features = trial.suggest_categorical('max_features', ["auto", "sqrt", "log2"])
+        params.max_features = trial.suggest_categorical("max_features", ["auto", "sqrt", "log2"])
 
     # Create the base experiment, using some default tuner
-    experiment_name = f'Random Forest {job_id} {problem}'
+    experiment_name = f"Random Forest {job_id} {problem}"
     experiment = Experiment(name=experiment_name, verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
@@ -88,5 +89,5 @@ def run(problem: str, job_id: str):
     log_experiment(experiment)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()
