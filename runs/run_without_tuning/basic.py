@@ -61,19 +61,20 @@ random_state = 42
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
     from problems import datasets
+
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
 
 
 @click.command()
-@click.option('-n', '--experiment_name', type=click.STRING, default='SupRB')
-@click.option('-w', '--fitness_weight', type=click.FLOAT, default=0.3)
-@click.option('-s', '--scaler_type', type=click.BOOL, default=True)
-@click.option('-i', '--n_iter', type=click.INT, default=32)
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option("-n", "--experiment_name", type=click.STRING, default="SupRB")
+@click.option("-w", "--fitness_weight", type=click.FLOAT, default=0.3)
+@click.option("-s", "--scaler_type", type=click.BOOL, default=True)
+@click.option("-i", "--n_iter", type=click.INT, default=32)
+@click.option("-p", "--problem", type=click.STRING, default="airfoil_self_noise")
 def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: int, problem: str):
-    X = pd.read_parquet('new_data/features_preselection.parq')
-    y = pd.read_parquet('new_data/target.parq').iloc[:, 0]
+    X = pd.read_parquet("new_data/features_preselection.parq")
+    y = pd.read_parquet("new_data/target.parq").iloc[:, 0]
 
     X = X.values
     y = y.values.flatten()
@@ -89,20 +90,28 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
     X, y = scale_X_y(X, y)
     X, y = shuffle(X, y, random_state=random_state)
 
-    estimator = SupRB(n_iter=n_iter,
-                      n_rules=16,
-                      n_jobs=1,
-                      rule_discovery=ES1xLambda(n_jobs=1,
-                                                 origin_generation=origin.SquaredError(),
-                                                 init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
-                                                                                   model=Ridge(alpha=0.01, random_state=random_state))),
-                      solution_composition=GeneticAlgorithm(n_iter=64,
-                                                            n_jobs=1,
-                                                            init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight))),
-                      logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]))
+    estimator = SupRB(
+        n_iter=n_iter,
+        n_rules=16,
+        n_jobs=1,
+        rule_discovery=ES1xLambda(
+            n_jobs=1,
+            origin_generation=origin.SquaredError(),
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
+        ),
+        solution_composition=GeneticAlgorithm(
+            n_iter=64,
+            n_jobs=1,
+            init=suprb.solution.initialization.RandomInit(fitness=suprb.solution.fitness.ComplexityWu(alpha=fitness_weight)),
+        ),
+        logger=CombinedLogger([("stdout", StdoutLogger()), ("default", DefaultLogger())]),
+    )
 
-    estimator = SupRBWrapper(rule_discovery__mutation__sigma=2.53261854608031, rule_discovery__delay=134,
-                             rule_discovery__init__fitness__alpha=0.043582602456505595)
+    estimator = SupRBWrapper(
+        rule_discovery__mutation__sigma=2.53261854608031,
+        rule_discovery__delay=134,
+        rule_discovery__init__fitness__alpha=0.043582602456505595,
+    )
 
     jobs = 8
 
@@ -112,7 +121,13 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
     random_states = np.random.SeedSequence(random_state).generate_state(jobs)
     experiment.with_random_states(random_states, n_jobs=jobs)
 
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10,)
+    evaluation = CrossValidate(
+        estimator=estimator,
+        X=X,
+        y=y,
+        random_state=random_state,
+        verbose=10,
+    )
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs)
 
@@ -120,5 +135,5 @@ def run(experiment_name: str, fitness_weight: float, scaler_type: bool, n_iter: 
     log_experiment(experiment)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

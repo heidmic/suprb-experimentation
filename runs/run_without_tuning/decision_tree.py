@@ -28,8 +28,8 @@ random_state = 42
 
 
 def run():
-    X = pd.read_parquet('new_data/features_preselection.parq')
-    y = pd.read_parquet('new_data/target.parq').iloc[:, 0].to_numpy()
+    X = pd.read_parquet("new_data/features_preselection.parq")
+    y = pd.read_parquet("new_data/target.parq").iloc[:, 0].to_numpy()
 
     print(X.columns)
     print("Dimensions", len(X.columns))
@@ -44,14 +44,15 @@ def run():
 
     # estimator = DecisionTreeRegressor(random_state=random_state)
 
-    estimator = DecisionTreeRegressor(random_state=random_state,
-                                      criterion="friedman_mse",
-                                      max_depth=5,
-                                      min_samples_leaf=10,
-                                      #   max_leaf_nodes=500,
-                                      )
+    estimator = DecisionTreeRegressor(
+        random_state=random_state,
+        criterion="friedman_mse",
+        max_depth=5,
+        min_samples_leaf=10,
+        #   max_leaf_nodes=500,
+    )
 
-    experiment_name = f'Decision Tree'
+    experiment_name = f"Decision Tree"
     jobs = 8
 
     print(experiment_name)
@@ -60,7 +61,13 @@ def run():
     random_states = np.random.SeedSequence(random_state).generate_state(jobs)
     experiment.with_random_states(random_states, n_jobs=jobs)
 
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10,)
+    evaluation = CrossValidate(
+        estimator=estimator,
+        X=X,
+        y=y,
+        random_state=random_state,
+        verbose=10,
+    )
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs)
 
@@ -68,5 +75,5 @@ def run():
     log_experiment(experiment)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

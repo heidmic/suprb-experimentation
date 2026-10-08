@@ -8,6 +8,7 @@ from sklearn.base import BaseEstimator
 from suprb import SupRB
 from suprb.logging.combination import CombinedLogger
 from suprb.logging.default import DefaultLogger
+from suprb.logging.multi_objective import MOLogger
 
 from experiments import Experiment
 
@@ -50,7 +51,7 @@ def try_log_dict(d: dict, name: str):
 
 
 def log_experiment(experiment: Experiment):
-    _log_experiment(experiment, parent_name='', depth=0)
+    _log_experiment(experiment, parent_name="", depth=0)
 
 
 def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dict:
@@ -62,8 +63,11 @@ def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dic
             mlflow.set_tag("root", True)
 
         # Log tuning results
-        if hasattr(experiment, 'tuned_params_'):
-            log_tuning(experiment)
+        if hasattr(experiment, "tuned_params_"):
+            if hasattr(experiment, "tuning_results_"):  # needed to split tune and eval in 2
+                log_tuning(experiment)
+            else:
+                mlflow.log_param("tuned_params", experiment.tuned_params_)
 
         if experiment.experiments:
             # Call log on nested experiments
@@ -79,20 +83,20 @@ def _log_experiment(experiment: Experiment, parent_name: str, depth: int) -> dic
 
         else:
             # Check if experiment has evaluations
-            if hasattr(experiment, 'results_') and hasattr(experiment, 'estimators_'):
+            if hasattr(experiment, "results_") and hasattr(experiment, "estimators_"):
                 # Log cv folds
-                for i, (estimator, result) in enumerate(zip(experiment.estimators_, _expand_dict(experiment.results_)),
-                                                        1):
-                    with mlflow.start_run(run_name=f"{run_name}.fold-{i}/{len(experiment.estimators_)}",
-                                          nested=True) as cv_run:
+                for i, (estimator, result) in enumerate(zip(experiment.estimators_, _expand_dict(experiment.results_)), 1):
+                    with mlflow.start_run(run_name=f"{run_name}.fold-{i}/{len(experiment.estimators_)}", nested=True) as cv_run:
                         log_run(estimator)
                         log_run_result(result)
 
-                        mlflow.set_tag('fold', True)
+                        mlflow.set_tag("fold", True)
 
                 # Log cv average
                 with mlflow.start_run(run_name=f"{run_name}.averaged_cv", nested=True) as average_run:
-                    average_results = {key: np.mean(value) for key, value in experiment.results_.items()}
+                    average_results = {
+                        key: np.mean(value) if not isinstance(value, list) else 0 for key, value in experiment.results_.items()
+                    }
                     log_run_result(average_results)
             else:
                 average_results = None
@@ -113,11 +117,12 @@ def log_tuning(experiment: Experiment):
 
     # Log history
     for step, objective_value in enumerate(tuning_result.objective_history):
-        mlflow.log_metric("objective_function", objective_value, step=step)
+        if objective_value is not None:
+            mlflow.log_metric("objective_function", objective_value, step=step)
 
     history = _expand_list(tuning_result.params_history)
 
-    try_log_dict(history, 'param_history.json')
+    try_log_dict(history, "param_history.json")
 
     # Try to log floaty params as metrics. `mlflow.log_metric` only accepts float values.
     for step, params in enumerate(tuning_result.params_history):
@@ -137,7 +142,7 @@ def log_tuning(experiment: Experiment):
 
 def log_run(estimator: BaseEstimator):
     # Log model parameters
-    try_log_dict(estimator.get_params(), 'params.json')
+    try_log_dict(estimator.get_params(), "params.json")
 
     logger = _get_default_logger(estimator)
     if logger is not None:
@@ -146,6 +151,12 @@ def log_run(estimator: BaseEstimator):
             for step, value in values.items():
                 mlflow.log_metric(key=key, value=value, step=step)
 
+        if isinstance(logger, MOLogger):
+            try_log_dict(logger.pareto_fronts_, "pareto_fronts.json")
+
 
 def log_run_result(result: dict):
+    if "test_pf_fitness" in result:
+        test_pf_fitness = result.pop("test_pf_fitness")
+        try_log_dict({"test_pf_fitness": test_pf_fitness}, "test_pareto_front.json")
     mlflow.log_metrics(result)

@@ -28,8 +28,8 @@ random_state = 42
 
 
 def run():
-    X = pd.read_parquet('new_data/features_preselection.parq')
-    y = pd.read_parquet('new_data/target.parq').iloc[:, 0]
+    X = pd.read_parquet("new_data/features_preselection.parq")
+    y = pd.read_parquet("new_data/target.parq").iloc[:, 0]
 
     X = X.values
     y = y.values.flatten()
@@ -39,7 +39,7 @@ def run():
 
     estimator = RandomForestRegressor(random_state=random_state)
 
-    experiment_name = f'Random Forest'
+    experiment_name = f"Random Forest"
     jobs = 8
 
     print(experiment_name)
@@ -48,7 +48,13 @@ def run():
     random_states = np.random.SeedSequence(random_state).generate_state(jobs)
     experiment.with_random_states(random_states, n_jobs=jobs)
 
-    evaluation = CrossValidate(estimator=estimator, X=X, y=y, random_state=random_state, verbose=10,)
+    evaluation = CrossValidate(
+        estimator=estimator,
+        X=X,
+        y=y,
+        random_state=random_state,
+        verbose=10,
+    )
 
     experiment.perform(evaluation, cv=ShuffleSplit(n_splits=jobs, test_size=0.25, random_state=random_state), n_jobs=jobs)
 
@@ -56,5 +62,5 @@ def run():
     log_experiment(experiment)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

@@ -9,19 +9,28 @@ from suprb.rule.matching import OrderedBound
 from experiments import Experiment
 from experiments.evaluation import CrossValidate
 from problems import scale_X_y
-from runs.hyperrectangle_tests.configurations.shared_config import load_dataset, global_params, estimator, \
-    random_state, individual_dataset_params
+from runs.hyperrectangle_tests.configurations.shared_config import (
+    load_dataset,
+    global_params,
+    estimator,
+    random_state,
+    individual_dataset_params,
+)
 
 from runs.hyperrectangle_tests.configurations.dataset_params import params_obr, params_ubr, params_csr, params_mpr
 
 # CHANGE FOR TESTING (Choices: OBR, UBR, CSR and MPR)
-representation = 'OBR'
+representation = "OBR"
 
 # The individual parameters for the respective Representation
-representation_params = {'OBR': params_obr, 'UBR': params_ubr, 'CSR': params_csr, 'MPR': params_mpr}
+representation_params = {"OBR": params_obr, "UBR": params_ubr, "CSR": params_csr, "MPR": params_mpr}
 # Which representation SupRB should be set to TODO
-matching_type = {'OBR': OrderedBound(np.array([])), 'UBR': OrderedBound(np.array([])),
-                 'CSR': OrderedBound(np.array([])), 'MPR': OrderedBound(np.array([]))}
+matching_type = {
+    "OBR": OrderedBound(np.array([])),
+    "UBR": OrderedBound(np.array([])),
+    "CSR": OrderedBound(np.array([])),
+    "MPR": OrderedBound(np.array([])),
+}
 
 
 def run(problem: str, _random_state: int):
@@ -35,7 +44,7 @@ def run(problem: str, _random_state: int):
 
     params = global_params | individual_dataset_params.get(problem, {}) | dataset_params.get(problem, {})
 
-    experiment = Experiment(name=f'Profiling {representation}_{problem}', params=params, verbose=10)
+    experiment = Experiment(name=f"Profiling {representation}_{problem}", params=params, verbose=10)
 
     # Repeat evaluations with several random states
     random_states = np.random.SeedSequence(_random_state).generate_state(1)
@@ -52,13 +61,18 @@ def prof_to_csv(prof: cProfile.Profile):
     pstats.Stats(prof, stream=out_stream).sort_stats("time").print_stats()
     result = out_stream.getvalue()
     # chop off header lines
-    result = 'ncalls' + result.split('ncalls')[-1]
-    lines = [','.join(line.rstrip().split(None, 5)) for line in result.split('\n')]
-    return '\n'.join(lines)
+    result = "ncalls" + result.split("ncalls")[-1]
+    lines = [",".join(line.rstrip().split(None, 5)) for line in result.split("\n")]
+    return "\n".join(lines)
 
 
-datasets = {0: 'parkinson_total', 1: 'protein_structure', 2: 'airfoil_self_noise',
-            3: 'concrete_strength', 4: 'combined_cycle_power_plant'}
+datasets = {
+    0: "parkinson_total",
+    1: "protein_structure",
+    2: "airfoil_self_noise",
+    3: "concrete_strength",
+    4: "combined_cycle_power_plant",
+}
 
 # Performs 10 different runs for each Representation/Learning Task-combination and stores information in csv-Files
 if __name__ == "__main__":
@@ -74,6 +88,6 @@ if __name__ == "__main__":
             run(problem=learning_task, _random_state=seed)
             pr.disable()
             csv = prof_to_csv(pr)
-            with open(f"{representation}/{learning_task}/{count}.csv", 'w+') as f:
+            with open(f"{representation}/{learning_task}/{count}.csv", "w+") as f:
                 f.write(csv)
             count += 1

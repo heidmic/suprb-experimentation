@@ -15,9 +15,9 @@ from suprb.optimizer.rule.mutation import Normal
 from experiments.parameter_search.skopt import SkoptTuner
 from problems import scale_X_y
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    np.seterr('raise')
+    np.seterr("raise")
 
     random_state = 42
 
@@ -32,17 +32,15 @@ if __name__ == '__main__':
             init=suprb.rule.initialization.HalfnormInit(),
             mutation=Normal(),
         ),
-        logger=CombinedLogger([('stdout', StdoutLogger()), ('default', DefaultLogger())]),
+        logger=CombinedLogger([("stdout", StdoutLogger()), ("default", DefaultLogger())]),
     )
 
     param_space = {
-        'rule_discovery__init__sigma': Real(0.01, 2),
-        'rule_discovery__mutation__sigma': Real(0.01, 2),
+        "rule_discovery__init__sigma": Real(0.01, 2),
+        "rule_discovery__mutation__sigma": Real(0.01, 2),
     }
 
-    tuner = SkoptTuner(model, X_train, y_train, scoring='r2', n_calls=10, cv=2,
-                       n_jobs_cv=2,
-                       verbose=10, random_state=random_state)
+    tuner = SkoptTuner(model, X_train, y_train, scoring="r2", n_calls=10, cv=2, n_jobs_cv=2, verbose=10, random_state=random_state)
     tuned_params, _ = tuner(parameter_space=param_space, local_params={})
 
     model.set_params(**tuned_params)
@@ -50,10 +48,10 @@ if __name__ == '__main__':
 
     mlflow.set_experiment("Make Regression")
     with mlflow.start_run(run_name="single+tuning"):
-        with mlflow.start_run(run_name='tuning', nested=True):
+        with mlflow.start_run(run_name="tuning", nested=True):
 
             # Log params
-            for attribute in ['tuner', 'n_calls', 'scoring', 'cv', 'parameter_space', 'random_state']:
+            for attribute in ["tuner", "n_calls", "scoring", "cv", "parameter_space", "random_state"]:
                 mlflow.log_param(attribute, getattr(tuner, attribute))
 
             # Log history
@@ -68,7 +66,7 @@ if __name__ == '__main__':
             for param_name, final_value in tuned_params.items():
                 mlflow.log_metric(f"{param_name}_final", final_value)
 
-        with mlflow.start_run(run_name='single', nested=True):
+        with mlflow.start_run(run_name="single", nested=True):
             logger: DefaultLogger = model.logger_.loggers_[1][1]
 
             # Log model parameters

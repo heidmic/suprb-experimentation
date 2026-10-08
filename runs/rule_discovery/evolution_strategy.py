@@ -24,13 +24,13 @@ from sklearn.datasets import fetch_openml
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 
-
 random_state = 42
 
 
 def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
     method_name = f"load_{name}"
     from problems import datasets
+
     if hasattr(datasets, method_name):
         return getattr(datasets, method_name)(**kwargs)
     else:
@@ -40,8 +40,7 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         if name == "meta":
             dataset.data.DS_Name = enc.fit_transform(dataset.data.DS_Name)
             dataset.data.Alg_Name = enc.fit_transform(dataset.data.Alg_Name)
-            dataset.data = dataset.data.drop(
-                dataset.data.columns[dataset.data.isna().any()].tolist(), axis=1)
+            dataset.data = dataset.data.drop(dataset.data.columns[dataset.data.isna().any()].tolist(), axis=1)
 
         if name == "chscase_foot":
             dataset.data.col_1 = enc.fit_transform(dataset.data.col_1)
@@ -60,12 +59,11 @@ def load_dataset(name: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         else:
             y = dataset.target.toarray()
 
-
         return X, y
 
 
 @click.command()
-@click.option('-p', '--problem', type=click.STRING, default='airfoil_self_noise')
+@click.option("-p", "--problem", type=click.STRING, default="airfoil_self_noise")
 def run(problem: str):
     print(f"Problem is {problem}")
 
@@ -75,11 +73,9 @@ def run(problem: str):
 
     estimator = SupRB(
         rule_discovery=es.ES1xLambda(
-            operator='&',
+            operator="&",
             n_iter=10_000,
-            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(),
-                                              model=Ridge(alpha=0.01,
-                                                          random_state=random_state)),
+            init=rule.initialization.MeanInit(fitness=rule.fitness.VolumeWu(), model=Ridge(alpha=0.01, random_state=random_state)),
             mutation=mutation.HalfnormIncrease(),
             origin_generation=origin.SquaredError(),
         ),
@@ -87,8 +83,7 @@ def run(problem: str):
         n_iter=32,
         n_rules=4,
         verbose=10,
-        logger=CombinedLogger(
-            [('stdout', StdoutLogger()), ('default', DefaultLogger())]),
+        logger=CombinedLogger([("stdout", StdoutLogger()), ("default", DefaultLogger())]),
     )
 
     tuning_params = dict(
@@ -99,8 +94,8 @@ def run(problem: str):
         n_jobs=4,
         n_calls=10_000,
         timeout=72 * 60 * 60,  # 72 hours
-        scoring='fitness',
-        verbose=10
+        scoring="fitness",
+        verbose=10,
     )
 
     @param_space()
@@ -108,34 +103,28 @@ def run(problem: str):
         # ES
         sigma_space = [0, np.sqrt(X.shape[1])]
 
-        params.rule_discovery__mutation__sigma = trial.suggest_float(
-            'rule_discovery__mutation__sigma', *sigma_space)
-        params.rule_discovery__delay = trial.suggest_int('rule_discovery__delay', 10, 100)
-        params.rule_discovery__init__fitness__alpha = trial.suggest_float(
-            'rule_discovery__init__fitness__alpha', 0.01, 0.2)
+        params.rule_discovery__mutation__sigma = trial.suggest_float("rule_discovery__mutation__sigma", *sigma_space)
+        params.rule_discovery__delay = trial.suggest_int("rule_discovery__delay", 10, 100)
+        params.rule_discovery__init__fitness__alpha = trial.suggest_float("rule_discovery__init__fitness__alpha", 0.01, 0.2)
 
         # GA
         params.solution_composition__selection = trial.suggest_categorical(
-            'solution_composition__selection',
-                                                     ['RouletteWheel',
-                                                      'Tournament',
-                                                      'LinearRank', 'Random'])
+            "solution_composition__selection", ["RouletteWheel", "Tournament", "LinearRank", "Random"]
+        )
         params.solution_composition__selection = getattr(ga.selection, params.solution_composition__selection)()
 
         if isinstance(params.solution_composition__selection, ga.selection.Tournament):
-            params.solution_composition__selection__k = trial.suggest_int('solution_composition__selection__k', 3, 10)
+            params.solution_composition__selection__k = trial.suggest_int("solution_composition__selection__k", 3, 10)
 
-        params.solution_composition__crossover = trial.suggest_categorical('solution_composition__crossover',
-                                                     ['NPoint', 'Uniform'])
+        params.solution_composition__crossover = trial.suggest_categorical("solution_composition__crossover", ["NPoint", "Uniform"])
         params.solution_composition__crossover = getattr(ga.crossover, params.solution_composition__crossover)()
 
         if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
-            params.solution_composition__crossover__n = trial.suggest_int('solution_composition__crossover__n', 1, 10)
+            params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation__mutation_rate = trial.suggest_float('solution_composition__mutation_rate', 0,
-                                                             0.1)
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
 
-    experiment = Experiment(name=f'{problem} ES Tuning & Experimentation', verbose=10)
+    experiment = Experiment(name=f"{problem} ES Tuning & Experimentation", verbose=10)
 
     tuner = OptunaTuner(X_train=X, y_train=y, **tuning_params)
     experiment.with_tuning(suprb_ES_GA_space, tuner=tuner)
@@ -151,7 +140,5 @@ def run(problem: str):
     log_experiment(experiment)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()
-
-

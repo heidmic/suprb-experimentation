@@ -17,7 +17,7 @@ datasets = {
     "concrete_strength": "Concrete Strength",
     "energy_cool": "Energy Efficiency Cooling",
     "protein_structure": "Physiochemical Properties of Protein Tertiary Structure",
-    "parkinson_total": "Parkinson's Telemonitoring"
+    "parkinson_total": "Parkinson's Telemonitoring",
 }
 
 saga_datasets = {
@@ -26,14 +26,14 @@ saga_datasets = {
     "concrete_strength": "Concrete Strength",
     # "energy_cool": "Energy Efficiency Cooling",
     "protein_structure": "Physiochemical Properties of Protein Tertiary Structure",
-    "parkinson_total": "Parkinson's Telemonitoring"
+    "parkinson_total": "Parkinson's Telemonitoring",
 }
 
 mix_datasets = {
     "combined_cycle_power_plant": "Combined Cycle Power Plant",
     "airfoil_self_noise": "Airfoil Self-Noise",
     "concrete_strength": "Concrete Strength",
-    "energy_cool": "Energy Efficiency Cooling"
+    "energy_cool": "Energy Efficiency Cooling",
 }
 
 solution_composition = {
@@ -42,7 +42,7 @@ solution_composition = {
     "ArtificialBeeColonyAlgorithm": "ABC",
     "AntColonyOptimization": "ACO",
     "GreyWolfOptimizer": "GWO",
-    "ParticleSwarmOptimization": "PSO"
+    "ParticleSwarmOptimization": "PSO",
 }
 
 sc_mix_rd = {
@@ -51,7 +51,7 @@ sc_mix_rd = {
     "ArtificialBeeColonyAlgorithm": "ABC",
     "AntColonyOptimization": "ACO",
     "GreyWolfOptimizer": "GWO",
-    "ParticleSwarmOptimization": "PSO"
+    "ParticleSwarmOptimization": "PSO",
 }
 
 
@@ -74,77 +74,101 @@ asoc = {
     "Random Forest": "RF",
 }
 
-mixing1 = {"r:1; f:FilterSubpopulation; -e:ExperienceCalculation": "1",
-           "r:2; f:FilterSubpopulation; -e:ExperienceCalculation": "2",
-           "r:3; f:FilterSubpopulation; -e:ExperienceCalculation": "3",
-           "r:4; f:FilterSubpopulation; -e:ExperienceCalculation": "4",
-           "r:5; f:FilterSubpopulation; -e:ExperienceCalculation": "5", }
+mixing1 = {
+    "r:1; f:FilterSubpopulation; -e:ExperienceCalculation": "1",
+    "r:2; f:FilterSubpopulation; -e:ExperienceCalculation": "2",
+    "r:3; f:FilterSubpopulation; -e:ExperienceCalculation": "3",
+    "r:4; f:FilterSubpopulation; -e:ExperienceCalculation": "4",
+    "r:5; f:FilterSubpopulation; -e:ExperienceCalculation": "5",
+}
 
-mixing2 = {"r:1; f:FilterSubpopulation; -e:CapExperience/": "1",
-           "r:2; f:FilterSubpopulation; -e:CapExperience/": "2",
-           "r:3; f:FilterSubpopulation; -e:CapExperience/": "3",
-           "r:4; f:FilterSubpopulation; -e:CapExperience/": "4",
-           "r:5; f:FilterSubpopulation; -e:CapExperience/": "5", }
+mixing2 = {
+    "r:1; f:FilterSubpopulation; -e:CapExperience/": "1",
+    "r:2; f:FilterSubpopulation; -e:CapExperience/": "2",
+    "r:3; f:FilterSubpopulation; -e:CapExperience/": "3",
+    "r:4; f:FilterSubpopulation; -e:CapExperience/": "4",
+    "r:5; f:FilterSubpopulation; -e:CapExperience/": "5",
+}
 
-mixing3 = {"r:1; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "1",
-           "r:2; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "2",
-           "r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "3",
-           "r:4; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "4",
-           "r:5; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "5", }
+mixing3 = {
+    "r:1; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "1",
+    "r:2; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "2",
+    "r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "3",
+    "r:4; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "4",
+    "r:5; f:FilterSubpopulation; -e:CapExperienceWithDimensionality": "5",
+}
 
-mixing4 = {"r:1; f:NBestFitness; -e:ExperienceCalculation": "1",
-           "r:2; f:NBestFitness; -e:ExperienceCalculation": "2",
-           "r:3; f:NBestFitness; -e:ExperienceCalculation": "3",
-           "r:4; f:NBestFitness; -e:ExperienceCalculation": "4",
-           "r:5; f:NBestFitness; -e:ExperienceCalculation": "5", }
+mixing4 = {
+    "r:1; f:NBestFitness; -e:ExperienceCalculation": "1",
+    "r:2; f:NBestFitness; -e:ExperienceCalculation": "2",
+    "r:3; f:NBestFitness; -e:ExperienceCalculation": "3",
+    "r:4; f:NBestFitness; -e:ExperienceCalculation": "4",
+    "r:5; f:NBestFitness; -e:ExperienceCalculation": "5",
+}
 
-mixing5 = {"r:1; f:NBestFitness; -e:CapExperience/": "1",
-           "r:2; f:NBestFitness; -e:CapExperience/": "2",
-           "r:3; f:NBestFitness; -e:CapExperience/": "3",
-           "r:4; f:NBestFitness; -e:CapExperience/": "4",
-           "r:5; f:NBestFitness; -e:CapExperience/": "5", }
+mixing5 = {
+    "r:1; f:NBestFitness; -e:CapExperience/": "1",
+    "r:2; f:NBestFitness; -e:CapExperience/": "2",
+    "r:3; f:NBestFitness; -e:CapExperience/": "3",
+    "r:4; f:NBestFitness; -e:CapExperience/": "4",
+    "r:5; f:NBestFitness; -e:CapExperience/": "5",
+}
 
-mixing6 = {"r:1; f:NBestFitness; -e:CapExperienceWithDimensionality": "1",
-           "r:2; f:NBestFitness; -e:CapExperienceWithDimensionality": "2",
-           "r:3; f:NBestFitness; -e:CapExperienceWithDimensionality": "3",
-           "r:4; f:NBestFitness; -e:CapExperienceWithDimensionality": "4",
-           "r:5; f:NBestFitness; -e:CapExperienceWithDimensionality": "5", }
+mixing6 = {
+    "r:1; f:NBestFitness; -e:CapExperienceWithDimensionality": "1",
+    "r:2; f:NBestFitness; -e:CapExperienceWithDimensionality": "2",
+    "r:3; f:NBestFitness; -e:CapExperienceWithDimensionality": "3",
+    "r:4; f:NBestFitness; -e:CapExperienceWithDimensionality": "4",
+    "r:5; f:NBestFitness; -e:CapExperienceWithDimensionality": "5",
+}
 
-mixing7 = {"r:1; f:NRandom; -e:ExperienceCalculation": "1",
-           "r:2; f:NRandom; -e:ExperienceCalculation": "2",
-           "r:3; f:NRandom; -e:ExperienceCalculation": "3",
-           "r:4; f:NRandom; -e:ExperienceCalculation": "4",
-           "r:5; f:NRandom; -e:ExperienceCalculation": "5", }
+mixing7 = {
+    "r:1; f:NRandom; -e:ExperienceCalculation": "1",
+    "r:2; f:NRandom; -e:ExperienceCalculation": "2",
+    "r:3; f:NRandom; -e:ExperienceCalculation": "3",
+    "r:4; f:NRandom; -e:ExperienceCalculation": "4",
+    "r:5; f:NRandom; -e:ExperienceCalculation": "5",
+}
 
-mixing8 = {"r:1; f:NRandom; -e:CapExperience/": "1",
-           "r:2; f:NRandom; -e:CapExperience/": "2",
-           "r:3; f:NRandom; -e:CapExperience/": "3",
-           "r:4; f:NRandom; -e:CapExperience/": "4",
-           "r:5; f:NRandom; -e:CapExperience/": "5", }
+mixing8 = {
+    "r:1; f:NRandom; -e:CapExperience/": "1",
+    "r:2; f:NRandom; -e:CapExperience/": "2",
+    "r:3; f:NRandom; -e:CapExperience/": "3",
+    "r:4; f:NRandom; -e:CapExperience/": "4",
+    "r:5; f:NRandom; -e:CapExperience/": "5",
+}
 
-mixing9 = {"r:1; f:NRandom; -e:CapExperienceWithDimensionality": "1",
-           "r:2; f:NRandom; -e:CapExperienceWithDimensionality": "2",
-           "r:3; f:NRandom; -e:CapExperienceWithDimensionality": "3",
-           "r:4; f:NRandom; -e:CapExperienceWithDimensionality": "4",
-           "r:5; f:NRandom; -e:CapExperienceWithDimensionality": "5", }
+mixing9 = {
+    "r:1; f:NRandom; -e:CapExperienceWithDimensionality": "1",
+    "r:2; f:NRandom; -e:CapExperienceWithDimensionality": "2",
+    "r:3; f:NRandom; -e:CapExperienceWithDimensionality": "3",
+    "r:4; f:NRandom; -e:CapExperienceWithDimensionality": "4",
+    "r:5; f:NRandom; -e:CapExperienceWithDimensionality": "5",
+}
 
-mixing10 = {"r:1; f:RouletteWheel; -e:ExperienceCalculation": "1",
-            "r:2; f:RouletteWheel; -e:ExperienceCalculation": "2",
-            "r:3; f:RouletteWheel; -e:ExperienceCalculation": "3",
-            "r:4; f:RouletteWheel; -e:ExperienceCalculation": "4",
-            "r:5; f:RouletteWheel; -e:ExperienceCalculation": "5", }
+mixing10 = {
+    "r:1; f:RouletteWheel; -e:ExperienceCalculation": "1",
+    "r:2; f:RouletteWheel; -e:ExperienceCalculation": "2",
+    "r:3; f:RouletteWheel; -e:ExperienceCalculation": "3",
+    "r:4; f:RouletteWheel; -e:ExperienceCalculation": "4",
+    "r:5; f:RouletteWheel; -e:ExperienceCalculation": "5",
+}
 
-mixing11 = {"r:1; f:RouletteWheel; -e:CapExperience/": "1",
-            "r:2; f:RouletteWheel; -e:CapExperience/": "2",
-            "r:3; f:RouletteWheel; -e:CapExperience/": "3",
-            "r:4; f:RouletteWheel; -e:CapExperience/": "4",
-            "r:5; f:RouletteWheel; -e:CapExperience/": "5", }
+mixing11 = {
+    "r:1; f:RouletteWheel; -e:CapExperience/": "1",
+    "r:2; f:RouletteWheel; -e:CapExperience/": "2",
+    "r:3; f:RouletteWheel; -e:CapExperience/": "3",
+    "r:4; f:RouletteWheel; -e:CapExperience/": "4",
+    "r:5; f:RouletteWheel; -e:CapExperience/": "5",
+}
 
-mixing12 = {"r:1; f:RouletteWheel; -e:CapExperienceWithDimensionality": "1",
-            "r:2; f:RouletteWheel; -e:CapExperienceWithDimensionality": "2",
-            "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "3",
-            "r:4; f:RouletteWheel; -e:CapExperienceWithDimensionality": "4",
-            "r:5; f:RouletteWheel; -e:CapExperienceWithDimensionality": "5", }
+mixing12 = {
+    "r:1; f:RouletteWheel; -e:CapExperienceWithDimensionality": "1",
+    "r:2; f:RouletteWheel; -e:CapExperienceWithDimensionality": "2",
+    "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "3",
+    "r:4; f:RouletteWheel; -e:CapExperienceWithDimensionality": "4",
+    "r:5; f:RouletteWheel; -e:CapExperienceWithDimensionality": "5",
+}
 
 mixing_calvo = {
     "r:3; f:FilterSubpopulation; -e:ExperienceCalculation": "Base",
@@ -158,7 +182,7 @@ mixing_calvo = {
     "r:3; f:NRandom; -e:CapExperienceWithDimensionality": r"$l$ Random & Experience Cap (dim)",
     "r:3; f:RouletteWheel; -e:ExperienceCalculation": "RouletteWheel",
     "r:3; f:RouletteWheel; -e:CapExperience/": "RouletteWheel & Experience Cap",
-    "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "RouletteWheel & Experience Cap (dim)"
+    "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "RouletteWheel & Experience Cap (dim)",
 }
 
 mixing_calvo_subset = {
@@ -170,7 +194,7 @@ mixing_calvo_subset = {
     "r:3; f:NRandom; -e:CapExperienceWithDimensionality": r"$l$ Random & Experience Cap (dim)",
     "r:3; f:RouletteWheel; -e:ExperienceCalculation": "RouletteWheel",
     "r:3; f:RouletteWheel; -e:CapExperience/": "RouletteWheel & Experience Cap",
-    "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "RouletteWheel & Experience Cap (dim)"
+    "r:3; f:RouletteWheel; -e:CapExperienceWithDimensionality": "RouletteWheel & Experience Cap (dim)",
 }
 
 mixing = []
@@ -195,8 +219,9 @@ def mlruns_to_csv(datasets, subdir, normalize):
         mse = "metrics.test_neg_mean_squared_error"
         complexity = "metrics.elitist_complexity"
 
-        df = all_runs_df[all_runs_df["tags.mlflow.runName"].str.contains(
-            dataset, case=False, na=False) & (all_runs_df["tags.fold"] == 'True')]
+        df = all_runs_df[
+            all_runs_df["tags.mlflow.runName"].str.contains(dataset, case=False, na=False) & (all_runs_df["tags.fold"] == "True")
+        ]
         df = df[["tags.mlflow.runName", mse, complexity]]
         print(dataset, np.min(df[mse]), np.max(df[mse]), np.min(df[complexity]), np.max(df[complexity]))
 
@@ -207,17 +232,13 @@ def mlruns_to_csv(datasets, subdir, normalize):
         df.to_csv(f"mlruns_csv/{subdir}/{dataset}_all.csv", index=False)
 
 
-saga = {
-    "s:ga": "GA",
-    "s:saga1": "SAGA1",
-    "s:saga2": "SAGA2",
-    "s:saga3": "SAGA3",
-    "s:sas": "SAGA4"
-}
+saga = {"s:ga": "GA", "s:saga1": "SAGA1", "s:saga2": "SAGA2", "s:saga3": "SAGA3", "s:sas": "SAGA4"}
 
-adel = {"SupRB": "SupRB",
-        "Random Forest": "RF",
-        "Decision Tree": "DT", }
+adel = {
+    "SupRB": "SupRB",
+    "Random Forest": "RF",
+    "Decision Tree": "DT",
+}
 
 
 def run_main():
@@ -298,15 +319,35 @@ def run_main():
 
     if setting[0] == "diss-graphs/graphs/MIX":
         if setting[4] != "mlruns_csv/MIX/subset_":
-            ttest(latex=False, cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
-                  cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name=r"$l$ Best", cand2_name="Base")
+            ttest(
+                latex=False,
+                cand1="r:3; f:NBestFitness; -e:ExperienceCalculation",
+                cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation",
+                cand1_name=r"$l$ Best",
+                cand2_name="Base",
+            )
 
-        ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
-              cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap", cand2_name="Base")
-        ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
-              cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation", cand1_name="Experience Cap (dim)", cand2_name="Base")
-        ttest(latex=False, cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
-              cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality", cand1_name="Experience Cap", cand2_name="Experience Cap (dim)")
+        ttest(
+            latex=False,
+            cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
+            cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation",
+            cand1_name="Experience Cap",
+            cand2_name="Base",
+        )
+        ttest(
+            latex=False,
+            cand1="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
+            cand2="r:3; f:FilterSubpopulation; -e:ExperienceCalculation",
+            cand1_name="Experience Cap (dim)",
+            cand2_name="Base",
+        )
+        ttest(
+            latex=False,
+            cand1="r:3; f:FilterSubpopulation; -e:CapExperience/",
+            cand2="r:3; f:FilterSubpopulation; -e:CapExperienceWithDimensionality",
+            cand1_name="Experience Cap",
+            cand2_name="Experience Cap (dim)",
+        )
 
     if setting[0] == "diss-graphs/graphs/SAGA":
         ttest(latex=False, cand1="s:saga1", cand2="s:ga", cand1_name="SAGA1", cand2_name="GA")
@@ -321,7 +362,7 @@ def run_main():
         ttest(latex=False, cand1="s:saga3", cand2="s:sas", cand1_name="SAGA3", cand2_name="SAGA4")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     rd = ["diss-graphs/graphs/RD", rule_discovery, "Rule Discovery", False, "mlruns_csv/RD"]
     sc = ["diss-graphs/graphs/SC_only_GA", solution_composition, "Solution Composition", False, "mlruns_csv/SC_only_GA"]
     xcsf = ["diss-graphs/graphs/RBML", asoc, "Estimator", False, "mlruns_csv/RBML"]

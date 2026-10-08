@@ -22,7 +22,6 @@ from suprb.optimizer.solution import ga
 from suprb.optimizer.rule import es, origin, mutation
 from suprb.solution.initialization import RandomInit
 
-
 random_state = 42
 
 
@@ -100,7 +99,30 @@ def run(
         if isinstance(params.solution_composition__crossover, ga.crossover.NPoint):
             params.solution_composition__crossover__n = trial.suggest_int("solution_composition__crossover__n", 1, 10)
 
-        params.solution_composition__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0.0, 0.1)
+        params.solution_composition__mutation__mutation_rate = trial.suggest_float("solution_composition__mutation_rate", 0, 0.1)
+
+        # Mixing
+        params.solution_composition__init__mixing__filter_subpopulation__rule_amount = rule_amount
+        params.solution_composition__init__mixing__experience_weight = experience_weight
+
+        params.solution_composition__init__mixing__filter_subpopulation = getattr(mixing_model, filter_subpopulation)()
+        params.solution_composition__init__mixing__experience_calculation = getattr(mixing_model, experience_calculation)()
+
+        # Upper and lower bound clip the experience into a given range
+        # params.solution_composition__init__mixing__experience_calculation__lower_bound = trial.suggest_float(
+        #     'solution_composition__init__mixing__experience_calculation__lower_bound', 0, 10)
+
+        if isinstance(
+            params.solution_composition__init__mixing__experience_calculation,
+            mixing_model.CapExperienceWithDimensionality,
+        ):
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_float(
+                "solution_composition__init__mixing__experience_calculation__upper_bound", 2, 5
+            )
+        else:
+            params.solution_composition__init__mixing__experience_calculation__upper_bound = trial.suggest_int(
+                "solution_composition__init__mixing__experience_calculation__upper_bound", 20, 50
+            )
 
     experiment_name = f"SupRB Tuning j:{job_id} p:{problem}; r:{rule_amount}; f:{filter_subpopulation}; -e:{experience_calculation}"
     print(experiment_name)

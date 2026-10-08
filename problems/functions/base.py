@@ -8,15 +8,15 @@ from ..base import scale_X_y, ProblemRepr
 
 
 def load_test_function(
-        func: Callable,
-        bounds: np.ndarray = None,
-        n_samples: int = 1000,
-        n_dims: int = None,
-        scale=True,
-        noise: float = 0,
-        shuffle=True,
-        random_state: int = None,
-        return_X_y=True
+    func: Callable,
+    bounds: np.ndarray = None,
+    n_samples: int = 1000,
+    n_dims: int = None,
+    scale=True,
+    noise: float = 0,
+    shuffle=True,
+    random_state: int = None,
+    return_X_y=True,
 ) -> ProblemRepr:
     """Generate X and y from a custom test function.
 
